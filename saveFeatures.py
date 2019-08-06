@@ -11,14 +11,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
 
 
-def save_model_features(trainX, userId):
+def save_model_features(testX, userId):
+
     modelName = const.BASE_PATH + '/' + const.TRAINED_MODELS_PATH + '/' + str(settings.selectedModel) + \
                 '_user' + str(userId) + '_trained.h5'
     model = load_model(modelName)
 
     layer_name = 'features_layer'
     tmp_model = Model(inputs=model.input, outputs=model.get_layer(layer_name).output)
-    intermediate_output = tmp_model.predict(trainX)
+    intermediate_output = tmp_model.predict(testX)
 
     with open("features.csv", "a+", newline='') as f:
         writer = csv.writer(f, delimiter=',')
@@ -38,12 +39,12 @@ def save_features():
         print('Processing user' + str(userId) + '...')
         # trainX, trainy = dataset.create_train_input('user' + str(userId), const.TRAINING_FILES_PATH,
         #                                                   settings.balanceType)
-        trainX, trainy = dataset.create_test_dataset('user' + str(userId))
+        testX, testy = dataset.create_test_dataset('user' + str(userId))
         # it is important to reshape dataset for timeDistributed model
-        n_steps, n_length = 4, 32
-        trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, 2))
-        print(trainX.shape)
-        save_model_features(trainX, userId)
+        # n_steps, n_length = 4, 32
+        # testX = testX.reshape((testX.shape[0], n_steps, n_length, 2))
+        print(testX.shape)
+        save_model_features(testX, userId)
 
     print("Finished writing to CSV file....")
 
