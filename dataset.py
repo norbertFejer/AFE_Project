@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import glob
 import tensorflow as tf
-import random
 import os
 from sklearn.model_selection import train_test_split
 import math
@@ -19,25 +18,18 @@ def load_file(filepath):
 # contains only x, y and client timestamps
 def load_relevant_data_from_file(filepath):
 
-    # if const.SAMPLES_NUM == 'ALL':
-    #     return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'])[['x', 'y', 'client timestamp']].values
-    # else:
-    #     number_of_rows = const.SAMPLES_NUM * const.NUM_FEATURES
-    #     return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'],
-    #                        nrows=number_of_rows)[['x', 'y', 'client timestamp']].values
-    return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'])[['x', 'y', 'client timestamp']].values
+     if const.SAMPLES_NUM == 'ALL':
+         return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'])[['x', 'y', 'client timestamp']].values
+
+     number_of_rows = const.SAMPLES_NUM * const.NUM_FEATURES
+     return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'],
+                        nrows=number_of_rows)[['x', 'y', 'client timestamp']].values
 
 
 # load a list of files and return as a 3d numpy array
-def load_dataset_group(filename, filepath):
+def load_dataset_group(filename, filepath, numberOfRows):
 
     loaded = list()
-
-    if const.SAMPLES_NUM == 'ALL':
-        number_of_rows = math.inf
-    else:
-        number_of_rows = const.SAMPLES_NUM * const.NUM_FEATURES
-
 
     # iterating through every file in the given folder
     for file in glob.iglob(filepath + '/' + filename + '/*'):
@@ -50,9 +42,8 @@ def load_dataset_group(filename, filepath):
         if normalized_velocities.shape[1] != 0:
             loaded.extend(normalized_velocities)
 
-            if len(loaded) > number_of_rows:
-                loaded = loaded[:number_of_rows]
-                return loaded
+            if len(loaded) > numberOfRows:
+                return loaded[:numberOfRows]
 
     return loaded
 
@@ -161,12 +152,12 @@ def normalize_data_user_defined(data):
 # file - filename
 # filepath - the given file path
 # n_features - this is the feature number for one chunk
-def load_dataset(file, filepath, n_features):
+def load_positive_dataset(file, filepath, numberOfSamples):
 
-    dataset = np.asarray(load_dataset_group(file, filepath))
+    dataset = np.asarray(load_dataset_group(file, filepath, numberOfSamples))
 
     # converting array to n_features number of chunks
-    return get_partitioned_dataset(dataset, n_features)
+    return get_partitioned_dataset(dataset, const.NUM_FEATURES)
 
 
 # creating output values:
@@ -176,42 +167,28 @@ def create_train_label(n_timestamps, value):
     return np.full((n_timestamps, 1), value)
 
 
-# creating test dataset for given user
-# balance is the samples number property, where this value defines the output size
-def create_train_input(sessionName, filePath):
+def create_train_input(userName, filePath):
 
-    # NUM_FEATURES is the feature num in a sample
-    dset_positive = load_dataset(sessionName, filePath, const.NUM_FEATURES)
+    if const.SAMPLES_NUM == 'ALL':
+        number_of_samples = math.inf
+    else:
+        number_of_samples = const.SAMPLES_NUM * const.NUM_FEATURES
 
-    if const.SAMPLES_NUM != 'ALL':
-        if dset_positive.shape[0] < const.SAMPLES_NUM:
-            print('kisebb te')
+    if settings.balanceType == settings.Balance.POSITIVE:
+         dset_positive, dset_negative = load_positive_balanced(userName, filePath, number_of_samples)
 
-            while dset_positive.shape[0] < const.SAMPLES_NUM:
-                dset_positive = np.concatenate((dset_positive, dset_positive), axis=0)
-
-            dset_positive = dset_positive[:const.SAMPLES_NUM]
+    if settings.balanceType == settings.Balance.NEGATIVE:
+        dset_positive, dset_negative = load_negative_balanced(userName, filePath, number_of_samples)
 
     if settings.selectedDataSet == settings.Dataset.DFL:
         label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
         dset_positive, X_test, label_positive, y_test = train_test_split(dset_positive, label_positive,
                                                                          test_size=const.TRAIN_SPLIT_VALUE,
                                                                          random_state=const.RANDOM_STATE)
-
-    dset_negative = load_negative_dataset(sessionName, filePath, dset_positive.shape[0])
-
-    if dset_negative.shape[0] > dset_positive.shape[0]:
-        i = 2
-        while i * dset_positive.shape[0] <= dset_negative.shape[0]:
-            dset_positive = np.concatenate((dset_positive, dset_positive), axis=0)
-            i = i + 1
-
-        max_boundary = dset_negative.shape[0] - (i - 1) * dset_positive.shape[0]
-        dset_positive = np.concatenate((dset_positive, dset_positive[:max_boundary]), axis=0)
+        dset_negative = dset_negative[:dset_positive.shape[0]]
     else:
-        dset_positive = dset_positive[0:dset_negative.shape[0]]
+        label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
 
-    label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
 
     X = np.concatenate((dset_positive, dset_negative), axis=0)
@@ -220,46 +197,74 @@ def create_train_input(sessionName, filePath):
     print(dset_negative.shape)
     y = np.concatenate((label_positive, label_negative), axis=0)
 
-    return X, y
+    return np.concatenate((dset_positive, dset_negative), axis=0), \
+           np.concatenate((label_positive, label_negative), axis=0)
+
+def load_positive_balanced(userName, filePath, numberOfRows):
+
+    # NUM_FEATURES is the feature num in a sample
+    dset_positive = load_positive_dataset(userName, filePath, numberOfRows)
+
+    if isinstance(const.SAMPLES_NUM, int) and dset_positive.shape[0] < const.SAMPLES_NUM:
+
+        while dset_positive.shape[0] < const.SAMPLES_NUM:
+            dset_positive = np.concatenate((dset_positive, dset_positive), axis=0)
+
+        dset_positive = dset_positive[:const.SAMPLES_NUM]
+
+    numberOfUsers = len(os.listdir(filePath))
+    numberOfSamples = int(dset_positive.shape[0] / (numberOfUsers - 1))
+
+    dset_negative = load_negative_dataset(userName, filePath, numberOfSamples)
+
+    if dset_negative.shape[0] < dset_positive.shape[0]:
+
+        while dset_negative.shape[0] < dset_positive.shape[0]:
+            dset_negative = np.concatenate((dset_negative, dset_negative), axis=0)
+
+        dset_negative = dset_negative[:dset_positive.shape[0]]
+
+    return dset_positive, dset_negative
 
 
-# creating random input for evaluating the model
-# load a list of files and return as a 3d numpy array
-def load_random_group(filename, filepath, numSamples):
+def load_negative_balanced(userName, filePath, numberOfSamples):
+
+    dset_negative = load_negative_dataset(userName, filePath, numberOfSamples)
+
+    numberOfRows = (len(os.listdir(filePath)) - 1) * const.SAMPLES_NUM
+
+    if isinstance(const.SAMPLES_NUM, int) and dset_negative.shape[0] < numberOfRows:
+
+        while dset_negative.shape[0] < numberOfRows:
+            dset_negative = np.concatenate((dset_negative, dset_negative), axis=0)
+
+        dset_negative = dset_negative[:numberOfRows]
+
+    dset_positive = load_positive_dataset(userName, filePath, dset_negative.shape[0])
+
+    if dset_positive.shape[0] < dset_negative.shape[0]:
+
+        while dset_positive.shape[0] < dset_negative.shape[0]:
+            dset_positive = np.concatenate((dset_positive, dset_positive), axis=0)
+
+        dset_positive = dset_positive[:dset_negative.shape[0]]
+
+    return dset_positive, dset_negative
+
+
+def load_negative_group_samples(filename, filepath, numSamples):
 
     loadedData = np.empty([1, 2])
-    loadedFileNames = list()
 
     # getting all subfolders
     users = os.listdir(filepath)
     # removing from list the user's session what we use during training our model
     users.remove(filename)
 
-    while loadedData.shape[0] < numSamples:
-        # getting random directory index
-        userInd = random.randint(0, len(users) - 1)
-        # getting all files from given directory
-        userSessions = os.listdir(filepath + '/' + users[userInd]);
+    for user in users:
+        tmpData = load_dataset_group(user, filepath, numSamples)
 
-        # getting random file from given folder
-        sessionInd = random.randint(0, len(userSessions) - 1)
-
-        # checking if we already used this session during training
-        # if we used, searching for new one, that had not used before
-        counter = 0
-        while userSessions[sessionInd] in loadedFileNames:
-            sessionInd = random.randint(0, len(userSessions) - 1)
-            counter += 1
-
-            if counter > const.MAX_ITER_LOADED_FILES:
-                loadedFileNames = list()
-
-        loadedFileNames.append(userSessions[sessionInd])
-
-        # loading file
-        tmpData = load_random_file_with_velocities(filepath + '/' + users[userInd] + '/' + userSessions[sessionInd])
-
-        if tmpData.shape[1] != 0:
+        if len(tmpData) != 0:
             loadedData = np.concatenate((loadedData, tmpData), axis=0)
 
     if loadedData.shape[0] > numSamples:
@@ -278,21 +283,11 @@ def load_random_file_with_velocities(filepath):
     return velocities
 
 
-def load_random_dataset(file, filepath, n_features, n_samples):
+def load_negative_dataset(file, filepath, numberOfSamples):
 
-    sample_num = n_samples * const.NUM_FEATURES;
-    dataset = np.asarray(load_random_group(file, filepath, sample_num))
-    dataset = dataset[:sample_num]
+    dataset = np.asarray(load_negative_group_samples(file, filepath, numberOfSamples))
 
-    return get_partitioned_dataset(dataset, n_features)
-
-
-def load_negative_dataset(file, filepath, positiveSamplesNum):
-
-    if settings.balanceType == settings.Balance.POSITIVE:
-        return load_random_dataset(file, filepath, const.NUM_FEATURES, positiveSamplesNum)
-    else:
-        return load_random_dataset(file, filepath, const.NUM_FEATURES, const.SAMPLES_NUM)
+    return get_partitioned_dataset(dataset, const.NUM_FEATURES)
 
 
 def get_action_based_test_data_with_labels(sessionName, testFilesPath, labelsPath, n_features):
@@ -349,7 +344,7 @@ def create_test_dataset(user):
 def load_action_based_test_dataset_dfl(sessionName, filePath):
 
     # NUM_FEATURES is the feature num in a sample
-    dset_positive = load_dataset(sessionName, filePath, const.NUM_FEATURES)
+    dset_positive = load_positive_dataset(sessionName, filePath, const.NUM_FEATURES)
     label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
 
     X_train, dset_positive, y_train, label_positive = train_test_split(dset_positive, label_positive,

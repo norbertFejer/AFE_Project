@@ -7,7 +7,7 @@ NUM_FEATURES = 128
 # this value gives NEGATIVE_SAMPLES_NUM * NUM_FEATURES number of samples
 # if it's value is 'ALL' then read all samples
 # if int value is set, than SAMPLES_NUM * NUM_FEATURES reads
-SAMPLES_NUM = 600
+SAMPLES_NUM = 300
 
 # for getting samples
 USER_NAME = 'User9'
@@ -23,22 +23,22 @@ if settings.selectedDataSet == settings.Dataset.DFL:
     STATELESS_TIME = 2000
 
 # test files location
-TEST_FILES_PATH = 'E:/Time Series Segmentation/MouseDynamics/test_files/'
+TEST_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/test_files/'
 
 if settings.selectedDataSet == settings.Dataset.DFL:
-    TEST_FILES_PATH = 'E:/Time Series Segmentation/zju-gaitacc/DFL'
+    TEST_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
 
 # test files labels
-TEST_LABELS_PATH = 'E:/Time Series Segmentation/MouseDynamics/public_labels.csv'
+TEST_LABELS_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/public_labels.csv'
 
 # training files location
-TRAINING_FILES_PATH = 'E:/Time Series Segmentation/MouseDynamics/training_files'
+TRAINING_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/training_files'
 
 if settings.selectedDataSet == settings.Dataset.DFL:
-    TRAINING_FILES_PATH = 'E:/Time Series Segmentation/zju-gaitacc/DFL'
+    TRAINING_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
 
 # trained models location
-TRAINED_MODELS_PATH = 'E:/Time Series Segmentation/Anaconda projects/Balabit/trainedModels'
+TRAINED_MODELS_PATH = 'C:/Anaconda projects/Balabit/trainedModels'
 
 # defines random state
 RANDOM_STATE = 42
