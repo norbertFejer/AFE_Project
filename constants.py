@@ -7,10 +7,10 @@ NUM_FEATURES = 128
 # this value gives NEGATIVE_SAMPLES_NUM * NUM_FEATURES number of samples
 # if it's value is 'ALL' then read all samples
 # if int value is set, than SAMPLES_NUM * NUM_FEATURES reads
-SAMPLES_NUM = 300
+SAMPLES_NUM = 400
 
 # for getting samples
-USER_NAME = 'User9'
+USER_NAME = 'user35'
 
 # batch size
 BATCH_SIZE = 32

@@ -40,7 +40,7 @@ def train_model(user, trainingFilesPath):
     model, history = settings.get_trained_model(trainX, trainy)
 
     # saving the trained model
-    modelName = str(settings.selectedModel) + '_' + const.USER_NAME + '_trained.h5'
+    modelName = str(settings.selectedModel) + '_' + user + '_trained.h5'
 
     if not os.path.exists(const.TRAINED_MODELS_PATH):
         os.makedirs(const.TRAINED_MODELS_PATH)

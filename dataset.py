@@ -191,12 +191,6 @@ def create_train_input(userName, filePath):
 
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
 
-    X = np.concatenate((dset_positive, dset_negative), axis=0)
-    print("meretek:")
-    print(dset_positive.shape)
-    print(dset_negative.shape)
-    y = np.concatenate((label_positive, label_negative), axis=0)
-
     return np.concatenate((dset_positive, dset_negative), axis=0), \
            np.concatenate((label_positive, label_negative), axis=0)
 
@@ -213,7 +207,7 @@ def load_positive_balanced(userName, filePath, numberOfRows):
         dset_positive = dset_positive[:const.SAMPLES_NUM]
 
     numberOfUsers = len(os.listdir(filePath))
-    numberOfSamples = int(dset_positive.shape[0] / (numberOfUsers - 1))
+    numberOfSamples = int(dset_positive.shape[0] * const.NUM_FEATURES / (numberOfUsers - 1))
 
     dset_negative = load_negative_dataset(userName, filePath, numberOfSamples)
 
@@ -267,9 +261,6 @@ def load_negative_group_samples(filename, filepath, numSamples):
         if len(tmpData) != 0:
             loadedData = np.concatenate((loadedData, tmpData), axis=0)
 
-    if loadedData.shape[0] > numSamples:
-        loaded = loadedData[:numSamples]
-
     return loadedData
 
 
@@ -321,7 +312,7 @@ def get_action_based_test_data_with_labels(sessionName, testFilesPath, labelsPat
     return np.asarray(loadedData), np.asarray(output_labels)
 
 
-def load_action_based_test_dataset(sessionName, testFilesPath, labelsPath, n_features):
+def load_action_based_test_dataset_balabit(sessionName, testFilesPath, labelsPath, n_features):
 
     dataset, labels = get_action_based_test_data_with_labels(sessionName, testFilesPath, labelsPath, n_features)
 
@@ -333,7 +324,7 @@ def create_test_dataset(user):
     dset_tmp, labels = [], []
 
     if settings.selectedDataSet == settings.Dataset.BALABIT:
-        dset_tmp, labels = load_action_based_test_dataset(user, const.TEST_FILES_PATH, const.TEST_LABELS_PATH, const.NUM_FEATURES)
+        dset_tmp, labels = load_action_based_test_dataset_balabit(user, const.TEST_FILES_PATH, const.TEST_LABELS_PATH, const.NUM_FEATURES)
 
     if settings.selectedDataSet == settings.Dataset.DFL:
         dset_tmp, labels = load_action_based_test_dataset_dfl(user, const.TRAINING_FILES_PATH)
@@ -344,19 +335,18 @@ def create_test_dataset(user):
 def load_action_based_test_dataset_dfl(sessionName, filePath):
 
     # NUM_FEATURES is the feature num in a sample
-    dset_positive = load_positive_dataset(sessionName, filePath, const.NUM_FEATURES)
+    dset_positive = load_positive_dataset(sessionName, filePath, const.NUM_FEATURES * const.SAMPLES_NUM)
     label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
 
-    X_train, dset_positive, y_train, label_positive = train_test_split(dset_positive, label_positive,
+    X_aux, dset_positive, y_aux, label_positive = train_test_split(dset_positive, label_positive,
                                                                        test_size=const.TRAIN_SPLIT_VALUE,
                                                                        random_state=const.RANDOM_STATE)
-    dset_negative = load_negative_dataset(sessionName, filePath, dset_positive.shape[0])
+
+    dset_negative = load_negative_dataset(sessionName, filePath, dset_positive.shape[0] * const.NUM_FEATURES)
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
 
-    X = np.concatenate((dset_positive, dset_negative), axis=0)
-    y = np.concatenate((label_positive, label_negative), axis=0)
-
-    return X, y
+    return np.concatenate((dset_positive, dset_negative), axis=0), \
+           np.concatenate((label_positive, label_negative), axis=0)
 
 
 # it shapes dataset to given model input dimensions

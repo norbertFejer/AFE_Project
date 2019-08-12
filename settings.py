@@ -59,7 +59,7 @@ selectedModel = Model.CNN
 balanceType = Balance.NEGATIVE
 
 # defines used dataset
-selectedDataSet = Dataset.DFL
+selectedDataSet = Dataset.BALABIT
 
 # defines
 selectedTrainUserNumber = TrainUserNumber.SINGLE
