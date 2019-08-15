@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
-from sklearn.metrics import roc_curve, auc, roc_auc_score, accuracy_score
+from sklearn.metrics import roc_auc_score
 
 def action_based_evaluation(user, testX, testy):
 
@@ -17,25 +17,30 @@ def action_based_evaluation(user, testX, testy):
                 user + '_trained.h5'
     model = load_model(modelName)
 
-    # evaluate model
-    _, accuracy = model.evaluate(testX, testy, batch_size=const.BATCH_SIZE, verbose=1)
+    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC:
+        print('ACC score: %.2f' % ( get_acc_result(model, testX, testy) ))
 
-    score = accuracy * 100.0
-    print('>#%d: %.3f' % (1, score))
+    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
+        print('AUC score: %.2f' % ( get_auc_result(model, testX, testy) ))
+
+    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
+        print('ACC score: %.2f' % ( get_acc_result(model, testX, testy) ))
+        print('AUC score: %.2f' % ( get_auc_result(model, testX, testy) ))
 
 
-def session_based_evaluation(user):
+
+def session_based_evaluation(userName):
 
     modelName = const.BASE_PATH + '/' + const.TRAINED_MODELS_PATH + '/' + str(settings.selectedModel) + '_' + \
-                user + '_trained.h5'
+                userName + '_trained.h5'
     model = load_model(modelName)
 
     labels = dataset.load_file(const.TEST_LABELS_PATH)
-    finalPath = const.TEST_FILES_PATH + user + '/*'
+    userSessionsPath = const.TEST_FILES_PATH + userName + '/*'
 
     file = open("test_session_scores.csv", "a+")
 
-    for session in glob.iglob(finalPath):
+    for session in glob.iglob(userSessionsPath):
 
         # if given file is labeled
         # (not every test file in given user folder is labeled)
@@ -62,22 +67,39 @@ def session_based_evaluation(user):
     file.close()
 
 
-def evaluate_model(user):
+# computes Area Under the Receiver Operating Characteristic Curve (ROC AUC) from prediction scores
+def get_auc_result(model, testX, y_true):
+
+    y_scores = model.predict(testX)
+    
+    return roc_auc_score(y_true, y_scores)
+
+
+# computes Accuracy
+def get_acc_result(model, testX, y_true):
+
+    # evaluate model
+    _, accuracy = model.evaluate(testX, y_true, batch_size=const.BATCH_SIZE, verbose=1)
+    
+    return accuracy
+
+
+def evaluate_model(userName):
 
     if settings.selectedEvaluationType == settings.EvaluationType.ACTION_BASED:
 
         print('Loading test dataset...')
-        testX, testy = dataset.create_test_dataset(user)
+        testX, testy = dataset.create_test_dataset(userName)
 
         testy = to_categorical(testy)
         print('Loading test dataset finished')
         print(testX.shape)
 
-        action_based_evaluation(user, testX, testy)
+        action_based_evaluation(userName, testX, testy)
 
     if settings.selectedEvaluationType == settings.EvaluationType.SESSION_BASED:
 
-        session_based_evaluation(user)
+        session_based_evaluation(userName)
 
 
 def plotScores(scorefilename, title='Title'):

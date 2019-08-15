@@ -23,6 +23,11 @@ class EvaluationType(Enum):
     ACTION_BASED = 'action_based'
 
 
+class TrainTestSplitType(Enum):
+    TRAIN_AVAILABLE = 'trainSetAvailable'
+    TRAIN_TEST_AVAILABLE = 'trainTestSetAvailable'
+
+
 class Users(Enum):
 
     @staticmethod
@@ -49,25 +54,48 @@ class Method(Enum):
     EVALUATE = 'evaluate_model'
 
 
+class EvaluationMetrics(Enum):
+    ACC = 'accuracy'
+    AUC = 'areaUnderCurve'
+    ALL = 'all'
+
+
 # defines selected method
-selectedMethod = Method.TRAIN
+selectedMethod = Method.EVALUATE
+
 
 # define which model will be used
 selectedModel = Model.CNN
 
-# defines balance rate
-balanceType = Balance.NEGATIVE
+
+# defines the type of balance
+balanceType = Balance.POSITIVE
+
 
 # defines used dataset
 selectedDataSet = Dataset.BALABIT
 
-# defines
+
+# TRAIN_AVAILABLE means, that we have only train dataset
+# TRAIN_TEST_AVAILABLE means, that we have both train and test dataset
+TRAIN_TEST_SPLIT_TYPE = TrainTestSplitType.TRAIN_TEST_AVAILABLE
+
+
+# defines how many user dataset will be used
+# in case of model training
 selectedTrainUserNumber = TrainUserNumber.SINGLE
 
-# defines
+
+# defines the evaluation metric
+selectedEvaluationMetric = EvaluationMetrics.ALL
+
+
+# defines how many user dataset will be used 
+# in case of model evaluation
 selectedEvaluateUserNumber = EvaluateUserNumber.SINGLE
 
-# defines
+
+# defines the type of evaluation
 selectedEvaluationType = EvaluationType.ACTION_BASED
 
 

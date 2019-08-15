@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 np.random.seed(42)
 
-
 rn.seed(12345)
 
 session_conf = tf.ConfigProto(intra_op_parallelism_threads=1,
@@ -31,7 +30,7 @@ def train_model(user, trainingFilesPath):
 
     # load input dataset
     print('Loading train dataset...')
-    trainX, trainy = dataset.create_train_input(user, trainingFilesPath)
+    trainX, trainy = dataset.create_train_dataset(user, trainingFilesPath)
 
     trainy = to_categorical(trainy)
     print('Loading train dataset finished')
