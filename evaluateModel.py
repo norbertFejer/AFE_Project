@@ -1,15 +1,17 @@
-import settings
 from keras.models import load_model
-import constants as const
-import dataset
 from keras.utils import to_categorical
 import glob
 import numpy as np
+import os
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
 from sklearn.metrics import roc_auc_score
+
+import constants as const
+import settings
+import dataset
 
 def action_based_evaluation(user, testX, testy):
 
@@ -17,16 +19,32 @@ def action_based_evaluation(user, testX, testy):
                 user + '_trained.h5'
     model = load_model(modelName)
 
+    outputStr = ""
+
     if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC:
         print('ACC score: %.2f' % ( get_acc_result(model, testX, testy) ))
+        outputStr += user + ',' + '%.2f' % get_acc_result(model, testX, testy) + '\n'
 
     if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
         print('AUC score: %.2f' % ( get_auc_result(model, testX, testy) ))
+        outputStr += user + ',' + '%.2f' % get_auc_result(model, testX, testy) + '\n'
 
     if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
+        outputStr += user + ',' + \
+            '%.2f' % get_acc_result(model, testX, testy) + ',' \
+            '%.2f' % get_auc_result(model, testX, testy) + '\n'
         print('ACC score: %.2f' % ( get_acc_result(model, testX, testy) ))
         print('AUC score: %.2f' % ( get_auc_result(model, testX, testy) ))
 
+    # saving evaluation results to file
+    if settings.saveResultsToFile:
+        fileTitle = str(settings.selectedDataSet) + '_' +  \
+                    str(settings.balanceType) + '_' + \
+                    str(const.SAMPLES_NUM) + '_samples.csv'
+        fileName = os.path.join(const.RESULTS_PATH, fileTitle)
+        file = open(fileName, 'a+')
+        file.write(outputStr)
+        file.close()
 
 
 def session_based_evaluation(userName):

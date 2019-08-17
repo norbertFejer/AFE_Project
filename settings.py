@@ -36,7 +36,9 @@ class Users(Enum):
 
     @staticmethod
     def getDFLUsers():
-        return ['User1', 'User2', 'User3', 'User5', 'User6', 'User7', 'User8', 'User9', 'User10', 'User11']
+        return ['User1', 'User2', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9', 'User10', 
+            'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19',
+            'User20', 'User21']
 
 
 class TrainUserNumber(Enum):
@@ -61,7 +63,7 @@ class EvaluationMetrics(Enum):
 
 
 # defines selected method
-selectedMethod = Method.EVALUATE
+selectedMethod = Method.TRAIN
 
 
 # define which model will be used
@@ -73,17 +75,17 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.BALABIT
+selectedDataSet = Dataset.DFL
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
 # TRAIN_TEST_AVAILABLE means, that we have both train and test dataset
-TRAIN_TEST_SPLIT_TYPE = TrainTestSplitType.TRAIN_TEST_AVAILABLE
+selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 
 
 # defines how many user dataset will be used
 # in case of model training
-selectedTrainUserNumber = TrainUserNumber.SINGLE
+selectedTrainUserNumber = TrainUserNumber.ALL
 
 
 # defines the evaluation metric
@@ -92,11 +94,15 @@ selectedEvaluationMetric = EvaluationMetrics.ALL
 
 # defines how many user dataset will be used 
 # in case of model evaluation
-selectedEvaluateUserNumber = EvaluateUserNumber.SINGLE
+selectedEvaluateUserNumber = EvaluateUserNumber.ALL
 
 
 # defines the type of evaluation
 selectedEvaluationType = EvaluationType.ACTION_BASED
+
+
+# True value will print result to file
+saveResultsToFile = True
 
 
 def get_trained_model(trainX, trainy):

@@ -20,12 +20,12 @@ def load_file(filepath):
 # contains only x, y and client timestamps
 def load_relevant_data_from_file(filepath):
 
-     if const.SAMPLES_NUM == 'ALL':
-         return pd.read_csv(filepath, 
+    if const.SAMPLES_NUM == 'ALL':
+        return pd.read_csv(filepath, 
                             usecols=['x', 'y', 'client timestamp'])[['x', 'y', 'client timestamp']].values
 
-     number_of_rows = const.SAMPLES_NUM * const.NUM_FEATURES
-     return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'],
+    number_of_rows = const.SAMPLES_NUM * const.NUM_FEATURES
+    return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'],
                         nrows=number_of_rows)[['x', 'y', 'client timestamp']].values
 
 
@@ -184,7 +184,7 @@ def create_train_dataset(userName, filePath):
         dset_positive, dset_negative = load_negative_balanced(userName, filePath, number_of_samples)
 
     # checking the train-test split type
-    if settings.TRAIN_TEST_SPLIT_TYPE == settings.TrainTestSplitType.TRAIN_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
         label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
         # splitting the given dataset to train and test set
         dset_positive, _, label_positive, _ = train_test_split(dset_positive, 
@@ -193,7 +193,7 @@ def create_train_dataset(userName, filePath):
                                                         random_state=const.RANDOM_STATE)
         dset_negative = dset_negative[:dset_positive.shape[0]]
 
-    if settings.TRAIN_TEST_SPLIT_TYPE == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
         label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
 
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
@@ -370,13 +370,13 @@ def create_test_dataset(userName):
     dset_tmp, labels = [], []
 
     # checking if current dataset has separate test set
-    if settings.TRAIN_TEST_SPLIT_TYPE == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
         dset_tmp, labels = load_train_test_available_action_based_test_dataset(userName, 
                                                                                 const.TEST_FILES_PATH, 
                                                                                 const.TEST_LABELS_PATH, 
                                                                                 const.NUM_FEATURES)
 
-    if settings.TRAIN_TEST_SPLIT_TYPE == settings.TrainTestSplitType.TRAIN_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
         dset_tmp, labels = load_train_available_action_based_test_dataset(userName, 
                                                                             const.TRAINING_FILES_PATH)
 

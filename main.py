@@ -3,6 +3,8 @@ import trainModel
 import evaluateModel
 import constants as const
 
+import os
+
 
 def train_model_all_user():
 
@@ -59,7 +61,46 @@ def train_model():
         return
 
 
+# checking if saving result to file is set
+# initializing result file (.csv)
+# creatig evaluationResults folder if not exists
+# setting header for file
+def initializing_result_file():
+
+    if settings.saveResultsToFile:
+        fileTitle = str(settings.selectedDataSet) + '_' +  \
+                    str(settings.balanceType) + '_' + \
+                    str(const.SAMPLES_NUM) + '_samples.csv'
+        fileName = os.path.join(const.RESULTS_PATH, fileTitle)
+
+        # deleting old result
+        if os.path.exists(fileName):
+            os.remove(fileName)
+
+        # checking if evaluationResult diretory exists
+        if not os.path.exists(const.RESULTS_PATH):
+            os.makedirs(const.RESULTS_PATH)
+
+        # creating header for file
+        headerStr = 'user name,'
+
+        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC:
+            headerStr += 'ACC score\n'
+
+        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
+            headerStr += 'AUC score\n'
+
+        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
+            headerStr += 'ACC score, AUC score\n'
+
+        file = open(fileName, 'w')
+        file.write(headerStr)
+        file.close()
+
+
 def evaluate_model():
+
+    initializing_result_file()
 
     if settings.selectedEvaluateUserNumber == settings.EvaluateUserNumber.ALL:
         evaluate_model_all_user()

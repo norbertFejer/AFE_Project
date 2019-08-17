@@ -4,6 +4,7 @@ __pycache__
 
 MouseDynamics/
 trainedModels/
+evaluationResults
 
 *.xlsx
 *.csv

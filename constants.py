@@ -9,11 +9,11 @@ NUM_FEATURES = 128
 # this value gives NEGATIVE_SAMPLES_NUM * NUM_FEATURES number of samples
 # if it's value is 'ALL' then read all samples
 # if int value is set, than SAMPLES_NUM * NUM_FEATURES reads
-SAMPLES_NUM = 'ALL'
+SAMPLES_NUM = 8000
 
 
 # defines the session names
-USER_NAME = 'user15'
+USER_NAME = 'User3'
 
 
 # defines train-test split ratio
@@ -44,6 +44,10 @@ TRAINING_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/training_files
 
 # trained models location
 TRAINED_MODELS_PATH = 'C:/Anaconda projects/Balabit/trainedModels'
+
+
+# results path
+RESULTS_PATH = 'C:/Anaconda projects/Balabit/evaluationResults'
 
 
 # defines random state to initialize environment
