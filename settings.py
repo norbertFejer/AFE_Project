@@ -61,6 +61,10 @@ class EvaluationMetrics(Enum):
     AUC = 'areaUnderCurve'
     ALL = 'all'
 
+class UserRecognitionType(Enum):
+    AUTHENTICATION = 'authentication'
+    IDENTIFICATION = 'identification'
+
 
 # defines selected method
 selectedMethod = Method.TRAIN
@@ -75,7 +79,10 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.DFL
+selectedDataSet = Dataset.BALABIT
+
+
+selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset

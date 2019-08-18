@@ -11,6 +11,9 @@ import constants as const
 import settings
 
 
+# ----------------------------------------------------------------------------
+# USER AUTHENTICATION
+
 # load a single file from given path
 def load_file(filepath):
     return pd.read_csv(filepath).values
@@ -405,3 +408,78 @@ def load_session_data(sessionPath):
     normalized_velocities = normalize_data(velocities, 'builtin')
 
     return get_partitioned_dataset(normalized_velocities, const.NUM_FEATURES)
+
+
+# ----------------------------------------------------------------------------
+# USER IDENTIFICATION
+
+
+def get_identification_dataset(method):
+
+    # setting the number of samples to read
+    if const.SAMPLES_NUM == 'ALL':
+        number_of_samples = math.inf
+    else:
+        number_of_samples = const.SAMPLES_NUM * const.NUM_FEATURES
+
+    dset_positive = np.empty([0, 128, 2])
+    label_positive = np.empty([0, 1])
+
+    print('Loading training dataset for identification...')
+    for userName in os.listdir(const.TRAINING_FILES_PATH):
+        tmp_dset = load_positive_dataset(userName, const.TRAINING_FILES_PATH, number_of_samples)
+
+        # if the positive dataset volume is not enough then replicates the dataset
+        if isinstance(const.SAMPLES_NUM, int) and tmp_dset.shape[0] < const.SAMPLES_NUM:
+
+            while tmp_dset.shape[0] < const.SAMPLES_NUM:
+                tmp_dset = np.concatenate((tmp_dset, tmp_dset), axis=0)
+
+            tmp_dset = tmp_dset[:const.SAMPLES_NUM]
+
+        userId = int(userName[4:])
+
+        if method == settings.Method.TRAIN:
+            tmp_dset, tmp_labels = get_identification_partitioned_train_dataset_with_labels(tmp_dset, userId)
+
+        if method == settings.Method.EVALUATE:
+            tmp_dset, tmp_labels = get_identification_partitioned_test_dataset_with_labels(tmp_dset, userId)
+
+        dset_positive = np.concatenate((dset_positive, tmp_dset), axis=0)
+        label_positive = np.concatenate((label_positive, tmp_labels), axis=0)
+
+    print('Loading dataset for identification finished.')
+
+    return dset_positive, label_positive
+
+
+def get_identification_partitioned_train_dataset_with_labels(dataset, userId):
+
+    labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
+    # splitting the given dataset to train and test set
+    dataset, _, labels, _ = train_test_split(dataset, 
+                                                labels,
+                                                test_size=const.TRAIN_TEST_SPLIT_VALUE,
+                                                random_state=const.RANDOM_STATE)
+
+    return dataset, labels
+
+
+def get_identification_partitioned_test_dataset_with_labels(dataset, userId):
+
+    labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
+    # splitting the given dataset to train and test set
+    _, dataset, _, labels = train_test_split(dataset, 
+                                                labels,
+                                                test_size=const.TRAIN_TEST_SPLIT_VALUE,
+                                                random_state=const.RANDOM_STATE)
+
+
+    return dataset, labels
+
+def create_identification_train_dataset():
+    return get_identification_dataset(settings.Method.TRAIN)
+
+
+def create_identification_test_dataset():
+    return get_identification_dataset(settings.Method.EVALUATE)

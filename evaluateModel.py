@@ -107,7 +107,12 @@ def evaluate_model(userName):
     if settings.selectedEvaluationType == settings.EvaluationType.ACTION_BASED:
 
         print('Loading test dataset...')
-        testX, testy = dataset.create_test_dataset(userName)
+
+        if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
+            testX, testy = dataset.create_test_dataset(userName)
+
+        if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
+            testX, testy = dataset.create_identification_test_dataset()
 
         testy = to_categorical(testy)
         print('Loading test dataset finished')

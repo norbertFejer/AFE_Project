@@ -30,7 +30,12 @@ def train_model(user, trainingFilesPath):
 
     # load input dataset
     print('Loading train dataset...')
-    trainX, trainy = dataset.create_train_dataset(user, trainingFilesPath)
+
+    if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
+        trainX, trainy = dataset.create_train_dataset(user, trainingFilesPath)
+
+    if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
+        trainX, trainy = dataset.create_identification_train_dataset()
 
     trainy = to_categorical(trainy)
     print('Loading train dataset finished')
