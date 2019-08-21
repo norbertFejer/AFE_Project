@@ -87,7 +87,7 @@ selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
 
 # TRAIN_AVAILABLE means, that we have only train dataset
 # TRAIN_TEST_AVAILABLE means, that we have both train and test dataset
-selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
+selectedTrainTestSplitType = TrainTestSplitType.TRAIN_TEST_AVAILABLE
 
 
 # defines how many user dataset will be used
@@ -95,13 +95,13 @@ selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 selectedTrainUserNumber = TrainUserNumber.ALL
 
 
-# defines the evaluation metric
-selectedEvaluationMetric = EvaluationMetrics.ALL
-
-
 # defines how many user dataset will be used 
 # in case of model evaluation
 selectedEvaluateUserNumber = EvaluateUserNumber.ALL
+
+
+# defines the evaluation metric
+selectedEvaluationMetric = EvaluationMetrics.ALL
 
 
 # defines the type of evaluation

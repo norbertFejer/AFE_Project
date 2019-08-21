@@ -17,9 +17,9 @@ def train_model_all_user():
         usersArray = settings.Users.getDFLUsers()
 
     for user in usersArray:
-        print('\nTraining model for user: ' + user)
+        print('\nTraining model for user: ' + user + '\n')
         trainModel.train_model(user, const.TRAINING_FILES_PATH)
-        print('\nTraining model finished for user: ' + user)
+        print('\nTraining model finished for user: ' + user + '\n')
 
 
 def train_model_single_user():
@@ -38,25 +38,29 @@ def evaluate_model_all_user():
         usersArray = settings.Users.getDFLUsers()
 
     for user in usersArray:
-        print('\nEvaluating model for user: ' + user)
+        print('\nEvaluating model for user: ' + user + '\n')
         evaluateModel.evaluate_model(user)
-        print('\nEvaluating model finished for user: ' + user)
+        print('\nEvaluating model finished for user: ' + user + '\n')
 
 
 def evaluate_model_single_user():
 
-    print('\nEvaluating model for user: ' + const.USER_NAME)
+    print('\nEvaluating model for user: ' + const.USER_NAME + '\n')
     evaluateModel.evaluate_model(const.USER_NAME)
-    print('\nEvaluating model finished for user: ' + const.USER_NAME)
+    print('\nEvaluating model finished for user: ' + const.USER_NAME + '\n')
 
 
 def train_model():
 
-    if settings.selectedTrainUserNumber == settings.TrainUserNumber.ALL:
+    if settings.selectedTrainUserNumber == settings.TrainUserNumber.ALL and \
+        settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
+
         train_model_all_user()
         return
 
-    if settings.selectedTrainUserNumber == settings.TrainUserNumber.SINGLE:
+    if settings.selectedTrainUserNumber == settings.TrainUserNumber.SINGLE or \
+        settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
+
         train_model_single_user()
         return
 

@@ -33,7 +33,7 @@ def load_relevant_data_from_file(filepath):
 
 
 # load a list of files and return as a 3d numpy array
-def load_dataset_group(filename, filepath, numberOfRows):
+def load_user_sessions(filename, filepath, numberOfSamples):
 
     loaded = list()
 
@@ -48,8 +48,9 @@ def load_dataset_group(filename, filepath, numberOfRows):
         if normalized_velocities.shape[1] != 0:
             loaded.extend(normalized_velocities)
 
-            if len(loaded) > numberOfRows:
-                return loaded[:numberOfRows]
+            if len(loaded) > numberOfSamples:
+                
+                return loaded[:numberOfSamples]
 
     return loaded
 
@@ -158,12 +159,30 @@ def normalize_data_user_defined(data):
 # file - filename
 # filepath - the given file path
 # n_features - this is the feature number for one chunk
-def load_positive_dataset(file, filepath, numberOfSamples):
+def load_positive_dataset(user, filepath, numberOfRows):
 
-    dataset = np.asarray(load_dataset_group(file, filepath, numberOfSamples))
+    numberOfSamples = numberOfRows * const.NUM_FEATURES
+
+    dataset = np.asarray(load_user_sessions(user, filepath, numberOfSamples))
+
+    dataset = get_partitioned_dataset(dataset, const.NUM_FEATURES)
+
+    print("Loading positive dataset for user: ", user, " finished.")
+    print("Shape before duplication: ", str(dataset.shape))
+
+    # if the positive dataset volume is not enough then replicates the dataset
+    if numberOfRows != math.inf and dataset.shape[0] < numberOfRows:
+
+        while dataset.shape[0] < numberOfRows:
+            
+            dataset = np.concatenate((dataset, dataset), axis=0)
+
+        dataset = dataset[:numberOfRows]
+
+    print("Shape after duplication: ", str(dataset.shape), '\n')
 
     # converting array to n_features number of chunks
-    return get_partitioned_dataset(dataset, const.NUM_FEATURES)
+    return dataset
 
 
 # returns an array with the given size and value
@@ -177,7 +196,7 @@ def create_train_dataset(userName, filePath):
     if const.SAMPLES_NUM == 'ALL':
         number_of_samples = math.inf
     else:
-        number_of_samples = const.SAMPLES_NUM * const.NUM_FEATURES
+        number_of_samples = const.SAMPLES_NUM
 
     # checking the selected balance type
     if settings.balanceType == settings.Balance.POSITIVE:
@@ -201,6 +220,9 @@ def create_train_dataset(userName, filePath):
 
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
 
+    print('Final positive dataset shape: ', str(dset_positive.shape))
+    print('Final negative dataset shape: ', str(dset_negative.shape), '\n')
+
     return np.concatenate((dset_positive, dset_negative), axis=0), \
            np.concatenate((label_positive, label_negative), axis=0)
 
@@ -213,20 +235,15 @@ def load_positive_balanced(userName, filePath, numberOfRows):
 
     dset_positive = load_positive_dataset(userName, filePath, numberOfRows)
 
-    # if the positive dataset volume is not enough then replicates the dataset
-    if isinstance(const.SAMPLES_NUM, int) and dset_positive.shape[0] < const.SAMPLES_NUM:
-
-        while dset_positive.shape[0] < const.SAMPLES_NUM:
-            dset_positive = np.concatenate((dset_positive, dset_positive), axis=0)
-
-        dset_positive = dset_positive[:const.SAMPLES_NUM]
-
     # get the users number from given folder
     numberOfUsers = len( os.listdir(filePath) )
     # defines the negative samples num
-    numberOfSamples = int(dset_positive.shape[0] * const.NUM_FEATURES / (numberOfUsers - 1))
+    numberOfNegativeRows = int(dset_positive.shape[0] / (numberOfUsers - 1))
 
-    dset_negative = load_negative_dataset(userName, filePath, numberOfSamples)
+    tmp = const.SAMPLES_NUM 
+    const.SAMPLES_NUM = numberOfNegativeRows
+    dset_negative = load_negative_dataset(userName, filePath, numberOfNegativeRows)
+    const.SAMPLES_NUM = tmp
 
     # if the negative dataset volume is not enough then replicates the dataset
     if dset_negative.shape[0] < dset_positive.shape[0]:
@@ -239,37 +256,26 @@ def load_positive_balanced(userName, filePath, numberOfRows):
     return dset_positive, dset_negative
 
 
-def load_negative_balanced(userName, filePath, numberOfSamples):
+def load_negative_balanced(userName, filePath, numberOfRows):
 
-    dset_negative = load_negative_dataset(userName, filePath, numberOfSamples)
+    dset_negative = load_negative_dataset(userName, filePath, numberOfRows)
 
-    numberOfRows = (len(os.listdir(filePath)) - 1) * const.SAMPLES_NUM
-
-    # if the negative dataset volume is not enough then replicates the dataset
-    # the dataset size must be equal with (numberOfSamples * number of users in dataset)
-    if isinstance(const.SAMPLES_NUM, int) and dset_negative.shape[0] < numberOfRows:
-
-        while dset_negative.shape[0] < numberOfRows:
-            dset_negative = np.concatenate((dset_negative, dset_negative), axis=0)
-
-        dset_negative = dset_negative[:numberOfRows]
-
+    # it is important to read all possible positive samples
+    # without this only reads a part of data, 
+    # because of the restriction definied in load_relevant_data_from_file() function 
+    # (nrows param)
+    tmp = const.SAMPLES_NUM 
+    const.SAMPLES_NUM = "ALL"
     dset_positive = load_positive_dataset(userName, filePath, dset_negative.shape[0])
-
-    # if the positive dataset volume is not enough then replicates the dataset
-    if dset_positive.shape[0] < dset_negative.shape[0]:
-
-        while dset_positive.shape[0] < dset_negative.shape[0]:
-            dset_positive = np.concatenate((dset_positive, dset_positive), axis=0)
-
-        dset_positive = dset_positive[:dset_negative.shape[0]]
+    const.SAMPLES_NUM = tmp
 
     return dset_positive, dset_negative
 
 
-def load_negative_group_samples(currentUser, filepath, numSamples):
+def load_negative_dataset(currentUser, filepath, numberOfRows):
 
-    loadedData = np.empty([1, 2])
+    numberOfSamples = numberOfRows * const.NUM_FEATURES
+    loadedData = np.empty([0, 128, 2])
 
     # getting all subfolders
     users = os.listdir(filepath)
@@ -277,10 +283,27 @@ def load_negative_group_samples(currentUser, filepath, numSamples):
     users.remove(currentUser)
 
     for user in users:
-        tmpData = load_dataset_group(user, filepath, numSamples)
+        tmpSessionFileData = load_user_sessions(user, filepath, numberOfSamples)
 
-        if len(tmpData) != 0:
-            loadedData = np.concatenate((loadedData, tmpData), axis=0)
+        if len(tmpSessionFileData) != 0:
+            tmpDataset =  get_partitioned_dataset(np.asarray(tmpSessionFileData), const.NUM_FEATURES)
+
+            print("Loading negative dataset from user: ", user, " finished.")
+            print("Shape before duplication: ", str(tmpDataset.shape))
+
+            # if the negative dataset volume is not enough then replicates the dataset
+            if tmpDataset.shape[0] < numberOfRows:
+
+                while tmpDataset.shape[0] < numberOfRows:
+                    tmpDataset = np.concatenate((tmpDataset, tmpDataset), axis=0)
+
+                tmpDataset = tmpDataset[:numberOfRows]
+
+            print("Shape after duplication: ", str(tmpDataset.shape))
+
+            loadedData = np.concatenate((loadedData, tmpDataset), axis=0)
+
+    print('\n')
 
     return loadedData
 
@@ -292,13 +315,6 @@ def load_random_file_with_velocities(filepath):
     velocities = normalize_data(velocities, 'builtin')
 
     return velocities
-
-
-def load_negative_dataset(file, filepath, numberOfSamples):
-
-    dataset = np.asarray(load_negative_group_samples(file, filepath, numberOfSamples))
-
-    return get_partitioned_dataset(dataset, const.NUM_FEATURES)
 
 
 def get_action_based_test_data_with_labels(userName, testFilesPath, labelsPath, n_features):
@@ -345,7 +361,7 @@ def load_train_available_action_based_test_dataset(userName, filePath):
     if const.SAMPLES_NUM == 'ALL':
         number_of_samples = math.inf
     else:
-        number_of_samples = const.SAMPLES_NUM * const.NUM_FEATURES
+        number_of_samples = const.SAMPLES_NUM
 
     if settings.balanceType == settings.Balance.POSITIVE:
         dset_positive, dset_negative = load_positive_balanced(userName, filePath, number_of_samples)
@@ -420,22 +436,13 @@ def get_identification_dataset(method):
     if const.SAMPLES_NUM == 'ALL':
         number_of_samples = math.inf
     else:
-        number_of_samples = const.SAMPLES_NUM * const.NUM_FEATURES
+        number_of_samples = const.SAMPLES_NUM
 
     dset_positive = np.empty([0, 128, 2])
     label_positive = np.empty([0, 1])
 
-    print('Loading training dataset for identification...')
     for userName in os.listdir(const.TRAINING_FILES_PATH):
         tmp_dset = load_positive_dataset(userName, const.TRAINING_FILES_PATH, number_of_samples)
-
-        # if the positive dataset volume is not enough then replicates the dataset
-        if isinstance(const.SAMPLES_NUM, int) and tmp_dset.shape[0] < const.SAMPLES_NUM:
-
-            while tmp_dset.shape[0] < const.SAMPLES_NUM:
-                tmp_dset = np.concatenate((tmp_dset, tmp_dset), axis=0)
-
-            tmp_dset = tmp_dset[:const.SAMPLES_NUM]
 
         userId = int(userName[4:])
 
@@ -447,8 +454,6 @@ def get_identification_dataset(method):
 
         dset_positive = np.concatenate((dset_positive, tmp_dset), axis=0)
         label_positive = np.concatenate((label_positive, tmp_labels), axis=0)
-
-    print('Loading dataset for identification finished.')
 
     return dset_positive, label_positive
 
