@@ -79,7 +79,7 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.BALABIT
+selectedDataSet = Dataset.DFL
 
 
 selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
@@ -87,7 +87,7 @@ selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
 
 # TRAIN_AVAILABLE means, that we have only train dataset
 # TRAIN_TEST_AVAILABLE means, that we have both train and test dataset
-selectedTrainTestSplitType = TrainTestSplitType.TRAIN_TEST_AVAILABLE
+selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 
 
 # defines how many user dataset will be used

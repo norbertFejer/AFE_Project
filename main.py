@@ -18,13 +18,13 @@ def train_model_all_user():
 
     for user in usersArray:
         print('\nTraining model for user: ' + user + '\n')
-        trainModel.train_model(user, const.TRAINING_FILES_PATH)
+        trainModel.train_model(user, const.TRAIN_FILES_PATH)
         print('\nTraining model finished for user: ' + user + '\n')
 
 
 def train_model_single_user():
 
-    trainModel.train_model(const.USER_NAME, const.TRAINING_FILES_PATH)
+    trainModel.train_model(const.USER_NAME, const.TRAIN_FILES_PATH)
 
 
 def evaluate_model_all_user():

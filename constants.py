@@ -39,7 +39,7 @@ TEST_LABELS_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/public_labels.csv
 
 
 # training files location
-TRAINING_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/training_files'
+TRAIN_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/training_files'
 
 
 # trained models location
@@ -61,5 +61,5 @@ MAX_ITER_LOADED_FILES = 25
 # for DFL dataset we use different settings
 if settings.selectedDataSet == settings.Dataset.DFL:
     TEST_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
-    TRAINING_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
+    TRAIN_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
     STATELESS_TIME = 2000

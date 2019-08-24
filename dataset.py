@@ -397,7 +397,7 @@ def create_test_dataset(userName):
 
     if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
         dset_tmp, labels = load_train_available_action_based_test_dataset(userName, 
-                                                                            const.TRAINING_FILES_PATH)
+                                                                            const.TRAIN_FILES_PATH)
 
     return get_shaped_dataset(dset_tmp, labels)
 
@@ -441,8 +441,8 @@ def get_identification_dataset(method):
     dset_positive = np.empty([0, 128, 2])
     label_positive = np.empty([0, 1])
 
-    for userName in os.listdir(const.TRAINING_FILES_PATH):
-        tmp_dset = load_positive_dataset(userName, const.TRAINING_FILES_PATH, number_of_samples)
+    for userName in os.listdir(const.TRAIN_FILES_PATH):
+        tmp_dset = load_positive_dataset(userName, const.TRAIN_FILES_PATH, number_of_samples)
 
         userId = int(userName[4:])
 
@@ -488,3 +488,35 @@ def create_identification_train_dataset():
 
 def create_identification_test_dataset():
     return get_identification_dataset(settings.Method.EVALUATE)
+
+
+# ----------------------------------------------------------------------------
+# AUXILIARY FUNCTIONS
+
+
+def get_users_dataset_shape(filepath):
+
+    users = os.listdir(filepath)
+
+    for user in users:
+        dataset = np.asarray(load_user_sessions(user, filepath, math.inf))
+        dataset = get_partitioned_dataset(dataset, const.NUM_FEATURES)
+
+        print("Train dataset shape for user: ", user, " - ", str(dataset.shape))
+
+
+def get_dataset_statistics():
+
+    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
+        print("Loading test dataset statistics...\n")
+        get_users_dataset_shape(const.TRAIN_FILES_PATH)
+
+        print("\nLoading test dataset statistics...\n")
+        get_users_dataset_shape(const.TEST_FILES_PATH)
+
+    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
+        print("Loading test dataset statistics...\n")
+        get_users_dataset_shape(const.TRAIN_FILES_PATH)
+
+
+get_dataset_statistics()
