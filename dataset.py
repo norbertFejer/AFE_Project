@@ -441,11 +441,12 @@ def get_identification_dataset(method):
     dset_positive = np.empty([0, 128, 2])
     label_positive = np.empty([0, 1])
 
+    userId = 0
     for userName in os.listdir(const.TRAIN_FILES_PATH):
         tmp_dset = load_positive_dataset(userName, const.TRAIN_FILES_PATH, number_of_samples)
 
-        userId = int(userName[4:])
-
+        # userId = int(userName[4:])
+    
         if method == settings.Method.TRAIN:
             tmp_dset, tmp_labels = get_identification_partitioned_train_dataset_with_labels(tmp_dset, userId)
 
@@ -454,6 +455,8 @@ def get_identification_dataset(method):
 
         dset_positive = np.concatenate((dset_positive, tmp_dset), axis=0)
         label_positive = np.concatenate((label_positive, tmp_labels), axis=0)
+
+        userId += 1
 
     return dset_positive, label_positive
 
@@ -517,6 +520,3 @@ def get_dataset_statistics():
     if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
         print("Loading test dataset statistics...\n")
         get_users_dataset_shape(const.TRAIN_FILES_PATH)
-
-
-get_dataset_statistics()

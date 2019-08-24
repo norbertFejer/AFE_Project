@@ -33,9 +33,11 @@ def train_model(user, trainingFilesPath):
 
     if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
         trainX, trainy = dataset.create_train_dataset(user, trainingFilesPath)
+        modelName = str(settings.selectedModel) + '_' + user + '_trained.h5'
 
     if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
         trainX, trainy = dataset.create_identification_train_dataset()
+        modelName = str(settings.selectedModel) + '_' + str(settings.selectedUserRecognitionType) + '_trained.h5'
 
     trainy = to_categorical(trainy)
     print('Loading train dataset finished')
@@ -44,8 +46,6 @@ def train_model(user, trainingFilesPath):
     model, history = settings.get_trained_model(trainX, trainy)
 
     # saving the trained model
-    modelName = str(settings.selectedModel) + '_' + user + '_trained.h5'
-
     if not os.path.exists(const.TRAINED_MODELS_PATH):
         os.makedirs(const.TRAINED_MODELS_PATH)
 

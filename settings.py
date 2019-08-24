@@ -67,7 +67,7 @@ class UserRecognitionType(Enum):
 
 
 # defines selected method
-selectedMethod = Method.TRAIN
+selectedMethod = Method.EVALUATE
 
 
 # define which model will be used
@@ -79,10 +79,10 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.DFL
+selectedDataSet = Dataset.BALABIT
 
 
-selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
+selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -92,12 +92,11 @@ selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 
 # defines how many user dataset will be used
 # in case of model training
-selectedTrainUserNumber = TrainUserNumber.ALL
-
+selectedTrainUserNumber = TrainUserNumber.SINGLE
 
 # defines how many user dataset will be used 
 # in case of model evaluation
-selectedEvaluateUserNumber = EvaluateUserNumber.ALL
+selectedEvaluateUserNumber = EvaluateUserNumber.SINGLE
 
 
 # defines the evaluation metric

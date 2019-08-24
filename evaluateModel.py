@@ -38,6 +38,7 @@ def action_based_evaluation(user, testX, testy):
 
     # saving evaluation results to file
     if settings.saveResultsToFile:
+        print(outputStr)
         fileTitle = str(settings.selectedDataSet) + '_' +  \
                     str(settings.balanceType) + '_' + \
                     str(const.SAMPLES_NUM) + '_samples.csv'
@@ -89,7 +90,6 @@ def session_based_evaluation(userName):
 def get_auc_result(model, testX, y_true):
 
     y_scores = model.predict(testX)
-    
     return roc_auc_score(y_true, y_scores)
 
 

@@ -50,19 +50,25 @@ def evaluate_model_single_user():
     print('\nEvaluating model finished for user: ' + const.USER_NAME + '\n')
 
 
+def evaluate_model_identification():
+
+    print('\nEvaluating model for identification...\n')
+    evaluateModel.evaluate_model(str(settings.selectedUserRecognitionType))
+    print('\nEvaluating model for identification finished.\n')
+
+
 def train_model():
 
-    if settings.selectedTrainUserNumber == settings.TrainUserNumber.ALL and \
-        settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
-
-        train_model_all_user()
-        return
-
-    if settings.selectedTrainUserNumber == settings.TrainUserNumber.SINGLE or \
-        settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
-
+    if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
         train_model_single_user()
-        return
+    
+    if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
+
+        if settings.selectedTrainUserNumber == settings.TrainUserNumber.ALL:
+            train_model_all_user()
+
+        if settings.selectedTrainUserNumber == settings.TrainUserNumber.SINGLE:
+            train_model_single_user()
 
 
 # checking if saving result to file is set
@@ -106,13 +112,16 @@ def evaluate_model():
 
     initializing_result_file()
 
-    if settings.selectedEvaluateUserNumber == settings.EvaluateUserNumber.ALL:
-        evaluate_model_all_user()
-        return
+    if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
 
-    if settings.selectedEvaluateUserNumber == settings.EvaluateUserNumber.SINGLE:
-        evaluate_model_single_user()
-        return
+        if settings.selectedEvaluateUserNumber == settings.EvaluateUserNumber.ALL:
+            evaluate_model_all_user()
+
+        if settings.selectedEvaluateUserNumber == settings.EvaluateUserNumber.SINGLE:
+            evaluate_model_single_user()
+
+    if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
+        evaluate_model_identification()
 
 
 def main():
