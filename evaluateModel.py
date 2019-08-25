@@ -38,7 +38,6 @@ def action_based_evaluation(user, testX, testy):
 
     # saving evaluation results to file
     if settings.saveResultsToFile:
-        print(outputStr)
         fileTitle = str(settings.selectedDataSet) + '_' +  \
                     str(settings.balanceType) + '_' + \
                     str(const.SAMPLES_NUM) + '_samples.csv'

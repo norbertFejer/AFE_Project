@@ -75,14 +75,14 @@ selectedModel = Model.CNN
 
 
 # defines the type of balance
-balanceType = Balance.POSITIVE
+balanceType = Balance.NEGATIVE
 
 
 # defines used dataset
 selectedDataSet = Dataset.BALABIT
 
 
-selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
+selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -92,11 +92,11 @@ selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 
 # defines how many user dataset will be used
 # in case of model training
-selectedTrainUserNumber = TrainUserNumber.SINGLE
+selectedTrainUserNumber = TrainUserNumber.ALL
 
 # defines how many user dataset will be used 
 # in case of model evaluation
-selectedEvaluateUserNumber = EvaluateUserNumber.SINGLE
+selectedEvaluateUserNumber = EvaluateUserNumber.ALL
 
 
 # defines the evaluation metric

@@ -5,6 +5,7 @@ import tensorflow as tf
 import os
 from sklearn.model_selection import train_test_split
 import math
+import random
 
 # user defined imports
 import constants as const
@@ -168,18 +169,18 @@ def load_positive_dataset(user, filepath, numberOfRows):
     dataset = get_partitioned_dataset(dataset, const.NUM_FEATURES)
 
     print("Loading positive dataset for user: ", user, " finished.")
-    print("Shape before duplication: ", str(dataset.shape))
+    print("Shape before augmentation: ", str(dataset.shape))
 
     # if the positive dataset volume is not enough then replicates the dataset
     if numberOfRows != math.inf and dataset.shape[0] < numberOfRows:
 
         while dataset.shape[0] < numberOfRows:
-            
-            dataset = np.concatenate((dataset, dataset), axis=0)
+            # dataset = np.concatenate((dataset, dataset), axis=0)
+            dataset = augment_data(dataset)
 
         dataset = dataset[:numberOfRows]
 
-    print("Shape after duplication: ", str(dataset.shape), '\n')
+    print("Shape after augmentation: ", str(dataset.shape), '\n')
 
     # converting array to n_features number of chunks
     return dataset
@@ -295,7 +296,8 @@ def load_negative_dataset(currentUser, filepath, numberOfRows):
             if tmpDataset.shape[0] < numberOfRows:
 
                 while tmpDataset.shape[0] < numberOfRows:
-                    tmpDataset = np.concatenate((tmpDataset, tmpDataset), axis=0)
+                    #tmpDataset = np.concatenate((tmpDataset, tmpDataset), axis=0)
+                    tmpDataset = augment_data(tmpDataset)
 
                 tmpDataset = tmpDataset[:numberOfRows]
 
@@ -520,3 +522,24 @@ def get_dataset_statistics():
     if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
         print("Loading test dataset statistics...\n")
         get_users_dataset_shape(const.TRAIN_FILES_PATH)
+
+
+# ----------------------------------------------------------------------------
+# DATA AUGMENTATION
+
+def add_random(x):
+    return x - 0.1 + 0.2 * random.random()
+
+
+def add_random_to_array(data):
+    return  np.asarray( [add_random(y) for y in data] ).reshape(1, const.NUM_FEATURES * 2)
+
+
+def augment_data(dataset):
+    dataset = dataset.reshape(dataset.shape[0], const.NUM_FEATURES * 2)
+
+    random.seed(const.RANDOM_STATE)
+    for arr in dataset:
+        dataset = np.concatenate((dataset, add_random_to_array(arr)), axis=0)
+
+    return dataset.reshape(dataset.shape[0], const.NUM_FEATURES, 2)
