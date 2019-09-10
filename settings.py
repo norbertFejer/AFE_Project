@@ -59,6 +59,8 @@ class Method(Enum):
 class EvaluationMetrics(Enum):
     ACC = 'accuracy'
     AUC = 'areaUnderCurve'
+    CONFUSION_MATRIX = 'confusionMatrix'
+    ACC_CONFUSION_MATRIX = 'accAndConfusionMatrix'
     ALL = 'all'
 
 class UserRecognitionType(Enum):
@@ -75,14 +77,14 @@ selectedModel = Model.CNN
 
 
 # defines the type of balance
-balanceType = Balance.NEGATIVE
+balanceType = Balance.POSITIVE
 
 
 # defines used dataset
 selectedDataSet = Dataset.BALABIT
 
 
-selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
+selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -92,15 +94,15 @@ selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 
 # defines how many user dataset will be used
 # in case of model training
-selectedTrainUserNumber = TrainUserNumber.ALL
+selectedTrainUserNumber = TrainUserNumber.SINGLE
 
 # defines how many user dataset will be used 
 # in case of model evaluation
-selectedEvaluateUserNumber = EvaluateUserNumber.ALL
+selectedEvaluateUserNumber = EvaluateUserNumber.SINGLE
 
 
 # defines the evaluation metric
-selectedEvaluationMetric = EvaluationMetrics.ALL
+selectedEvaluationMetric = EvaluationMetrics.ACC_CONFUSION_MATRIX
 
 
 # defines the type of evaluation

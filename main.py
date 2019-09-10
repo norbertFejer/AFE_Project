@@ -100,6 +100,12 @@ def initializing_result_file():
         if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
             headerStr += 'AUC score\n'
 
+        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.CONFUSION_MATRIX:
+            headerStr += 'Confusion matrix\n'
+
+        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC_CONFUSION_MATRIX:
+            headerStr += 'ACC score, Confusion matrix\n'
+
         if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
             headerStr += 'ACC score, AUC score\n'
 

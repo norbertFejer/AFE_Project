@@ -13,7 +13,7 @@ SAMPLES_NUM = 300
 
 
 # defines the session names
-USER_NAME = 'user12'
+USER_NAME = 'user7'
 
 
 # defines train-test split ratio

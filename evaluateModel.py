@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, confusion_matrix
 
 import constants as const
 import settings
@@ -22,19 +22,49 @@ def action_based_evaluation(user, testX, testy):
     outputStr = ""
 
     if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC:
-        print('ACC score: %.2f' % ( get_acc_result(model, testX, testy) ))
-        outputStr += user + ',' + '%.2f' % get_acc_result(model, testX, testy) + '\n'
+        res = get_acc_result(model, testX, testy)
+        print('ACC score: %.2f' % ( res ))
+        outputStr += user + ',' + '%.2f' % res + '\n'
 
     if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
-        print('AUC score: %.2f' % ( get_auc_result(model, testX, testy) ))
-        outputStr += user + ',' + '%.2f' % get_auc_result(model, testX, testy) + '\n'
+        res = get_auc_result(model, testX, testy)
+        print('AUC score: %.2f' % ( res ))
+        outputStr += user + ',' + '%.2f' % res + '\n'
+
+    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.CONFUSION_MATRIX:
+        res = get_confusion_matrix(model, testX, testy)
+        print('Confusion matrix:\n %s' % ( res ))
+        outputStr += user + ','
+
+        for row in res:
+            for elem in row:
+                outputStr += '%s' % elem + ','
+            outputStr += '\n,'
+
+        outputStr += '\n'
+
+    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC_CONFUSION_MATRIX:
+        res_acc = get_acc_result(model, testX, testy)
+        conf_matrix = get_confusion_matrix(model, testX, testy)
+        print('ACC score: %.2f' % ( res_acc ))
+        print('Confusion matrix:\n %s' % ( conf_matrix ))
+        outputStr += user + ',' + '%.2f' % res_acc + ','
+
+        for row in conf_matrix:
+            for elem in row:
+                outputStr += '%s' % elem + ','
+            outputStr += '\n,,'
+
+        outputStr += '\n'
 
     if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
+        res_acc = get_acc_result(model, testX, testy)
+        res_auc = get_auc_result(model, testX, testy)
         outputStr += user + ',' + \
-            '%.2f' % get_acc_result(model, testX, testy) + ',' \
-            '%.2f' % get_auc_result(model, testX, testy) + '\n'
-        print('ACC score: %.2f' % ( get_acc_result(model, testX, testy) ))
-        print('AUC score: %.2f' % ( get_auc_result(model, testX, testy) ))
+            '%.2f' % res_acc + ',' \
+            '%.2f' % res_auc + '\n'
+        print('ACC score: %.2f' % ( res_acc ))
+        print('AUC score: %.2f' % ( res_auc ))
 
     # saving evaluation results to file
     if settings.saveResultsToFile:
@@ -101,6 +131,14 @@ def get_acc_result(model, testX, y_true):
     return accuracy
 
 
+def get_confusion_matrix(model, testX, y_true):
+
+    y_pred = np.argmax( model.predict(testX), axis=1)
+    y_true = np.argmax( y_true, axis=1)
+    conf_matrix = confusion_matrix(y_true, y_pred)
+
+    return conf_matrix
+
 def evaluate_model(userName):
 
     if settings.selectedEvaluationType == settings.EvaluationType.ACTION_BASED:
@@ -114,6 +152,7 @@ def evaluate_model(userName):
             testX, testy = dataset.create_identification_test_dataset()
 
         testy = to_categorical(testy)
+
         print('Loading test dataset finished')
         print(testX.shape)
 

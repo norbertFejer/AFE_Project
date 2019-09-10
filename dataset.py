@@ -446,8 +446,6 @@ def get_identification_dataset(method):
     userId = 0
     for userName in os.listdir(const.TRAIN_FILES_PATH):
         tmp_dset = load_positive_dataset(userName, const.TRAIN_FILES_PATH, number_of_samples)
-
-        # userId = int(userName[4:])
     
         if method == settings.Method.TRAIN:
             tmp_dset, tmp_labels = get_identification_partitioned_train_dataset_with_labels(tmp_dset, userId)
