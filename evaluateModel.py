@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
-from sklearn.metrics import roc_auc_score, confusion_matrix
+from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score
 
 import constants as const
 import settings
@@ -124,9 +124,12 @@ def get_auc_result(model, testX, y_true):
 
 # computes Accuracy
 def get_acc_result(model, testX, y_true):
-
+    
     # evaluate model
-    _, accuracy = model.evaluate(testX, y_true, batch_size=const.BATCH_SIZE, verbose=1)
+    #_, accuracy = model.evaluate(testX, y_true, batch_size=const.BATCH_SIZE, verbose=1)
+    y_pred = np.argmax( model.predict(testX), axis=1)
+    y_true = np.argmax( y_true, axis=1)
+    accuracy = accuracy_score(y_true, y_pred)
     
     return accuracy
 

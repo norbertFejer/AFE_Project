@@ -69,7 +69,7 @@ class UserRecognitionType(Enum):
 
 
 # defines selected method
-selectedMethod = Method.EVALUATE
+selectedMethod = Method.TRAIN
 
 
 # define which model will be used
