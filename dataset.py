@@ -213,7 +213,8 @@ def create_train_dataset(userName, filePath):
         dset_positive, _, label_positive, _ = train_test_split(dset_positive, 
                                                         label_positive,
                                                         test_size=const.TRAIN_TEST_SPLIT_VALUE,
-                                                        random_state=const.RANDOM_STATE)
+                                                        random_state=const.RANDOM_STATE,
+                                                        shuffle=False)
         dset_negative = dset_negative[:dset_positive.shape[0]]
 
     if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
@@ -374,12 +375,14 @@ def load_train_available_action_based_test_dataset(userName, filePath):
     label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
     _, dset_positive, _, label_positive = train_test_split(dset_positive, label_positive,
                                                                 test_size=const.TRAIN_TEST_SPLIT_VALUE,
-                                                                random_state=const.RANDOM_STATE)
+                                                                random_state=const.RANDOM_STATE,
+                                                                shuffle=False)
 
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
     _, dset_negative, _, label_negative = train_test_split(dset_negative, label_negative,
                                                                 test_size=const.TRAIN_TEST_SPLIT_VALUE,
-                                                                random_state=const.RANDOM_STATE)
+                                                                random_state=const.RANDOM_STATE,
+                                                                shuffle=False)
                                                                 
     return np.concatenate((dset_positive, dset_negative), axis=0), \
            np.concatenate((label_positive, label_negative), axis=0)
@@ -463,24 +466,48 @@ def get_identification_dataset(method):
 
 def get_identification_partitioned_train_dataset_with_labels(dataset, userId):
 
-    labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
-    # splitting the given dataset to train and test set
-    dataset, _, labels, _ = train_test_split(dataset, 
+    if settings.selectedTestDatasetType == settings.TestDatasetType.AUGMENTED:
+        labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
+        # splitting the given dataset to train and test set
+        dataset, _, labels, _ = train_test_split(dataset, 
                                                 labels,
                                                 test_size=const.TRAIN_TEST_SPLIT_VALUE,
-                                                random_state=const.RANDOM_STATE)
+                                                random_state=const.RANDOM_STATE,
+                                                shuffle=False)
+
+    if settings.selectedTestDatasetType == settings.TestDatasetType.DEFAULT:
+        train_test_split_value = const.SAMPLES_NUM - const.TRAIN_TEST_SPLIT_VALUE
+        labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
+        # splitting the given dataset to train and test set
+        _, dataset, _, labels = train_test_split(dataset, 
+                                                labels,
+                                                test_size=train_test_split_value,
+                                                random_state=const.RANDOM_STATE,
+                                                shuffle=False)
 
     return dataset, labels
 
 
 def get_identification_partitioned_test_dataset_with_labels(dataset, userId):
 
-    labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
-    # splitting the given dataset to train and test set
-    _, dataset, _, labels = train_test_split(dataset, 
+    if settings.selectedTestDatasetType == settings.TestDatasetType.AUGMENTED:
+        labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
+        # splitting the given dataset to train and test set
+        _, dataset, _, labels = train_test_split(dataset, 
                                                 labels,
                                                 test_size=const.TRAIN_TEST_SPLIT_VALUE,
-                                                random_state=const.RANDOM_STATE)
+                                                random_state=const.RANDOM_STATE,
+                                                shuffle=False)
+
+    if settings.selectedTestDatasetType == settings.TestDatasetType.DEFAULT:
+        train_test_split_value = const.SAMPLES_NUM - const.TRAIN_TEST_SPLIT_VALUE
+        labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
+        # splitting the given dataset to train and test set
+        dataset, _, labels, _ = train_test_split(dataset, 
+                                                labels,
+                                                test_size=train_test_split_value,
+                                                random_state=const.RANDOM_STATE,
+                                                shuffle=False)
 
 
     return dataset, labels

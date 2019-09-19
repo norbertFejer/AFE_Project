@@ -153,6 +153,7 @@ def evaluate_model(userName):
 
         if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
             testX, testy = dataset.create_identification_test_dataset()
+            print(testX)
 
         testy = to_categorical(testy)
 

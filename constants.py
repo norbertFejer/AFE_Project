@@ -9,7 +9,7 @@ NUM_FEATURES = 128
 # this value gives NEGATIVE_SAMPLES_NUM * NUM_FEATURES number of samples
 # if it's value is 'ALL' then read all samples
 # if int value is set, than SAMPLES_NUM * NUM_FEATURES reads
-SAMPLES_NUM = 256
+SAMPLES_NUM = 4096
 
 
 # defines the session names
@@ -18,7 +18,9 @@ USER_NAME = 'user'
 
 # defines train-test split ratio
 # only needed if TRAIN_TEST_SPLIT_TYPE is TRAIN_AVAILABLE
-TRAIN_TEST_SPLIT_VALUE = 0.3
+# if it's value between (0, 1) then represents the proportion of the dataset to include in the train split
+# if int, represents the absolute number of train samples 
+TRAIN_TEST_SPLIT_VALUE = 70
 
 
 # defines the batch size

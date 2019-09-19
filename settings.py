@@ -67,9 +67,13 @@ class UserRecognitionType(Enum):
     AUTHENTICATION = 'authentication'
     IDENTIFICATION = 'identification'
 
+class TestDatasetType(Enum):
+    AUGMENTED = 'augmentedDataset'
+    DEFAULT = 'defaultDataset'
+
 
 # defines selected method
-selectedMethod = Method.TRAIN
+selectedMethod = Method.EVALUATE
 
 
 # define which model will be used
@@ -81,7 +85,7 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.BALABIT
+selectedDataSet = Dataset.DFL
 
 
 selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
@@ -90,6 +94,11 @@ selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
 # TRAIN_AVAILABLE means, that we have only train dataset
 # TRAIN_TEST_AVAILABLE means, that we have both train and test dataset
 selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
+
+
+# DEFAULT means, that the test dataset contains only the original data
+# AUGMENTED means, that the test dataset contains also augmented data
+selectedTestDatasetType = TestDatasetType.DEFAULT
 
 
 # defines how many user dataset will be used
