@@ -73,7 +73,7 @@ class TestDatasetType(Enum):
 
 
 # defines selected method
-selectedMethod = Method.EVALUATE
+selectedMethod = Method.TRAIN
 
 
 # define which model will be used
@@ -85,10 +85,10 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.DFL
+selectedDataSet = Dataset.BALABIT
 
 
-selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
+selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset

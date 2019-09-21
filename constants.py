@@ -9,11 +9,11 @@ NUM_FEATURES = 128
 # this value gives NEGATIVE_SAMPLES_NUM * NUM_FEATURES number of samples
 # if it's value is 'ALL' then read all samples
 # if int value is set, than SAMPLES_NUM * NUM_FEATURES reads
-SAMPLES_NUM = 4096
+SAMPLES_NUM = 128
 
 
 # defines the session names
-USER_NAME = 'user'
+USER_NAME = 'user7'
 
 
 # defines train-test split ratio
