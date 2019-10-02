@@ -43,7 +43,7 @@ def train_model(user, trainingFilesPath):
     print('Loading train dataset finished')
     print(trainX.shape)
 
-    model, history = settings.get_trained_model(trainX, trainy)
+    model, history = const.get_trained_model(trainX, trainy)
 
     # saving the trained model
     if not os.path.exists(const.TRAINED_MODELS_PATH):

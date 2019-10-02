@@ -7,6 +7,8 @@ from keras.layers import Dropout
 from keras.layers import Dense
 from keras.layers import Flatten
 
+import constants as const
+
 
 def train_model(trainX, trainy):
 
@@ -15,7 +17,7 @@ def train_model(trainX, trainy):
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
 
     # reshape data into time steps of sub-sequences
-    n_steps, n_length = 4, 32
+    n_steps, n_length = 4, int(const.NUM_FEATURES / 4)
     trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
 
     # define model

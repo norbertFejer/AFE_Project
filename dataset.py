@@ -277,7 +277,7 @@ def load_negative_balanced(userName, filePath, numberOfRows):
 def load_negative_dataset(currentUser, filepath, numberOfRows):
 
     numberOfSamples = numberOfRows * const.NUM_FEATURES
-    loadedData = np.empty([0, 128, 2])
+    loadedData = np.empty([0, const.NUM_FEATURES, 2])
 
     # getting all subfolders
     users = os.listdir(filepath)
@@ -414,7 +414,7 @@ def get_shaped_dataset(dataset, labels):
         return dataset, labels
 
     if settings.selectedModel == settings.Model.TIME_DISTRIBUTED:
-        n_steps, n_length = 4, 32
+        n_steps, n_length = 4, int(const.NUM_FEATURES / 4)
         dataset = dataset.reshape((dataset.shape[0], n_steps, n_length, 2))
 
         return dataset, labels
@@ -443,7 +443,7 @@ def get_identification_dataset(method):
     else:
         number_of_samples = const.SAMPLES_NUM
 
-    dset_positive = np.empty([0, 128, 2])
+    dset_positive = np.empty([0, const.NUM_FEATURES, 2])
     label_positive = np.empty([0, 1])
 
     userId = 0

@@ -1,6 +1,4 @@
 from enum import Enum
-import timeDistributedModel
-import cnnModel
 
 
 class Model(Enum):
@@ -85,10 +83,10 @@ balanceType = Balance.POSITIVE
 
 
 # defines used dataset
-selectedDataSet = Dataset.DFL
+selectedDataSet = Dataset.BALABIT
 
 
-selectedUserRecognitionType = UserRecognitionType.IDENTIFICATION
+selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -98,7 +96,7 @@ selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
 
 # DEFAULT means, that the test dataset contains only the original data
 # AUGMENTED means, that the test dataset contains also augmented data
-selectedTestDatasetType = TestDatasetType.DEFAULT
+selectedTestDatasetType = TestDatasetType.AUGMENTED
 
 
 # defines how many user dataset will be used
@@ -120,14 +118,3 @@ selectedEvaluationType = EvaluationType.ACTION_BASED
 
 # True value will print result to file
 saveResultsToFile = True
-
-
-def get_trained_model(trainX, trainy):
-
-    if selectedModel == Model.TIME_DISTRIBUTED:
-
-        return timeDistributedModel.train_model(trainX, trainy)
-
-    if selectedModel == Model.CNN:
-
-        return cnnModel.train_model(trainX, trainy)
