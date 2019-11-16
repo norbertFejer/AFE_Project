@@ -6,7 +6,7 @@ class Model(Enum):
     TIME_DISTRIBUTED = 'timeDistributedModel'
 
 
-class Balance(Enum):
+class DatasetBalanceType(Enum):
     POSITIVE = 'positive'
     NEGATIVE = 'negative'
 
@@ -21,7 +21,7 @@ class EvaluationType(Enum):
     ACTION_BASED = 'action_based'
 
 
-class TrainTestSplitType(Enum):
+class DatasetType(Enum):
     TRAIN_AVAILABLE = 'trainSetAvailable'
     TRAIN_TEST_AVAILABLE = 'trainTestSetAvailable'
 
@@ -54,7 +54,7 @@ class Method(Enum):
     EVALUATE = 'evaluate_model'
 
 
-class EvaluationMetrics(Enum):
+class EvaluationMetric(Enum):
     ACC = 'accuracy'
     AUC = 'areaUnderCurve'
     CONFUSION_MATRIX = 'confusionMatrix'
@@ -65,56 +65,61 @@ class UserRecognitionType(Enum):
     AUTHENTICATION = 'authentication'
     IDENTIFICATION = 'identification'
 
-class TestDatasetType(Enum):
-    AUGMENTED = 'augmentedDataset'
-    DEFAULT = 'defaultDataset'
+class ChunkSamplesHandler(Enum):
+    CONCATENATE_CHUNKS = 'concatenate'
+    DROP_CHUNKS = 'drop'
 
 
-# defines selected method
-selectedMethod = Method.TRAIN
+class NormalizationMethod(Enum):
+    BUILTIN = 'builtin'
+    USER_DEFINED = 'userDefined'
 
 
-# define which model will be used
-selectedModel = Model.CNN
+# Defines the selected method
+sel_method = Method.TRAIN
 
 
-# defines the type of balance
-balanceType = Balance.POSITIVE
+# Defines which model will be used
+sel_model = Model.CNN
 
 
-# defines used dataset
-selectedDataSet = Dataset.BALABIT
+# Defines the type of samples negative/positive balance rate
+sel_balance_type = DatasetBalanceType.POSITIVE
 
 
-selectedUserRecognitionType = UserRecognitionType.AUTHENTICATION
+# Defines used dataset
+sel_dataset = Dataset.BALABIT
+
+
+# Defines the selected recognition type
+sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+
+
+# Defines what will be with the chunk samples
+sel_chunck_samples_handler = ChunkSamplesHandler.CONCATENATE_CHUNKS
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
-# TRAIN_TEST_AVAILABLE means, that we have both train and test dataset
-selectedTrainTestSplitType = TrainTestSplitType.TRAIN_AVAILABLE
+# TRAIN_TEST_AVAILABLE means, that we have both train and separate test dataset
+sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 
 
-# DEFAULT means, that the test dataset contains only the original data
-# AUGMENTED means, that the test dataset contains also augmented data
-selectedTestDatasetType = TestDatasetType.AUGMENTED
-
-
-# defines how many user dataset will be used
+# Defines how many user will be used
 # in case of model training
-selectedTrainUserNumber = TrainUserNumber.SINGLE
+sel_train_user_number = TrainUserNumber.SINGLE
 
-# defines how many user dataset will be used 
+# Defines how many user will be used 
 # in case of model evaluation
-selectedEvaluateUserNumber = EvaluateUserNumber.SINGLE
+sel_evaluate_user_number = EvaluateUserNumber.SINGLE
 
 
-# defines the evaluation metric
-selectedEvaluationMetric = EvaluationMetrics.ACC_CONFUSION_MATRIX
+# Defines the evaluation metric
+sel_evaluation_metric = EvaluationMetric.ACC_CONFUSION_MATRIX
 
 
-# defines the type of evaluation
-selectedEvaluationType = EvaluationType.ACTION_BASED
+# Defines the type of evaluation
+sel_evaluation_type = EvaluationType.ACTION_BASED
 
 
-# True value will print result to file
-saveResultsToFile = True
+# Defines normalizaton method during creating the training dataset
+sel_normalization_method = NormalizationMethod.USER_DEFINED

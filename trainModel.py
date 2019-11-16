@@ -5,7 +5,7 @@ from keras import backend as K
 import os
 
 import settings
-import dataset
+import dataset2 as dataset
 import constants as const
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
@@ -25,19 +25,15 @@ K.set_session(sess)
 os.environ["CUDA_VISIBLE_DEVICES"]="0" #specific index
 # ---------------------------------------------------------------------------------
 
-
 def train_model(user, trainingFilesPath):
 
     # load input dataset
     print('Loading train dataset...')
 
-    if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
-        trainX, trainy = dataset.create_train_dataset(user, trainingFilesPath)
-        modelName = str(settings.selectedModel) + '_' + user + '_trained.h5'
-
-    if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
-        trainX, trainy = dataset.create_identification_train_dataset()
-        modelName = str(settings.selectedModel) + '_' + str(settings.selectedUserRecognitionType) + '_trained.h5'
+    dset = dataset.Dataset()
+    
+    trainX, trainy = dset.create_train_dataset()
+    modelName = str(settings.sel_model) + '_' + str(settings.sel_user_recognition_type) + '_trained.h5'
 
     trainy = to_categorical(trainy)
     print('Loading train dataset finished')

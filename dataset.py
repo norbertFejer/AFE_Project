@@ -24,11 +24,11 @@ def load_file(filepath):
 # contains only x, y and client timestamps
 def load_relevant_data_from_file(filepath):
 
-    if const.SAMPLES_NUM == 'ALL':
+    if const.BLOCK_NUM == 'ALL':
         return pd.read_csv(filepath, 
                             usecols=['x', 'y', 'client timestamp'])[['x', 'y', 'client timestamp']].values
 
-    number_of_rows = const.SAMPLES_NUM * const.NUM_FEATURES
+    number_of_rows = const.BLOCK_NUM * const.BLOCK_SIZE
     return pd.read_csv(filepath, usecols=['x', 'y', 'client timestamp'],
                         nrows=number_of_rows)[['x', 'y', 'client timestamp']].values
 
@@ -108,10 +108,10 @@ def remove_idle_state(data):
     i = 0
     tmp_dataset = list()
 
-    while (i + const.NUM_FEATURES) <= data.shape[0]:
+    while (i + const.BLOCK_SIZE) <= data.shape[0]:
 
         hasStatelesTime = False
-        for j in range(i, i + const.NUM_FEATURES - 1):
+        for j in range(i, i + const.BLOCK_SIZE - 1):
 
             # checking if given difference is bigger than STATELESS_TIME
             # it means that the mouse dynamic is negligible
@@ -121,8 +121,8 @@ def remove_idle_state(data):
                 break
 
         if hasStatelesTime == False:
-            tmp_dataset.extend(data[i:i + const.NUM_FEATURES, :])
-            i = i + const.NUM_FEATURES
+            tmp_dataset.extend(data[i:i + const.BLOCK_SIZE, :])
+            i = i + const.BLOCK_SIZE
 
     return np.asarray(tmp_dataset)
 
@@ -162,11 +162,11 @@ def normalize_data_user_defined(data):
 # n_features - this is the feature number for one chunk
 def load_positive_dataset(user, filepath, numberOfRows):
 
-    numberOfSamples = numberOfRows * const.NUM_FEATURES
+    numberOfSamples = numberOfRows * const.BLOCK_SIZE
 
     dataset = np.asarray(load_user_sessions(user, filepath, numberOfSamples))
 
-    dataset = get_partitioned_dataset(dataset, const.NUM_FEATURES)
+    dataset = get_partitioned_dataset(dataset, const.BLOCK_SIZE)
 
     print("Loading positive dataset for user: ", user, " finished.")
     print("Shape before augmentation: ", str(dataset.shape))
@@ -194,20 +194,20 @@ def create_train_label(n_timestamps, value):
 def create_train_dataset(userName, filePath):
 
     # setting the number of samples to read
-    if const.SAMPLES_NUM == 'ALL':
+    if const.BLOCK_NUM == 'ALL':
         number_of_samples = math.inf
     else:
-        number_of_samples = const.SAMPLES_NUM
+        number_of_samples = const.BLOCK_NUM
 
     # checking the selected balance type
-    if settings.balanceType == settings.Balance.POSITIVE:
+    if settings.balanceType == settings.DatasetBalanceType.POSITIVE:
          dset_positive, dset_negative = load_positive_balanced(userName, filePath, number_of_samples)
 
-    if settings.balanceType == settings.Balance.NEGATIVE:
+    if settings.balanceType == settings.DatasetBalanceType.NEGATIVE:
         dset_positive, dset_negative = load_negative_balanced(userName, filePath, number_of_samples)
 
     # checking the train-test split type
-    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.DatasetType.TRAIN_AVAILABLE:
         label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
         # splitting the given dataset to train and test set
         dset_positive, _, label_positive, _ = train_test_split(dset_positive, 
@@ -217,7 +217,7 @@ def create_train_dataset(userName, filePath):
                                                         shuffle=False)
         dset_negative = dset_negative[:dset_positive.shape[0]]
 
-    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.DatasetType.TRAIN_TEST_AVAILABLE:
         label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
 
     label_negative = create_train_label(dset_negative.shape[0], 1)  # 1 intrusion detected (is illegal)
@@ -242,10 +242,10 @@ def load_positive_balanced(userName, filePath, numberOfRows):
     # defines the negative samples num
     numberOfNegativeRows = int(dset_positive.shape[0] / (numberOfUsers - 1))
 
-    tmp = const.SAMPLES_NUM 
-    const.SAMPLES_NUM = numberOfNegativeRows
+    tmp = const.BLOCK_NUM 
+    const.BLOCK_NUM = numberOfNegativeRows
     dset_negative = load_negative_dataset(userName, filePath, numberOfNegativeRows)
-    const.SAMPLES_NUM = tmp
+    const.BLOCK_NUM = tmp
 
     # if the negative dataset volume is not enough then replicates the dataset
     if dset_negative.shape[0] < dset_positive.shape[0]:
@@ -266,18 +266,18 @@ def load_negative_balanced(userName, filePath, numberOfRows):
     # without this only reads a part of data, 
     # because of the restriction definied in load_relevant_data_from_file() function 
     # (nrows param)
-    tmp = const.SAMPLES_NUM 
-    const.SAMPLES_NUM = "ALL"
+    tmp = const.BLOCK_NUM 
+    const.BLOCK_NUM = "ALL"
     dset_positive = load_positive_dataset(userName, filePath, dset_negative.shape[0])
-    const.SAMPLES_NUM = tmp
+    const.BLOCK_NUM = tmp
 
     return dset_positive, dset_negative
 
 
 def load_negative_dataset(currentUser, filepath, numberOfRows):
 
-    numberOfSamples = numberOfRows * const.NUM_FEATURES
-    loadedData = np.empty([0, const.NUM_FEATURES, 2])
+    numberOfSamples = numberOfRows * const.BLOCK_SIZE
+    loadedData = np.empty([0, const.BLOCK_SIZE, 2])
 
     # getting all subfolders
     users = os.listdir(filepath)
@@ -288,7 +288,7 @@ def load_negative_dataset(currentUser, filepath, numberOfRows):
         tmpSessionFileData = load_user_sessions(user, filepath, numberOfSamples)
 
         if len(tmpSessionFileData) != 0:
-            tmpDataset =  get_partitioned_dataset(np.asarray(tmpSessionFileData), const.NUM_FEATURES)
+            tmpDataset =  get_partitioned_dataset(np.asarray(tmpSessionFileData), const.BLOCK_SIZE)
 
             print("Loading negative dataset from user: ", user, " finished.")
             print("Shape before duplication: ", str(tmpDataset.shape))
@@ -361,15 +361,15 @@ def load_train_test_available_action_based_test_dataset(userName, testFilesPath,
 def load_train_available_action_based_test_dataset(userName, filePath):
 
     # setting the number of samples to read
-    if const.SAMPLES_NUM == 'ALL':
+    if const.BLOCK_NUM == 'ALL':
         number_of_samples = math.inf
     else:
-        number_of_samples = const.SAMPLES_NUM
+        number_of_samples = const.BLOCK_NUM
 
-    if settings.balanceType == settings.Balance.POSITIVE:
+    if settings.balanceType == settings.DatasetBalanceType.POSITIVE:
         dset_positive, dset_negative = load_positive_balanced(userName, filePath, number_of_samples)
 
-    if settings.balanceType == settings.Balance.NEGATIVE:
+    if settings.balanceType == settings.DatasetBalanceType.NEGATIVE:
         dset_positive, dset_negative = load_negative_balanced(userName, filePath, number_of_samples)
 
     label_positive = create_train_label(dset_positive.shape[0], 0)  # 0 valid user
@@ -394,13 +394,13 @@ def create_test_dataset(userName):
     dset_tmp, labels = [], []
 
     # checking if current dataset has separate test set
-    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.DatasetType.TRAIN_TEST_AVAILABLE:
         dset_tmp, labels = load_train_test_available_action_based_test_dataset(userName, 
                                                                                 const.TEST_FILES_PATH, 
                                                                                 const.TEST_LABELS_PATH, 
-                                                                                const.NUM_FEATURES)
+                                                                                const.BLOCK_SIZE)
 
-    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.DatasetType.TRAIN_AVAILABLE:
         dset_tmp, labels = load_train_available_action_based_test_dataset(userName, 
                                                                             const.TRAIN_FILES_PATH)
 
@@ -414,7 +414,7 @@ def get_shaped_dataset(dataset, labels):
         return dataset, labels
 
     if settings.selectedModel == settings.Model.TIME_DISTRIBUTED:
-        n_steps, n_length = 4, int(const.NUM_FEATURES / 4)
+        n_steps, n_length = 4, int(const.BLOCK_SIZE / 4)
         dataset = dataset.reshape((dataset.shape[0], n_steps, n_length, 2))
 
         return dataset, labels
@@ -428,7 +428,7 @@ def load_session_data(sessionPath):
     # normalizing data to [0, 1]
     normalized_velocities = normalize_data(velocities, 'builtin')
 
-    return get_partitioned_dataset(normalized_velocities, const.NUM_FEATURES)
+    return get_partitioned_dataset(normalized_velocities, const.BLOCK_SIZE)
 
 
 # ----------------------------------------------------------------------------
@@ -438,12 +438,12 @@ def load_session_data(sessionPath):
 def get_identification_dataset(method):
 
     # setting the number of samples to read
-    if const.SAMPLES_NUM == 'ALL':
+    if const.BLOCK_NUM == 'ALL':
         number_of_samples = math.inf
     else:
-        number_of_samples = const.SAMPLES_NUM
+        number_of_samples = const.BLOCK_NUM
 
-    dset_positive = np.empty([0, const.NUM_FEATURES, 2])
+    dset_positive = np.empty([0, const.BLOCK_SIZE, 2])
     label_positive = np.empty([0, 1])
 
     userId = 0
@@ -476,7 +476,7 @@ def get_identification_partitioned_train_dataset_with_labels(dataset, userId):
                                                 shuffle=False)
 
     if settings.selectedTestDatasetType == settings.TestDatasetType.DEFAULT:
-        train_test_split_value = const.SAMPLES_NUM - const.TRAIN_TEST_SPLIT_VALUE
+        train_test_split_value = const.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
         labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
         # splitting the given dataset to train and test set
         _, dataset, _, labels = train_test_split(dataset, 
@@ -500,7 +500,7 @@ def get_identification_partitioned_test_dataset_with_labels(dataset, userId):
                                                 shuffle=False)
 
     if settings.selectedTestDatasetType == settings.TestDatasetType.DEFAULT:
-        train_test_split_value = const.SAMPLES_NUM - const.TRAIN_TEST_SPLIT_VALUE
+        train_test_split_value = const.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
         labels = create_train_label(dataset.shape[0], userId)  # 0 valid user
         # splitting the given dataset to train and test set
         dataset, _, labels, _ = train_test_split(dataset, 
@@ -530,21 +530,21 @@ def get_users_dataset_shape(filepath):
 
     for user in users:
         dataset = np.asarray(load_user_sessions(user, filepath, math.inf))
-        dataset = get_partitioned_dataset(dataset, const.NUM_FEATURES)
+        dataset = get_partitioned_dataset(dataset, const.BLOCK_SIZE)
 
         print("Train dataset shape for user: ", user, " - ", str(dataset.shape))
 
 
 def get_dataset_statistics():
 
-    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_TEST_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.DatasetType.TRAIN_TEST_AVAILABLE:
         print("Loading test dataset statistics...\n")
         get_users_dataset_shape(const.TRAIN_FILES_PATH)
 
         print("\nLoading test dataset statistics...\n")
         get_users_dataset_shape(const.TEST_FILES_PATH)
 
-    if settings.selectedTrainTestSplitType == settings.TrainTestSplitType.TRAIN_AVAILABLE:
+    if settings.selectedTrainTestSplitType == settings.DatasetType.TRAIN_AVAILABLE:
         print("Loading test dataset statistics...\n")
         get_users_dataset_shape(const.TRAIN_FILES_PATH)
 
@@ -557,14 +557,14 @@ def add_random(x):
 
 
 def add_random_to_array(data):
-    return  np.asarray( [add_random(y) for y in data] ).reshape(1, const.NUM_FEATURES * 2)
+    return  np.asarray( [add_random(y) for y in data] ).reshape(1, const.BLOCK_SIZE * 2)
 
 
 def augment_data(dataset):
-    dataset = dataset.reshape(dataset.shape[0], const.NUM_FEATURES * 2)
+    dataset = dataset.reshape(dataset.shape[0], const.BLOCK_SIZE * 2)
 
     random.seed(const.RANDOM_STATE)
     for arr in dataset:
         dataset = np.concatenate((dataset, add_random_to_array(arr)), axis=0)
 
-    return dataset.reshape(dataset.shape[0], const.NUM_FEATURES, 2)
+    return dataset.reshape(dataset.shape[0], const.BLOCK_SIZE, 2)

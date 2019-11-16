@@ -59,16 +59,7 @@ def evaluate_model_identification():
 
 def train_model():
 
-    if settings.selectedUserRecognitionType == settings.UserRecognitionType.IDENTIFICATION:
-        train_model_single_user()
-    
-    if settings.selectedUserRecognitionType == settings.UserRecognitionType.AUTHENTICATION:
-
-        if settings.selectedTrainUserNumber == settings.TrainUserNumber.ALL:
-            train_model_all_user()
-
-        if settings.selectedTrainUserNumber == settings.TrainUserNumber.SINGLE:
-            train_model_single_user()
+    train_model_single_user()
 
 
 # checking if saving result to file is set
@@ -80,7 +71,7 @@ def initializing_result_file():
     if settings.saveResultsToFile:
         fileTitle = str(settings.selectedDataSet) + '_' +  \
                     str(settings.balanceType) + '_' + \
-                    str(const.SAMPLES_NUM) + '_samples.csv'
+                    str(const.BLOCK_NUM) + '_samples.csv'
         fileName = os.path.join(const.RESULTS_PATH, fileTitle)
 
         # deleting old result
@@ -94,19 +85,19 @@ def initializing_result_file():
         # creating header for file
         headerStr = 'user name,'
 
-        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC:
+        if settings.selectedEvaluationMetric == settings.EvaluationMetric.ACC:
             headerStr += 'ACC score\n'
 
-        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
+        if settings.selectedEvaluationMetric == settings.EvaluationMetric.AUC:
             headerStr += 'AUC score\n'
 
-        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.CONFUSION_MATRIX:
+        if settings.selectedEvaluationMetric == settings.EvaluationMetric.CONFUSION_MATRIX:
             headerStr += 'Confusion matrix\n'
 
-        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC_CONFUSION_MATRIX:
+        if settings.selectedEvaluationMetric == settings.EvaluationMetric.ACC_CONFUSION_MATRIX:
             headerStr += 'ACC score, Confusion matrix\n'
 
-        if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
+        if settings.selectedEvaluationMetric == settings.EvaluationMetric.ALL:
             headerStr += 'ACC score, AUC score\n'
 
         file = open(fileName, 'w')
@@ -132,10 +123,10 @@ def evaluate_model():
 
 def main():
 
-    if settings.selectedMethod == settings.Method.TRAIN:
+    if settings.sel_method == settings.Method.TRAIN:
         train_model()
 
-    if settings.selectedMethod == settings.Method.EVALUATE:
+    if settings.sel_method == settings.Method.EVALUATE:
         evaluate_model()
 
 

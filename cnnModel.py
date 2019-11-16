@@ -25,7 +25,7 @@ def train_model(trainX, trainy):
 
     merged = concatenate([tower_1, tower_2])
     dropout = Dropout(0.15)(merged)
-    out = Dense(60, activation='relu', name='features_layer')(dropout)
+    out = Dense(60, activation='relu', name='feature_layer')(dropout)
     out = Dense(n_outputs, activation='sigmoid')(out)
 
     model = Model(input_shape, out)

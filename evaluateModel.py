@@ -21,17 +21,17 @@ def action_based_evaluation(user, testX, testy):
 
     outputStr = ""
 
-    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC:
+    if settings.selectedEvaluationMetric == settings.EvaluationMetric.ACC:
         res = get_acc_result(model, testX, testy)
         print('ACC score: %.2f' % ( res ))
         outputStr += user + ',' + '%.2f' % res + '\n'
 
-    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.AUC:
+    if settings.selectedEvaluationMetric == settings.EvaluationMetric.AUC:
         res = get_auc_result(model, testX, testy)
         print('AUC score: %.2f' % ( res ))
         outputStr += user + ',' + '%.2f' % res + '\n'
 
-    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.CONFUSION_MATRIX:
+    if settings.selectedEvaluationMetric == settings.EvaluationMetric.CONFUSION_MATRIX:
         res = get_confusion_matrix(model, testX, testy)
         print('Confusion matrix:\n %s' % ( res ))
         outputStr += user + ','
@@ -43,7 +43,7 @@ def action_based_evaluation(user, testX, testy):
 
         outputStr += '\n'
 
-    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ACC_CONFUSION_MATRIX:
+    if settings.selectedEvaluationMetric == settings.EvaluationMetric.ACC_CONFUSION_MATRIX:
         res_acc = get_acc_result(model, testX, testy)
         conf_matrix = get_confusion_matrix(model, testX, testy)
         print('ACC score: %.2f' % ( res_acc ))
@@ -57,7 +57,7 @@ def action_based_evaluation(user, testX, testy):
 
         outputStr += '\n'
 
-    if settings.selectedEvaluationMetric == settings.EvaluationMetrics.ALL:
+    if settings.selectedEvaluationMetric == settings.EvaluationMetric.ALL:
         res_acc = get_acc_result(model, testX, testy)
         res_auc = get_auc_result(model, testX, testy)
         outputStr += user + ',' + \
@@ -70,7 +70,7 @@ def action_based_evaluation(user, testX, testy):
     if settings.saveResultsToFile:
         fileTitle = str(settings.selectedDataSet) + '_' +  \
                     str(settings.balanceType) + '_' + \
-                    str(const.SAMPLES_NUM) + '_samples.csv'
+                    str(const.BLOCK_NUM) + '_samples.csv'
         fileName = os.path.join(const.RESULTS_PATH, fileTitle)
         file = open(fileName, 'a+')
         file.write(outputStr)

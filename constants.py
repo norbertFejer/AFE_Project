@@ -1,84 +1,80 @@
+from math import inf
+
 import settings
 import timeDistributedModel
 import cnnModel
 
 
-# number of given chunks to divide
-NUM_FEATURES = 128
+# Defines the samples number, that represents a movement
+BLOCK_SIZE = 128
 
 
-# samples number from given user
-# this value gives NEGATIVE_SAMPLES_NUM * NUM_FEATURES number of samples
-# if it's value is 'ALL' then read all samples
-# if int value is set, than SAMPLES_NUM * NUM_FEATURES reads
-<<<<<<< HEAD
-SAMPLES_NUM = 1024
-=======
-SAMPLES_NUM = 128
->>>>>>> c25a36512b5489e1f97325b025ba47ab1fc76ba1
+# Block size number from given user
+# If it's value is math.inf then reads all samples.
+# If int value is set, than BLOCK_NUM * BLOCK_SIZE reads rows will be read.
+BLOCK_NUM = 400
 
 
-# defines the session names
-USER_NAME = 'user7'
+# Defines the used user name
+USER_NAME = 'user35'
 
 
-# defines train-test split ratio
-# it means the test dataset size
-# only needed if TRAIN_TEST_SPLIT_TYPE is TRAIN_AVAILABLE
-# if it's value between (0, 1) then represents the proportion of the dataset to include in the train split
-# if int, represents the absolute number of train samples 
+# Defines train-test split ratio.
+# Only needs if TRAIN_TEST_SPLIT_TYPE is TRAIN_AVAILABLE
+# If it's value between (0, 1) then represents the proportion of the dataset to include in the train split.
+# If int, represents the absolute number of train samples.
 TRAIN_TEST_SPLIT_VALUE = 70
 
 
-# defines the batch size
+# Defines the batch size
 BATCH_SIZE = 32
 
 
-# defines the interval when no user interaction occurred
-# it is measured in seconds
+# Defines the interval when no user interaction occurred.
+# It is measured in seconds.
 STATELESS_TIME = 2
 
 
-# test files location
-TEST_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/test_files/'
+# Test files location
+TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/test_files/'
 
 
-# test labels location
-TEST_LABELS_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/public_labels.csv'
+# Test labels location
+TEST_LABELS_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/public_labels.csv'
 
 
-# training files location
-TRAIN_FILES_PATH = 'C:/Anaconda projects/Balabit/MouseDynamics/training_files'
+# Training files location
+TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/training_files'
 
 
-# trained models location
-TRAINED_MODELS_PATH = 'C:/Anaconda projects/Balabit/trainedModels'
+# Trained models location
+TRAINED_MODELS_PATH = 'C:/Anaconda projects/Software_mod/trainedModels'
 
 
-# results path
-RESULTS_PATH = 'C:/Anaconda projects/Balabit/evaluationResults'
+# Results path
+RESULTS_PATH = 'C:/Anaconda projects/Software_mod/evaluationResults'
 
 
-# defines random state to initialize environment
+# Defines random state to initialize environment
 RANDOM_STATE = 42
 
 
-# maximum number of tryings when searching already not used session
-MAX_ITER_LOADED_FILES = 25
+# Set verbose mode on/off
+VERBOSE = True
 
 
-# for DFL dataset we use different settings
-if settings.selectedDataSet == settings.Dataset.DFL:
-    TEST_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
-    TRAIN_FILES_PATH = 'C:/Anaconda projects/Balabit/DFL'
+# For DFL dataset we use different settings
+if settings.sel_dataset == settings.Dataset.DFL:
+    TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
+    TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     STATELESS_TIME = 2000
 
 def get_trained_model(trainX, trainy):
 
-    if settings.selectedModel == settings.Model.TIME_DISTRIBUTED:
+    if settings.sel_model == settings.Model.TIME_DISTRIBUTED:
 
         return timeDistributedModel.train_model(trainX, trainy)
 
-    if settings.selectedModel == settings.Model.CNN:
+    if settings.sel_model == settings.Model.CNN:
 
         return cnnModel.train_model(trainX, trainy)
