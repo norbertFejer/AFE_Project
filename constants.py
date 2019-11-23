@@ -16,7 +16,7 @@ BLOCK_NUM = 400
 
 
 # Defines the used user name
-USER_NAME = 'user35'
+USER_NAME = 'user7'
 
 
 # Defines train-test split ratio.
@@ -68,13 +68,3 @@ if settings.sel_dataset == settings.Dataset.DFL:
     TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     STATELESS_TIME = 2000
-
-def get_trained_model(trainX, trainy):
-
-    if settings.sel_model == settings.Model.TIME_DISTRIBUTED:
-
-        return timeDistributedModel.train_model(trainX, trainy)
-
-    if settings.sel_model == settings.Model.CNN:
-
-        return cnnModel.train_model(trainX, trainy)

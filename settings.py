@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class Model(Enum):
-    CNN = 'cnnModel'
-    TIME_DISTRIBUTED = 'timeDistributedModel'
+    CNN = 0
+    TIME_DISTRIBUTED = 1
 
 
 class DatasetBalanceType(Enum):
@@ -12,8 +12,8 @@ class DatasetBalanceType(Enum):
 
 
 class Dataset(Enum):
-    BALABIT = 'balabit'
-    DFL = 'dfl'
+    BALABIT = 0
+    DFL = 1
 
 
 class EvaluationType(Enum):
@@ -29,11 +29,11 @@ class DatasetType(Enum):
 class Users(Enum):
 
     @staticmethod
-    def getBalabitUsers():
+    def get_balabit_users():
         return ['user7', 'user9', 'user12', 'user15', 'user16', 'user20', 'user21', 'user23', 'user29', 'user35']
 
     @staticmethod
-    def getDFLUsers():
+    def get_dfl_users():
         return ['User1', 'User2', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9', 'User10', 
             'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19',
             'User20', 'User21']
@@ -58,7 +58,6 @@ class EvaluationMetric(Enum):
     ACC = 'accuracy'
     AUC = 'areaUnderCurve'
     CONFUSION_MATRIX = 'confusionMatrix'
-    ACC_CONFUSION_MATRIX = 'accAndConfusionMatrix'
     ALL = 'all'
 
 class UserRecognitionType(Enum):
@@ -80,7 +79,7 @@ sel_method = Method.TRAIN
 
 
 # Defines which model will be used
-sel_model = Model.CNN
+sel_model = Model.TIME_DISTRIBUTED
 
 
 # Defines the type of samples negative/positive balance rate
@@ -114,7 +113,7 @@ sel_evaluate_user_number = EvaluateUserNumber.SINGLE
 
 
 # Defines the evaluation metric
-sel_evaluation_metric = EvaluationMetric.ACC_CONFUSION_MATRIX
+sel_evaluation_metric = EvaluationMetric.ACC
 
 
 # Defines the type of evaluation
@@ -123,3 +122,21 @@ sel_evaluation_type = EvaluationType.ACTION_BASED
 
 # Defines normalizaton method during creating the training dataset
 sel_normalization_method = NormalizationMethod.USER_DEFINED
+
+
+def get_balabit_users():
+    return Users.get_balabit_users()
+
+
+def get_dfl_users():
+    return Users.get_dfl_users()
+
+
+def get_users():
+    switcher = { 
+        0: get_balabit_users,
+        1: get_dfl_users, 
+    } 
+  
+    func = switcher.get(sel_dataset.value, lambda: "Wrong dataset name!")
+    return func()
