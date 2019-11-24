@@ -55,10 +55,10 @@ class Method(Enum):
 
 
 class EvaluationMetric(Enum):
-    ACC = 'accuracy'
-    AUC = 'areaUnderCurve'
-    CONFUSION_MATRIX = 'confusionMatrix'
-    ALL = 'all'
+    ALL = 0
+    ACC = 1
+    AUC = 2
+    CONFUSION_MATRIX = 3
 
 class UserRecognitionType(Enum):
     AUTHENTICATION = 'authentication'
@@ -79,7 +79,7 @@ sel_method = Method.TRAIN
 
 
 # Defines which model will be used
-sel_model = Model.TIME_DISTRIBUTED
+sel_model = Model.CNN
 
 
 # Defines the type of samples negative/positive balance rate
@@ -91,7 +91,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines what will be with the chunk samples
@@ -107,13 +107,17 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 # in case of model training
 sel_train_user_number = TrainUserNumber.SINGLE
 
+
+enable_transfer_learning = True
+
+
 # Defines how many user will be used 
 # in case of model evaluation
 sel_evaluate_user_number = EvaluateUserNumber.SINGLE
 
 
-# Defines the evaluation metric
-sel_evaluation_metric = EvaluationMetric.ACC
+# Defines the evaluation metrics
+sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
 
 
 # Defines the type of evaluation

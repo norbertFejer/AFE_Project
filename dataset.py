@@ -41,7 +41,7 @@ class Dataset:
             raise Exception("Can't open file " + session_path)
 
 
-    def __load_user_sessions(self, user, files_path):
+    def load_user_sessions(self, user, files_path):
         """ Loads a given user all sessions
             
             Parameters: 
@@ -62,7 +62,7 @@ class Dataset:
         return sessions_data_df
 
 
-    def __filter_by_states(self, df):
+    def filter_by_states(self, df):
         """ Filters the given states from dataset
 
             Parameters:
@@ -239,9 +239,9 @@ class Dataset:
         """
         # If the user is None it means that we only need to read one given session, specified with files_path parameter
         if user == None:
-            data = self.__filter_by_states( self.__load_session(files_path) )
+            data = self.filter_by_states( self.__load_session(files_path) )
         else:
-            data = self.__filter_by_states( self.__load_user_sessions(user, files_path) )
+            data = self.filter_by_states( self.load_user_sessions(user, files_path) )
 
         data = self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) )
         self.__normalize_data(data)
@@ -370,20 +370,20 @@ class Dataset:
         return np.concatenate((dset_positive, dset_negative), axis=0)
 
 
-    def __create_labeled_dataset(self):
+    def __create_labeled_dataset(self, user):
         """ Creates dataset with labels
 
             Parameters: 
-                None
+                user (str) - username
 
             Returns:
                 np.ndarray, np.ndarray: dataset, labels
         """
 
         if stt.sel_balance_type == stt.DatasetBalanceType.POSITIVE:
-            data = self.__load_positive_balanced_dataset(const.USER_NAME, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            data = self.__load_positive_balanced_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
         else:
-            data = self.__load_negative_balanced_dataset(const.USER_NAME, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            data = self.__load_negative_balanced_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
         # 0 - valid user (is legal)
         # 1 - intruder (is illegal)
@@ -405,16 +405,16 @@ class Dataset:
         return np.full((length, 1), value)
 
 
-    def create_train_dataset(self):
+    def create_train_dataset(self, user):
         """ Returns the train dataset and the labels for the dataset
 
             Parameters:
-                None
+                user (str) - username
 
             Returns:
                 np.ndarray, np.array: train dataset, train labels for the dataset
         """
-        data, labels = self.__create_labeled_dataset()
+        data, labels = self.__create_labeled_dataset(user)
 
         # If we only have train dataset we split into train and test data
         if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
@@ -423,19 +423,19 @@ class Dataset:
         return data, labels
 
 
-    def create_test_dataset(self):
+    def create_test_dataset(self, user):
         """ Returns the test dataset and the labels for the dataset
 
             Parameters:
-                None
+                user (str) - username
 
             Returns:
                 np.ndarray, np.array: test dataset, test labels for the dataset
         """
         if stt.sel_dataset_type == stt.DatasetType.TRAIN_TEST_AVAILABLE:
-            return self.__get_train_test_available_test_dataset()
+            return self.__get_train_test_available_test_dataset(user)
         else:
-            return self.__get_train_available_test_dataset()
+            return self.__get_train_available_test_dataset(user)
         
 
 
@@ -477,25 +477,25 @@ class Dataset:
                np.concatenate((pos_labels, labels[(data.shape[0] - pos_data.shape[0]) : ]), axis=0)
 
 
-    def __get_train_available_test_dataset(self):
+    def __get_train_available_test_dataset(self, user):
         """ Returns the dataset splitted to test dataset and the labels for it
 
             Parameters:
-                None
+                user (str) - username
 
             Returns:
                 np.ndarray, np.array: test dataset, test labels for the dataset
         """
-        data, labels = self.__create_labeled_dataset()
+        data, labels = self.__create_labeled_dataset(user)
 
         return self.__split_data_to_test_dataset(data, labels)
 
     
-    def __get_train_test_available_test_dataset(self):
+    def __get_train_test_available_test_dataset(self, user):
         """ Returns the dataset from test files, which is labeled in public labels file
 
             Parameters:
-                None
+                user (str) - username
 
             Returns:
                 np.ndarray, np.array: test dataset, test labels for the dataset
@@ -505,7 +505,7 @@ class Dataset:
         dataset = np.ndarray(shape=(0, const.BLOCK_SIZE, 2), dtype=float)
         labels = np.ndarray(shape=(0, 1), dtype=int)
 
-        for session_path in glob(const.TEST_FILES_PATH + '/' + const.USER_NAME + '/*'):
+        for session_path in glob(const.TEST_FILES_PATH + '/' + user + '/*'):
             session_name = session_path[len(session_path) - 18 : ]
 
             # If the current session is labeled in public labels file
@@ -520,11 +520,17 @@ class Dataset:
                 labels = np.concatenate((labels, self.__create_labels(tmp_dset.shape[0], label)), axis=0)
 
         return dataset, labels
+
+    # Statistics ----------------------------------------------------------------------------------------------
+
+    def print_all_user_dataset_shape(self):
+        users = os.listdir(const.TRAIN_FILES_PATH)
+
+        for user in users:
+            dataset = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
+            print('Dataset shape for user:', user , '-', dataset.shape)
             
             
 if __name__ == "__main__":
-    print('starting...')
     dataset = Dataset()
-    dataset, labels = dataset.create_test_dataset()
-    print(dataset.shape)
-    print(stt.sel_model)
+    dataset.print_all_user_dataset_shape()

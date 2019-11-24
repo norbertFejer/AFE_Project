@@ -34,47 +34,50 @@ class TrainModel:
     def __train_model_for_user(self, user, model_name):
 
         # Load input dataset
-        self.print_msg('Loading train dataset...')
+        self.print_msg('Loading train dataset...\n')
         
-        trainX, trainy = self.dataset.create_train_dataset()
+        trainX, trainy = self.dataset.create_train_dataset(user)
         trainy = to_categorical(trainy)
-
-        self.print_msg('Loading train dataset finished.')
+        
+        self.print_msg('Train dataset shape:')
         self.print_msg(trainX.shape)
+        self.print_msg(trainy.shape)
+        self.print_msg('\nLoading train dataset finished.')
 
-        model, history = self.__get_trained_model(trainX, trainy)
-
-        # Save the model
-        if not os.path.exists(const.TRAINED_MODELS_PATH):
-            os.makedirs(const.TRAINED_MODELS_PATH)
-
-        model.save(const.TRAINED_MODELS_PATH + '/' + model_name)
-
-        return history
+        self.__train_selected_model(trainX, trainy, model_name)
 
 
-    def __get_model_0(self, trainX, trainy):
-        return cnnModel.get_trained_model(trainX, trainy)
+    def __fit_and_save_model(self, model, trainX, trainy):
+        model.train_model(trainX, trainy)
+        model.save_model()
 
 
-    def __get_model_1(self, trainX, trainy):
-        return timeDistributedModel.get_trained_model(trainX, trainy)
+    def __get_model_0(self, trainX, trainy, model_name):
+        cnn_model = cnnModel.CNNmodel(model_name)
+        self.__fit_and_save_model(cnn_model, trainX, trainy)
 
 
-    def __get_trained_model(self, trainX, trainy):
+    def __get_model_1(self, trainX, trainy, model_name):
+        time_distributed_model = timeDistributedModel.TimeDistributedModel(model_name)
+        self.__fit_and_save_model(time_distributed_model, trainX, trainy)
+
+
+    def __train_selected_model(self, trainX, trainy, model_name):
         
         switcher = {
             0: self.__get_model_0,
             1: self.__get_model_1
         }
 
-        func = switcher.get(stt.sel_model.value, lambda: 'Not a valid model name!')
-        return func(trainX, trainy)
+        train_model = switcher.get(stt.sel_model.value, lambda: 'Not a valid model name!')
+        train_model(trainX, trainy, model_name)
 
 
     def __train_model_single_user(self, model_name):
-        self.print_msg('Training model for user: ' + const.USER_NAME)
+        self.print_msg('\nTraining model for user: ' + const.USER_NAME + '...\n')
+        model_name = const.USER_NAME + '_' + model_name
         self.__train_model_for_user(const.USER_NAME, model_name)
+        self.print_msg('\nTraining model for user: ' + const.USER_NAME + ' finished.\n')
 
 
     def __train_model_all_user(self, model_name):
@@ -82,21 +85,31 @@ class TrainModel:
 
         for user in usersArr:
             self.print_msg('\nTraining model for user: ' + user + '\n')
-            self.__train_model_for_user(user, model_name)
+            tmp_model_name = user + '_' + model_name
+            self.__train_model_for_user(user, tmp_model_name)
             self.print_msg('\nTraining model finished for user: ' + user + '\n')
+
+
+    def __train_model_identification(self, model_name):
+        self.print_msg('Training model for identification...')
+        self.__train_model_for_user('', model_name)
+        self.print_msg('Training model for identification finished...')
 
 
     def train_model(self):
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
-            model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + const.USER_NAME + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
-        else:
-            model_name = str(stt.sel_model) + ' ' + str(stt.sel_dataset) + '_identification_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
+            model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
 
-        if stt.sel_train_user_number == stt.TrainUserNumber.SINGLE:
-            self.__train_model_single_user(model_name)
+            if stt.sel_train_user_number == stt.TrainUserNumber.SINGLE:
+                self.__train_model_single_user(model_name)
+            else:
+                self.__train_model_all_user(model_name)      
+
         else:
-            self.__train_model_all_user(model_name)
+            model_name = 'identification_' + str(stt.sel_model) + ' ' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
+            self.__train_model_identification(model_name)
+
 
 
     def __plot_train(self, history):

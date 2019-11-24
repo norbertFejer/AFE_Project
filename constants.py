@@ -12,7 +12,7 @@ BLOCK_SIZE = 128
 # Block size number from given user
 # If it's value is math.inf then reads all samples.
 # If int value is set, than BLOCK_NUM * BLOCK_SIZE reads rows will be read.
-BLOCK_NUM = 400
+BLOCK_NUM = 300
 
 
 # Defines the used user name
