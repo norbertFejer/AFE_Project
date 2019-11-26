@@ -7,7 +7,6 @@ import cnnModel
 
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
-from keras.models import Model
 import os
 
 
@@ -31,12 +30,15 @@ class TrainModel:
         print_msg = lambda msg: None
 
 
-    def __train_model_for_user(self, user, model_name):
+    def __train_model_by_method(self, user, model_name):
 
         # Load input dataset
         self.print_msg('Loading train dataset...\n')
         
-        trainX, trainy = self.dataset.create_train_dataset(user)
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
+            trainX, trainy = self.dataset.create_train_dataset(user)
+        else:
+            trainX, trainy = self.dataset.create_train_dataset_for_identification()
         trainy = to_categorical(trainy)
         
         self.print_msg('Train dataset shape:')
@@ -76,7 +78,7 @@ class TrainModel:
     def __train_model_single_user(self, model_name):
         self.print_msg('\nTraining model for user: ' + const.USER_NAME + '...\n')
         model_name = const.USER_NAME + '_' + model_name
-        self.__train_model_for_user(const.USER_NAME, model_name)
+        self.__train_model_by_method(const.USER_NAME, model_name)
         self.print_msg('\nTraining model for user: ' + const.USER_NAME + ' finished.\n')
 
 
@@ -86,20 +88,21 @@ class TrainModel:
         for user in usersArr:
             self.print_msg('\nTraining model for user: ' + user + '\n')
             tmp_model_name = user + '_' + model_name
-            self.__train_model_for_user(user, tmp_model_name)
+            self.__train_model_by_method(user, tmp_model_name)
             self.print_msg('\nTraining model finished for user: ' + user + '\n')
 
 
     def __train_model_identification(self, model_name):
         self.print_msg('Training model for identification...')
-        self.__train_model_for_user('', model_name)
+        model_name = 'identification_' + model_name
+        self.__train_model_by_method(None, model_name)
         self.print_msg('Training model for identification finished...')
 
 
     def train_model(self):
+        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
-            model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
 
             if stt.sel_train_user_number == stt.TrainUserNumber.SINGLE:
                 self.__train_model_single_user(model_name)
@@ -107,7 +110,6 @@ class TrainModel:
                 self.__train_model_all_user(model_name)      
 
         else:
-            model_name = 'identification_' + str(stt.sel_model) + ' ' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
             self.__train_model_identification(model_name)
 
 

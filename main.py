@@ -1,6 +1,12 @@
 import settings as stt
+import constants as const
 import trainModel
 import evaluateModel
+
+from numpy.random import seed
+seed(const.RANDOM_STATE)
+from tensorflow import set_random_seed
+set_random_seed(const.RANDOM_STATE)
 
 
 def main():

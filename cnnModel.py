@@ -1,5 +1,6 @@
 import constants as const
 import baseModel as base_model
+import settings as stt
 
 from keras.layers import Input
 from keras.layers.convolutional import Conv1D
@@ -18,7 +19,7 @@ class CNNmodel(base_model.BaseModel):
         super().__init__(model_name)
 
         self.verbose, self.epochs, self.batch_size = 2, 16, 32
-        block_size, n_input, n_output = const.BLOCK_SIZE, 2, 2
+        block_size, n_input = const.BLOCK_SIZE, 2
 
         input_shape = Input(shape=(block_size, n_input))
 
@@ -33,7 +34,7 @@ class CNNmodel(base_model.BaseModel):
         merged = concatenate([tower_1, tower_2])
         dropout = Dropout(0.15)(merged)
         out = Dense(60, activation='relu', name='feature_layer')(dropout)
-        out = Dense(n_output, activation='sigmoid')(out)
+        out = Dense(self.n_output, activation='sigmoid')(out)
 
         self.model = Model(input_shape, out)
         optim = optimizers.Adam(lr=0.002, decay=1e-4)

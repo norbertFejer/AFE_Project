@@ -41,7 +41,7 @@ class Dataset:
             raise Exception("Can't open file " + session_path)
 
 
-    def load_user_sessions(self, user, files_path):
+    def __load_user_sessions(self, user, files_path):
         """ Loads a given user all sessions
             
             Parameters: 
@@ -62,7 +62,7 @@ class Dataset:
         return sessions_data_df
 
 
-    def filter_by_states(self, df):
+    def __filter_by_states(self, df):
         """ Filters the given states from dataset
 
             Parameters:
@@ -71,6 +71,9 @@ class Dataset:
             Returns:
                 DataFrame: returning value
         """
+        # Filtering outliers
+        df = df[(df['x'] < const.MAX_WIDTH) & (df['y'] < const.MAX_HEIGHT)]
+        # Dropping the Scroll states
         return df.loc[~df['button'].isin(['Scroll'])]
 
 
@@ -239,9 +242,9 @@ class Dataset:
         """
         # If the user is None it means that we only need to read one given session, specified with files_path parameter
         if user == None:
-            data = self.filter_by_states( self.__load_session(files_path) )
+            data = self.__filter_by_states( self.__load_session(files_path) )
         else:
-            data = self.filter_by_states( self.load_user_sessions(user, files_path) )
+            data = self.__filter_by_states( self.__load_user_sessions(user, files_path) )
 
         data = self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) )
         self.__normalize_data(data)
@@ -418,7 +421,7 @@ class Dataset:
 
         # If we only have train dataset we split into train and test data
         if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
-            data, labels = self.__split_data_to_train_dataset(data, labels)
+            data, labels = self.__split_dataset_to_train(data, labels)
 
         return data, labels
 
@@ -439,7 +442,7 @@ class Dataset:
         
 
 
-    def __split_data_to_train_dataset(self, data, labels):
+    def __split_dataset_to_train(self, data, labels):
         """ Splits data and labels with a predifined ratio
 
             Parameters:
@@ -460,8 +463,9 @@ class Dataset:
                np.concatenate((pos_labels, labels[middle_pos: (middle_pos + pos_data.shape[0])]), axis=0)
 
 
-    def __split_data_to_test_dataset(self, data, labels):
+    def __split_dataset_to_test(self, data, labels):
         """ Splits data and labels with a predifined ratio
+            Dataset contains both positive and negative samples
 
             Parameters:
                 data (np.ndarray): dataset
@@ -488,7 +492,7 @@ class Dataset:
         """
         data, labels = self.__create_labeled_dataset(user)
 
-        return self.__split_data_to_test_dataset(data, labels)
+        return self.__split_dataset_to_test(data, labels)
 
     
     def __get_train_test_available_test_dataset(self, user):
@@ -521,6 +525,73 @@ class Dataset:
 
         return dataset, labels
 
+
+    def __create_identification_dataset_by_method(self, method):
+        users = os.listdir(const.TRAIN_FILES_PATH)
+        dataset = np.ndarray(shape=(0, const.BLOCK_SIZE, 2))
+        labels = np.ndarray(shape=(0, 1))
+
+        id = 0
+        for user in users:
+            tmp_dataset = self.__load_positive_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            tmp_labels = self.__create_labels(tmp_dataset.shape[0], id)
+
+            if method == stt.Method.TRAIN:
+                tmp_dataset, tmp_labels = self.__split_positive_data_to_train_dataset(tmp_dataset, tmp_labels)
+            else:
+                tmp_dataset, tmp_labels = self.__split_positive_data_to_test_dataset(tmp_dataset, tmp_labels)
+
+            id = id + 1
+            self.print_msg('Dataset shape from user: ' +  user + ' - ' + str(tmp_dataset.shape))
+
+            dataset = np.concatenate((dataset, tmp_dataset), axis=0)
+            labels = np.concatenate((labels, tmp_labels), axis=0)
+    
+        return dataset, labels
+
+
+    def create_train_dataset_for_identification(self):
+        return self.__create_identification_dataset_by_method(stt.Method.TRAIN)
+
+
+    def create_test_dataset_for_identification(self):
+        return self.__create_identification_dataset_by_method(stt.Method.EVALUATE)
+
+
+    def __split_positive_data_to_train_dataset(self, data, labels):
+        """ Splits data and labels with a predifined ratio
+            Dataset contains only positive samples
+
+            Parameters:
+                data (np.ndarray): dataset
+                labels (np.ndarray): labels for the given dataset
+
+            Returns:
+                np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
+        """
+        # Splitting the positive dataset
+        trainX, _, trainy, _ = train_test_split(data, labels, test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
+        
+        return trainX, trainy
+
+
+    def __split_positive_data_to_test_dataset(self, data, labels):
+        """ Splits data and labels with a predifined ratio
+            Dataset contains only positive samples
+
+            Parameters:
+                data (np.ndarray): dataset
+                labels (np.ndarray): labels for the given dataset
+
+            Returns:
+                np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
+        """
+        # Splitting the positive dataset
+        _, testX, _, testy = train_test_split(data, labels, test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
+        
+        return testX, testy
+               
+
     # Statistics ----------------------------------------------------------------------------------------------
 
     def print_all_user_dataset_shape(self):
@@ -529,8 +600,17 @@ class Dataset:
         for user in users:
             dataset = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
             print('Dataset shape for user:', user , '-', dataset.shape)
+
+
+    # Plotter ----------------------------------------------------------------------------------------------
+
+    def get_dataset_for_user(self, user):
+
+        df = self.__load_user_sessions(const.USER_NAME, const.TRAIN_FILES_PATH)
+        df = self.__filter_by_states(df)
+        return df[['x', 'y', 'client timestamp']]
             
             
 if __name__ == "__main__":
     dataset = Dataset()
-    dataset.print_all_user_dataset_shape()
+    dataset.create_test_dataset_for_identification()

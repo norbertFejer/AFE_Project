@@ -63,6 +63,11 @@ RANDOM_STATE = 42
 VERBOSE = True
 
 
+# Maximum values in pixels
+MAX_WIDTH = 4000
+MAX_HEIGHT = 4000
+
+
 # For DFL dataset we use different settings
 if settings.sel_dataset == settings.Dataset.DFL:
     TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'

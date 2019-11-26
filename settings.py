@@ -95,7 +95,7 @@ sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines what will be with the chunk samples
-sel_chunck_samples_handler = ChunkSamplesHandler.CONCATENATE_CHUNKS
+sel_chunck_samples_handler = ChunkSamplesHandler.DROP_CHUNKS
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -122,6 +122,9 @@ sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC, Evaluation
 
 # Defines the type of evaluation
 sel_evaluation_type = EvaluationType.ACTION_BASED
+
+
+print_evaluation_results_to_file = True
 
 
 # Defines normalizaton method during creating the training dataset

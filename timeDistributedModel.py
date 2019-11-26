@@ -18,7 +18,7 @@ class TimeDistributedModel(base_model.BaseModel):
         super().__init__(model_name)
 
         self.verbose, self.epochs, self.batch_size = 2, 20, 128
-        self.n_input, n_output = 2, 2
+        self.n_input = 2
 
         # reshape data into time steps of sub-sequences
         self.n_steps, self.n_length = 4, int(const.BLOCK_SIZE / 4)
@@ -34,7 +34,7 @@ class TimeDistributedModel(base_model.BaseModel):
         self.model.add(LSTM(80))
         self.model.add(Dropout(0.3))
         self.model.add(Dense(60, activation='relu', name='feature_layer'))
-        self.model.add(Dense(n_output, activation='sigmoid'))
+        self.model.add(Dense(self.n_output, activation='sigmoid'))
 
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 

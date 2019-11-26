@@ -11,11 +11,18 @@ class BaseModel:
     def __init__(self, model_name):
         self.model = None
         self.model_name = model_name
+        self.is_trained = False
+
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
+            self.n_output = 2
+        
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
+            self.n_output = len( stt.get_users() )
 
 
     def set_weights_from_pretrained_model(self, model_path):
 
-        if not os.path.exists(model_path):
+        if stt.enable_transfer_learning and not os.path.exists(model_path):
             return
 
         old_model = load_model(model_path)
@@ -25,13 +32,17 @@ class BaseModel:
 
 
     def train_model(self):
+        self.is_trained = True
 
-        if stt.enable_transfer_learning:
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
             self.set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + self.model_name)
 
     
     def get_trained_model(self):
-        return self.model
+
+        if self.is_trained:
+            return self.model
+        return False
 
 
     def save_model(self):
@@ -41,3 +52,15 @@ class BaseModel:
             os.makedirs(const.TRAINED_MODELS_PATH)
 
         self.model.save(const.TRAINED_MODELS_PATH + '/' + self.model_name)
+
+
+    @staticmethod
+    def predict_with_pretrained_model(model_name, x_data):
+        model_path = const.TRAINED_MODELS_PATH + '/' + model_name
+        model = load_model(model_path)
+
+        if stt.sel_model == stt.Model.TIME_DISTRIBUTED:
+            n_steps, n_length = 4, int(const.BLOCK_SIZE / 4)
+            x_data = x_data.reshape((x_data.shape[0], n_steps, n_length, 2))
+
+        return model.predict(x_data)
