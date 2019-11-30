@@ -21,24 +21,25 @@ class CNNmodel(base_model.BaseModel):
         self.verbose, self.epochs, self.batch_size = 2, 16, 32
 
 
-    def create_model(self):
-        
+    def create_model(self, is_trainable = True):
+        super().create_model(is_trainable)
+
         block_size, n_input = const.BLOCK_SIZE, 2
 
-        input_shape = Input(shape=(block_size, n_input))
+        input_shape = Input(shape=(block_size, n_input), name='input_layer')
 
-        tower_11 = Conv1D(filters=40, kernel_size=6, strides=2, activation='relu')(input_shape)
-        tower_12 = Conv1D(filters=60, kernel_size=3, strides=1, activation='relu')(tower_11)
-        tower_1 = GlobalMaxPooling1D()(tower_12)
+        tower_11 = Conv1D(filters=40, kernel_size=6, strides=2, activation='relu', trainable=self.is_trainable)(input_shape)
+        tower_12 = Conv1D(filters=60, kernel_size=3, strides=1, activation='relu', trainable=self.is_trainable)(tower_11)
+        tower_1 = GlobalMaxPooling1D(trainable=self.is_trainable)(tower_12)
 
-        tower_21 = Conv1D(filters=40, kernel_size=4, strides=2, activation='relu')(input_shape)
-        tower_22 = Conv1D(filters=60, kernel_size=2, strides=1, activation='relu')(tower_21)
-        tower_2 = GlobalMaxPooling1D()(tower_22)
+        tower_21 = Conv1D(filters=40, kernel_size=4, strides=2, activation='relu', trainable=self.is_trainable)(input_shape)
+        tower_22 = Conv1D(filters=60, kernel_size=2, strides=1, activation='relu', trainable=self.is_trainable)(tower_21)
+        tower_2 = GlobalMaxPooling1D(trainable=self.is_trainable)(tower_22)
 
-        merged = concatenate([tower_1, tower_2])
-        dropout = Dropout(0.15)(merged)
-        out = Dense(60, activation='relu', name='feature_layer')(dropout)
-        out = Dense(self.n_output, activation='sigmoid')(out)
+        merged = concatenate([tower_1, tower_2], trainable=self.is_trainable)
+        dropout = Dropout(0.15, trainable=self.is_trainable)(merged)
+        out = Dense(60, activation='relu', name='feature_layer', trainable=self.is_trainable)(dropout)
+        out = Dense(self.n_output, activation='sigmoid', name='output_layer')(out)
 
         self.model = Model(input_shape, out)
         optim = optimizers.Adam(lr=0.002, decay=1e-4)
@@ -46,12 +47,15 @@ class CNNmodel(base_model.BaseModel):
         # print(self.model.summary())
         self.model.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
 
+        for l in self.model.layers:
+            print(l.name, l.trainable)
+
 
     def train_model(self, trainX, trainy):
-
         super().train_model()
 
         # fit network
         history = self.model.fit(trainX, trainy, epochs=self.epochs, batch_size=self.batch_size, verbose=self.verbose)
+        self.is_trained = True
 
         return history

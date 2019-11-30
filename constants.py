@@ -19,6 +19,9 @@ BLOCK_NUM = 300
 USER_NAME = 'user7'
 
 
+USED_MODEL_FOR_TRANSFER_LEARNING = 'identification_Model.CNN_Dataset.DFL_128_300_trained.h5'
+
+
 # Defines train-test split ratio.
 # Only needs if TRAIN_TEST_SPLIT_TYPE is TRAIN_AVAILABLE
 # If it's value between (0, 1) then represents the proportion of the dataset to include in the train split.

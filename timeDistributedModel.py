@@ -22,21 +22,25 @@ class TimeDistributedModel(base_model.BaseModel):
         self.n_steps, self.n_length = 4, int(const.BLOCK_SIZE / 4)
 
 
-    def create_model(self):
+    def create_model(self, is_trainable = True):
+        super().create_model(is_trainable)
 
         self.model = Sequential()
         self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
-                                input_shape=(None, self.n_length, self.n_input)))
-        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
-        self.model.add(TimeDistributed(Dropout(0.2)))
-        self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
-        self.model.add(TimeDistributed(Flatten()))
-        self.model.add(LSTM(80))
-        self.model.add(Dropout(0.3))
-        self.model.add(Dense(60, activation='relu', name='feature_layer'))
-        self.model.add(Dense(self.n_output, activation='sigmoid'))
+                                input_shape=(None, self.n_length, self.n_input), trainable=self.is_trainable))
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'), trainable=self.is_trainable))
+        self.model.add(TimeDistributed(Dropout(0.2), trainable=self.is_trainable))
+        self.model.add(TimeDistributed(MaxPooling1D(pool_size=2), trainable=self.is_trainable))
+        self.model.add(TimeDistributed(Flatten(), trainable=self.is_trainable))
+        self.model.add(LSTM(80, trainable=self.is_trainable))
+        self.model.add(Dropout(0.3, trainable=self.is_trainable))
+        self.model.add(Dense(60, activation='relu', name='feature_layer', trainable=self.is_trainable))
+        self.model.add(Dense(self.n_output, activation='sigmoid', name='output_layer'))
 
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+        for l in self.model.layers:
+            print(l.name, l.trainable)
 
 
     def train_model(self, trainX, trainy):
@@ -46,5 +50,7 @@ class TimeDistributedModel(base_model.BaseModel):
 
         # fit network
         history = self.model.fit(trainX, trainy, epochs=self.epochs, batch_size=self.batch_size, verbose=self.verbose)
+        self.is_trained = True
+
         return history
 

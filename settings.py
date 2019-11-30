@@ -22,8 +22,8 @@ class EvaluationType(Enum):
 
 
 class DatasetType(Enum):
-    TRAIN_AVAILABLE = 'trainSetAvailable'
-    TRAIN_TEST_AVAILABLE = 'trainTestSetAvailable'
+    TRAIN_AVAILABLE = 'train_set_available'
+    TRAIN_TEST_AVAILABLE = 'train_test_set_available'
 
 
 class Users(Enum):
@@ -72,11 +72,11 @@ class ChunkSamplesHandler(Enum):
 
 class NormalizationMethod(Enum):
     BUILTIN = 'builtin'
-    USER_DEFINED = 'userDefined'
+    USER_DEFINED = 'user_defined'
 
 
 # Defines the selected method
-sel_method = Method.TRAIN
+sel_method = Method.EVALUATE
 
 
 # Defines which model will be used
@@ -96,7 +96,7 @@ sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
 # Defines what will be with the chunk samples
-sel_chunck_samples_handler = ChunkSamplesHandler.CONCATENATE_CHUNKS
+sel_chunck_samples_handler = ChunkSamplesHandler.DROP_CHUNKS
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -109,7 +109,7 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 sel_train_user_number = TrainUserNumber.SINGLE
 
 
-enable_transfer_learning = False
+enable_train_model_using_pretrained_weights = False
 
 
 # Defines how many user will be used 

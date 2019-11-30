@@ -11,7 +11,7 @@ set_random_seed(const.RANDOM_STATE)
 
 def main():
 
-    if stt.sel_method == stt.Method.TRAIN:
+    if stt.sel_method == stt.Method.TRAIN or stt.sel_method == stt.Method.TRANSFER_LEARNING:
         tm = trainModel.TrainModel()
         tm.train_model()
 

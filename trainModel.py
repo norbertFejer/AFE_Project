@@ -50,7 +50,12 @@ class TrainModel:
 
 
     def __fit_and_save_model(self, model, trainX, trainy):
-        model.create_model()
+
+        if stt.sel_method == stt.Method.TRANSFER_LEARNING:
+            model.create_model(False)
+        else:
+            model.create_model()
+
         model.train_model(trainX, trainy)
         model.save_model()
 
