@@ -11,6 +11,25 @@ import constants as const
 import settings as stt
 
 class Dataset:
+    __instance = None
+
+
+    @staticmethod 
+    def getInstance():
+        """ Static access method. 
+        """
+        if Dataset.__instance == None:
+            Dataset()
+        return Dataset.__instance
+
+
+    def __init__(self):
+      """ Virtually private constructor. 
+      """
+      if Dataset.__instance != None:
+        raise Exception("This class is a singleton!")
+      else:
+        Dataset.__instance = self
 
 
     if const.VERBOSE:

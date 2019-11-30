@@ -76,7 +76,7 @@ class NormalizationMethod(Enum):
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRAIN
 
 
 # Defines which model will be used

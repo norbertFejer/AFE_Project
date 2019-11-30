@@ -9,6 +9,7 @@ class Plotter:
     def __init__(self):
         self.dataset = dset.Dataset()
 
+
     def plot_user_blocks(self):
 
         dataset = self.dataset.get_user_preprocessed_dataset(const.USER_NAME)

@@ -29,19 +29,18 @@ class BaseModel:
         try:
             old_model = load_model(model_path)
         except:
-            return
-        print('itt belso---------------------------------------------------')
+            raise Exception(model_path + ' model does not exist!')
+
         for i in range(len(old_model.layers) - 1):
             self.model.layers[i].set_weights(old_model.layers[i].get_weights())
 
 
     def train_model(self):
 
-        if stt.enable_train_model_using_pretrained_weights and stt.sel_method != stt.Method.TRANSFER_LEARNING:
+        if stt.sel_method == stt.Method.TRAIN and stt.enable_train_model_using_pretrained_weights:
             self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + self.model_name)
 
         if stt.sel_method == stt.Method.TRANSFER_LEARNING:
-            print('itt1---------------------------------------------------')
             self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + const.USED_MODEL_FOR_TRANSFER_LEARNING)
     
     
