@@ -52,6 +52,7 @@ class EvaluateUserNumber(Enum):
 class Method(Enum):
     TRAIN = 'train_model'
     EVALUATE = 'evaluate_model'
+    TRANSFER_LEARNING = 'transfer_learning'
 
 
 class EvaluationMetric(Enum):
@@ -91,11 +92,11 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
+sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
 # Defines what will be with the chunk samples
-sel_chunck_samples_handler = ChunkSamplesHandler.DROP_CHUNKS
+sel_chunck_samples_handler = ChunkSamplesHandler.CONCATENATE_CHUNKS
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
@@ -108,7 +109,7 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 sel_train_user_number = TrainUserNumber.SINGLE
 
 
-enable_transfer_learning = True
+enable_transfer_learning = False
 
 
 # Defines how many user will be used 

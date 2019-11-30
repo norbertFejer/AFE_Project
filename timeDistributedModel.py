@@ -19,11 +19,11 @@ class TimeDistributedModel(base_model.BaseModel):
 
         self.verbose, self.epochs, self.batch_size = 2, 20, 128
         self.n_input = 2
-
-        # reshape data into time steps of sub-sequences
         self.n_steps, self.n_length = 4, int(const.BLOCK_SIZE / 4)
 
-        # define model
+
+    def create_model(self):
+
         self.model = Sequential()
         self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
                                 input_shape=(None, self.n_length, self.n_input)))

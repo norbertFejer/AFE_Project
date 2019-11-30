@@ -19,6 +19,10 @@ class CNNmodel(base_model.BaseModel):
         super().__init__(model_name)
 
         self.verbose, self.epochs, self.batch_size = 2, 16, 32
+
+
+    def create_model(self):
+        
         block_size, n_input = const.BLOCK_SIZE, 2
 
         input_shape = Input(shape=(block_size, n_input))

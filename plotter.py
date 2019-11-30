@@ -10,14 +10,12 @@ class Plotter:
         self.dataset = dset.Dataset()
 
     def plot_user_blocks(self):
-        df = self.dataset.get_dataset_for_user(const.USER_NAME)
 
-        x_max = df['x'].max()
-        y_max = df['y'].max()
+        dataset = self.dataset.get_user_preprocessed_dataset(const.USER_NAME)
+        print(dataset.head())
+        #x_standard, y_standard = self.parse_standard_resolution(df['x'].max(), y_max = df['y'].max())
 
-        x_standard, y_standard = self.parse_standard_resolution(x_max, y_max)
-        print(x_standard)
-        print(y_standard)
+        # self.plot_coordinates(dataset[0], x_standard, y_standard)
 
 
     def parse_standard_resolution(self, x_max, y_max):
@@ -32,7 +30,21 @@ class Plotter:
         while y_standard[y_pos] < y_max and y_pos < len(y_standard):
             y_pos += 1
 
+        if x_max > x_standard[x_pos]:
+            x_standard[x_pos] = x_max
+
+        if y_max > y_standard[y_pos]:
+            y_standard[y_pos] = y_max
+
         return x_standard[x_pos], y_standard[y_pos]
+
+
+    def plot_coordinates(self, x_data, y_data, x_max, y_max):
+        plt.plot(x_data, y_data)
+        plt.xlabel('X coordinate')
+        plt.ylabel('Y coordinate')
+        plt.axis([0, x_max, 0, y_max])
+        plt.show()
 
    
 if __name__ == "__main__":

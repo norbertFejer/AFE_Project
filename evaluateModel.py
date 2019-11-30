@@ -6,6 +6,7 @@ import baseModel as base_model
 from keras.utils import to_categorical
 from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score
 import numpy as np
+import os
 
 
 class EvaluateModel:
@@ -73,7 +74,7 @@ class EvaluateModel:
             self.print_msg('\n' + str(metric) + ' value:')
             value = self.__get_evaluation_score(metric.value, model_name, testX, y_true)
             results[str(metric)] = value
-            print(value)
+            self.print_msg(value)
 
         if stt.print_evaluation_results_to_file:
             self.__print_results_to_file(results, model_name)
@@ -139,6 +140,10 @@ class EvaluateModel:
 
 
     def __print_results_to_file(self, results, file_name):
+
+        if not os.path.exists(const.RESULTS_PATH):
+            os.makedirs(const.RESULTS_PATH)
+
         file = open(const.RESULTS_PATH + '/' + file_name + '.csv', 'w')
         
         for key, value in results.items():

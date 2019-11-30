@@ -50,6 +50,7 @@ class TrainModel:
 
 
     def __fit_and_save_model(self, model, trainX, trainy):
+        model.create_model()
         model.train_model(trainX, trainy)
         model.save_model()
 

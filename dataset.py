@@ -604,11 +604,11 @@ class Dataset:
 
     # Plotter ----------------------------------------------------------------------------------------------
 
-    def get_dataset_for_user(self, user):
-
-        df = self.__load_user_sessions(const.USER_NAME, const.TRAIN_FILES_PATH)
-        df = self.__filter_by_states(df)
-        return df[['x', 'y', 'client timestamp']]
+    def get_user_preprocessed_dataset(self, user): 
+        data = self.__filter_by_states( self.__load_user_sessions(user, const.TRAIN_FILES_PATH) )
+        data = self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], inf)
+    
+        return data
             
             
 if __name__ == "__main__":

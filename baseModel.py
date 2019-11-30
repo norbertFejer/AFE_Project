@@ -20,12 +20,17 @@ class BaseModel:
             self.n_output = len( stt.get_users() )
 
 
-    def set_weights_from_pretrained_model(self, model_path):
+    def create_model(self):
+        raise NotImplementedError
 
-        if stt.enable_transfer_learning and not os.path.exists(model_path):
+
+    def __set_weights_from_pretrained_model(self, model_path):
+
+        try:
+            old_model = load_model(model_path)
+        except:
             return
-
-        old_model = load_model(model_path)
+        print('itt----------------------------------------------------------------------------')
 
         for i in range(len(old_model.layers) - 1):
             self.model.layers[i].set_weights(old_model.layers[i].get_weights())
@@ -34,9 +39,9 @@ class BaseModel:
     def train_model(self):
         self.is_trained = True
 
-        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            self.set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + self.model_name)
-
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION and stt.enable_transfer_learning:
+            self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + self.model_name)
+    
     
     def get_trained_model(self):
 
