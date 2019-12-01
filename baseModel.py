@@ -45,7 +45,7 @@ class BaseModel:
             old_model = load_model(model_path)
         except:
             raise Exception(model_path + ' model does not exist!')
-
+        print('belepett........................................................................')
         # The last layer weights will not be set
         for i in range(len(old_model.layers) - 1):
             self.model.layers[i].set_weights(old_model.layers[i].get_weights())
@@ -60,7 +60,7 @@ class BaseModel:
             Returns:
                 None
         """ 
-        if stt.sel_method == stt.Method.TRAIN and stt.enable_train_model_using_pretrained_weights:
+        if stt.sel_method == stt.Method.TRAIN and stt.use_pretrained_weights_for_training_model:
             self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + self.model_name)
 
         if stt.sel_method == stt.Method.TRANSFER_LEARNING:

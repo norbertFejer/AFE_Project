@@ -19,6 +19,7 @@ BLOCK_NUM = 300
 USER_NAME = 'user7'
 
 
+# Define the model name to initializing weights for transfer learning
 USED_MODEL_FOR_TRANSFER_LEARNING = 'identification_Model.CNN_Dataset.DFL_128_300_trained.h5'
 
 
@@ -66,7 +67,7 @@ RANDOM_STATE = 42
 VERBOSE = True
 
 
-# Maximum values in pixels
+# Maximum screen sizes in pixels
 MAX_WIDTH = 4000
 MAX_HEIGHT = 4000
 

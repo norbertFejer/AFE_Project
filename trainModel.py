@@ -52,7 +52,7 @@ class TrainModel:
     def __fit_and_save_model(self, model, trainX, trainy):
 
         if stt.sel_method == stt.Method.TRANSFER_LEARNING:
-            model.create_model(False)
+            model.create_model(stt.use_trainable_weights_for_transfer_learning)
         else:
             model.create_model()
 

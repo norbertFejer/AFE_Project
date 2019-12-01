@@ -76,7 +76,7 @@ class NormalizationMethod(Enum):
 
 
 # Defines the selected method
-sel_method = Method.TRAIN
+sel_method = Method.TRANSFER_LEARNING
 
 
 # Defines which model will be used
@@ -109,7 +109,14 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 sel_train_user_number = TrainUserNumber.SINGLE
 
 
-enable_train_model_using_pretrained_weights = False
+# If True model weights will be trainable
+# If False model weights will be non-trainable
+use_trainable_weights_for_transfer_learning = False
+
+
+# If True and given model already exists the training process will use the pretrained weights
+# If False the model weights will be initialized randomly
+use_pretrained_weights_for_training_model = False
 
 
 # Defines how many user will be used 
@@ -125,6 +132,7 @@ sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC, Evaluation
 sel_evaluation_type = EvaluationType.ACTION_BASED
 
 
+# Defines saving evaluation results to file
 print_evaluation_results_to_file = True
 
 
@@ -133,14 +141,38 @@ sel_normalization_method = NormalizationMethod.USER_DEFINED
 
 
 def get_balabit_users():
+    """ Returns the Balabit Dataset users
+
+        Parameters:
+            None
+
+        Returns:
+            np.ndarray() - users list
+    """ 
     return Users.get_balabit_users()
 
 
 def get_dfl_users():
+    """ Returns the DFL Dataset users
+
+        Parameters:
+            None
+
+        Returns:
+            np.ndarray() - users list
+    """ 
     return Users.get_dfl_users()
 
 
 def get_users():
+    """ Gets users name from the selected dataset
+
+        Parameters:
+            None
+
+        Returns:
+            np.ndarray() - users list
+    """ 
     switcher = { 
         0: get_balabit_users,
         1: get_dfl_users, 
