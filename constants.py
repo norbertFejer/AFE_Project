@@ -10,8 +10,8 @@ BLOCK_SIZE = 128
 
 
 # Block size number from given user
-# If it's value is math.inf then reads all samples.
-# If int value is set, than BLOCK_NUM * BLOCK_SIZE reads rows will be read.
+# If its value is inf then reads all samples.
+# If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
 BLOCK_NUM = 300
 
 
@@ -25,7 +25,7 @@ USED_MODEL_FOR_TRANSFER_LEARNING = 'identification_Model.CNN_Dataset.DFL_128_300
 
 # Defines train-test split ratio.
 # Only needs if TRAIN_TEST_SPLIT_TYPE is TRAIN_AVAILABLE
-# If it's value between (0, 1) then represents the proportion of the dataset to include in the train split.
+# If its value is between (0, 1) then represents the proportion of the dataset to include in the train split.
 # If int, represents the absolute number of train samples.
 TRAIN_TEST_SPLIT_VALUE = 70
 

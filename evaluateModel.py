@@ -14,6 +14,7 @@ class EvaluateModel:
 
     def __init__(self):
         self.dataset = dset.Dataset()
+        self.results = {}
 
 
     if const.VERBOSE:
@@ -67,19 +68,19 @@ class EvaluateModel:
         return func(model_name, testX, y_true)
 
 
-    def __evaluate_model_by_metrics(self, model_name, testX, y_true):
-        results = {}
+    def __evaluate_model_by_metrics(self, user, model_name, testX, y_true):
+
+        evaluation_result = []
 
         # Evaluating model with all selected metrics
         for metric in stt.sel_evaluation_metrics:
             self.print_msg('\n' + str(metric) + ' value:')
             value = self.__get_evaluation_score(metric.value, model_name, testX, y_true)
             # Saving result to a map for further use
-            results[str(metric)] = value
+            evaluation_result.append(value)
             self.print_msg(value)
 
-        if stt.print_evaluation_results_to_file:
-            self.__print_results_to_file(results, model_name)
+        self.results[user] = evaluation_result
 
 
     def __evaluate_model_by_method(self, user, model_name):
@@ -94,7 +95,7 @@ class EvaluateModel:
         self.print_msg(testX.shape)
         self.print_msg(y_true.shape)
         
-        self.__evaluate_model_by_metrics(model_name, testX, y_true)
+        self.__evaluate_model_by_metrics(user, model_name, testX, y_true)
 
 
     def __evaluate_model_action_based_single_user(self, model_name):
@@ -139,8 +140,13 @@ class EvaluateModel:
                 # TODO
                 raise NotImplementedError
 
+            file_name = 'authentication_' + model_name
         else:
             self.__evaluate_model_for_identification(model_name)
+            file_name = 'identification_' + model_name
+            
+        if stt.print_evaluation_results_to_file:    
+            self.__print_results_to_file(self.results, file_name)
 
 
     def __print_results_to_file(self, results, file_name):
@@ -153,15 +159,25 @@ class EvaluateModel:
             Returns:
                 None
         """
-
         if not os.path.exists(const.RESULTS_PATH):
             os.makedirs(const.RESULTS_PATH)
 
+        file_name = file_name[:len(file_name) - 3]
         file = open(const.RESULTS_PATH + '/' + file_name + '.csv', 'w')
+        file.write('username,')
+
+        for metric in stt.sel_evaluation_metrics:
+            file.write(str(metric) + ',')
+
+        file.write('\n')
         
-        for key, value in results.items():
-            file.write(str(key) + ':\n')
-            file.write(str(value) + '\n')
+        for user, values in results.items():
+            file.write(str(user) + ',')
+            
+            for value in values:
+                file.write(str(value) + ',')
+
+            file.write('\n')
 
         file.close()
 

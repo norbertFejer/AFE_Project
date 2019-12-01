@@ -76,7 +76,7 @@ class NormalizationMethod(Enum):
 
 
 # Defines the selected method
-sel_method = Method.TRANSFER_LEARNING
+sel_method = Method.EVALUATE
 
 
 # Defines which model will be used
@@ -106,14 +106,16 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 
 # Defines how many user will be used
 # in case of model training
-sel_train_user_number = TrainUserNumber.SINGLE
+sel_train_user_number = TrainUserNumber.ALL
 
 
+# It is used for TRANSFER_LEARNING
 # If True model weights will be trainable
 # If False model weights will be non-trainable
 use_trainable_weights_for_transfer_learning = False
 
 
+# It is used for TRAIN model
 # If True and given model already exists the training process will use the pretrained weights
 # If False the model weights will be initialized randomly
 use_pretrained_weights_for_training_model = False
@@ -121,7 +123,7 @@ use_pretrained_weights_for_training_model = False
 
 # Defines how many user will be used 
 # in case of model evaluation
-sel_evaluate_user_number = EvaluateUserNumber.SINGLE
+sel_evaluate_user_number = EvaluateUserNumber.ALL
 
 
 # Defines the evaluation metrics
