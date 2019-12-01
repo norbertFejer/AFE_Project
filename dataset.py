@@ -34,7 +34,7 @@ class Dataset:
 
     if const.VERBOSE:
         def print_msg(self, msg):
-            """ Prints the given message
+            """ Prints the given message if VERBOSE is True
 
                 Parameters: msg (str)
 
@@ -106,7 +106,6 @@ class Dataset:
             Return:
                 DataFrame: preprocessed dx, dy and dt with chunck handled
         """
-
         complete_df, chunk_df = self.__handle_raw_data(df)
 
         if stt.sel_chunck_samples_handler == stt.ChunkSamplesHandler.CONCATENATE_CHUNKS:
@@ -135,7 +134,6 @@ class Dataset:
                     df1 contains the entire samples that with in given BLOCK_SIZE
                     df2 contains the chunkc, which length is less than the BLOCK_SIZE
         """
-
         # Calculates the difference between two consecutive row
         df = df.diff()
         df = df.rename(columns={'x': 'dx', 'y': 'dy', 'client timestamp': 'dt'})
@@ -187,7 +185,6 @@ class Dataset:
             Returns:
                 DataFrame: normalized dataframe
         """
-
         if stt.sel_normalization_method == stt.NormalizationMethod.USER_DEFINED:
             self.__normalize_data_user_defined(df)
         else:
@@ -222,7 +219,6 @@ class Dataset:
             Returns:
                 DataFrame: x and y directional speed
         """
-
         # Setting default value if dt == 0
         df.loc[ df['dt'] <= 0 ] = 0.01
 
@@ -288,7 +284,6 @@ class Dataset:
             Returns:
                 df (DataFrame): augmentated dataset
         """
-
         # Calculating how many rows have to augment
         if block_num == inf:
             aug_row_num = df.shape[0]
@@ -401,7 +396,6 @@ class Dataset:
             Returns:
                 np.ndarray, np.ndarray: dataset, labels
         """
-
         if stt.sel_balance_type == stt.DatasetBalanceType.POSITIVE:
             data = self.__load_positive_balanced_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
         else:
@@ -546,10 +540,20 @@ class Dataset:
 
 
     def __create_identification_dataset_by_method(self, method):
+        """ Returns the identification dataset defined with method
+
+            Parameters:
+                method (str) - Value in (TRAIN, EVALUATE, TRANFER LEARNING)
+
+            Returns:
+                np.ndarray, np.array: train/test dataset, train/test labels for identification
+        """
+        # Listing all user in a given dataset
         users = os.listdir(const.TRAIN_FILES_PATH)
         dataset = np.ndarray(shape=(0, const.BLOCK_SIZE, 2))
         labels = np.ndarray(shape=(0, 1))
 
+        # We have to renumber user id's, because of using to_categorical()
         id = 0
         for user in users:
             tmp_dataset = self.__load_positive_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
@@ -570,16 +574,33 @@ class Dataset:
 
 
     def create_train_dataset_for_identification(self):
+        """ Returns identification train dataset
+
+            Parameters:
+                None
+
+            Returns:
+                np.ndarray, np.array: train dataset, train labels for the identification
+        """
         return self.__create_identification_dataset_by_method(stt.Method.TRAIN)
 
 
     def create_test_dataset_for_identification(self):
+        """ Returns identification test dataset
+
+            Parameters:
+                None
+
+            Returns:
+                np.ndarray, np.array: test dataset, test labels for the identification
+        """
         return self.__create_identification_dataset_by_method(stt.Method.EVALUATE)
 
 
     def __split_positive_data_to_train_dataset(self, data, labels):
         """ Splits data and labels with a predifined ratio
             Dataset contains only positive samples
+            Used for creating train dataset
 
             Parameters:
                 data (np.ndarray): dataset
@@ -588,7 +609,7 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
         """
-        # Splitting the positive dataset
+        # Splitting dataset
         trainX, _, trainy, _ = train_test_split(data, labels, test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
         
         return trainX, trainy
@@ -597,15 +618,16 @@ class Dataset:
     def __split_positive_data_to_test_dataset(self, data, labels):
         """ Splits data and labels with a predifined ratio
             Dataset contains only positive samples
+            Used for creating test dataset
 
             Parameters:
                 data (np.ndarray): dataset
                 labels (np.ndarray): labels for the given dataset
 
             Returns:
-                np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
+                np.ndarray, np.array: splitted test dataset, splitted test labels for the dataset
         """
-        # Splitting the positive dataset
+        # Splitting dataset
         _, testX, _, testy = train_test_split(data, labels, test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
         
         return testX, testy
@@ -613,7 +635,16 @@ class Dataset:
 
     # Statistics ----------------------------------------------------------------------------------------------
 
+
     def print_all_user_dataset_shape(self):
+        """ Prints available dataset shape for all user
+
+            Parameters:
+                None
+
+            Returns:
+                None
+        """
         users = os.listdir(const.TRAIN_FILES_PATH)
 
         for user in users:
@@ -623,7 +654,16 @@ class Dataset:
 
     # Plotter ----------------------------------------------------------------------------------------------
 
-    def get_user_preprocessed_dataset(self, user): 
+
+    def get_user_preprocessed_dataset(self, user):
+        """ Retuns the given user preprocessed dataset, containing x, y and timestamp
+
+            Parameters:
+                user (str) - username
+
+            Returns:
+                np.ndarray() - given user dataset
+        """ 
         data = self.__filter_by_states( self.__load_user_sessions(user, const.TRAIN_FILES_PATH) )
         data = self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], inf)
     

@@ -18,7 +18,7 @@ class EvaluateModel:
 
     if const.VERBOSE:
         def print_msg(self, msg):
-            """ Prints the given message
+            """ Prints the given message if VERBOSE is True
 
                 Parameters: msg (str)
 
@@ -70,9 +70,11 @@ class EvaluateModel:
     def __evaluate_model_by_metrics(self, model_name, testX, y_true):
         results = {}
 
+        # Evaluating model with all selected metrics
         for metric in stt.sel_evaluation_metrics:
             self.print_msg('\n' + str(metric) + ' value:')
             value = self.__get_evaluation_score(metric.value, model_name, testX, y_true)
+            # Saving result to a map for further use
             results[str(metric)] = value
             self.print_msg(value)
 
@@ -133,13 +135,24 @@ class EvaluateModel:
             if stt.sel_evaluation_type == stt.EvaluationType.ACTION_BASED:
                 self.__action_based_evaluation(model_name)
             else:
-                print('session based')
+                # It has to implement session based evaluation
+                # TODO
+                raise NotImplementedError
 
         else:
             self.__evaluate_model_for_identification(model_name)
 
 
     def __print_results_to_file(self, results, file_name):
+        """ Prints the given result to file
+
+            Parameters:
+                map - contains all result in form: (metric name, value)
+                str - filename for saving results
+
+            Returns:
+                None
+        """
 
         if not os.path.exists(const.RESULTS_PATH):
             os.makedirs(const.RESULTS_PATH)

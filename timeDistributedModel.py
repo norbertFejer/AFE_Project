@@ -39,9 +39,6 @@ class TimeDistributedModel(base_model.BaseModel):
 
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-        for l in self.model.layers:
-            print(l.name, l.trainable)
-
 
     def train_model(self, trainX, trainy):
         super().train_model()

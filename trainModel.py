@@ -18,7 +18,7 @@ class TrainModel:
 
     if const.VERBOSE:
         def print_msg(self, msg):
-            """ Prints the given message
+            """ Prints the given message if VERBOSE is True
 
                 Parameters: msg (str)
 
@@ -61,16 +61,46 @@ class TrainModel:
 
 
     def __get_model_0(self, trainX, trainy, model_name):
+        """ Trains the CNN model
+
+            Parameters:
+                np.ndarray - input dataset
+                np.ndarray - true labels
+                str - model name
+
+            Returns:
+                None
+        """
         cnn_model = cnnModel.CNNmodel(model_name)
         self.__fit_and_save_model(cnn_model, trainX, trainy)
 
 
     def __get_model_1(self, trainX, trainy, model_name):
+        """ Trains TIME_DISTRIBUTED model
+
+            Parameters:
+                np.ndarray - input dataset
+                np.ndarray - true labels
+                str - model name
+
+            Returns:
+                None
+        """
         time_distributed_model = timeDistributedModel.TimeDistributedModel(model_name)
         self.__fit_and_save_model(time_distributed_model, trainX, trainy)
 
 
     def __train_selected_model(self, trainX, trainy, model_name):
+        """ Getting model by name and training it
+
+            Parameters:
+                np.ndarray - input dataset
+                np.ndarray - true labels
+                str - model name
+
+            Returns:
+                None
+        """
         
         switcher = {
             0: self.__get_model_0,
@@ -106,6 +136,14 @@ class TrainModel:
 
 
     def train_model(self):
+        """ Trains the model with the selected params
+
+            Parameters:
+                None
+
+            Returns:
+                None
+        """
         model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:

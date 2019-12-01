@@ -96,7 +96,7 @@ sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
 # Defines what will be with the chunk samples
-sel_chunck_samples_handler = ChunkSamplesHandler.DROP_CHUNKS
+sel_chunck_samples_handler = ChunkSamplesHandler.CONCATENATE_CHUNKS
 
 
 # TRAIN_AVAILABLE means, that we have only train dataset
