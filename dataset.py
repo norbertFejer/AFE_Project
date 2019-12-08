@@ -146,7 +146,7 @@ class Dataset:
         # Vectorization for better performance
         df = df.values
         # complete_samples are samples that are greater or equal than the BLOCK_SIZE
-        # chunk_samples are lengths less than BLOCK_SIZE
+        # chunk_samples has lenght less than BLOCK_SIZE
         complete_samples, chunk_samples = [], []
         row_start, row_end, ind = 1, 1 + const.BLOCK_SIZE, 0
 
@@ -354,7 +354,7 @@ class Dataset:
             Returns:
                 np.ndarray: positive and negative data concatenation
         """
-        dset_positive = self.__load_positive_dataset(user, const.BLOCK_NUM, files_path)
+        dset_positive = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
 
         # Calculates how many block_num has to read from users
         user_num = len(os.listdir(files_path)) - 1
@@ -397,9 +397,9 @@ class Dataset:
                 np.ndarray, np.ndarray: dataset, labels
         """
         if stt.sel_balance_type == stt.DatasetBalanceType.POSITIVE:
-            data = self.__load_positive_balanced_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            data = self.__load_positive_balanced_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
         else:
-            data = self.__load_negative_balanced_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            data = self.__load_negative_balanced_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
         # 0 - valid user (is legal)
         # 1 - intruder (is illegal)
@@ -470,7 +470,14 @@ class Dataset:
         # data[middel_pos:] contains the negative dataset
         middle_pos = int(data.shape[0] / 2)
         # Splitting the positive dataset
-        pos_data, _, pos_labels, _ = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
+
+        # Inverting train_test_split() to get test data from the beginning of the dataset
+        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
+            train_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+        else:
+            train_dataset_size = data[:middle_pos].shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+
+        _, pos_data, _, pos_labels = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=train_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
         
         return np.concatenate((pos_data, data[middle_pos : (middle_pos + pos_data.shape[0])]), axis=0), \
                np.concatenate((pos_labels, labels[middle_pos: (middle_pos + pos_data.shape[0])]), axis=0)
@@ -488,7 +495,13 @@ class Dataset:
                 np.ndarray, np.array: splitted test dataset, splitted test labels for the dataset
         """
         middle_pos = int(data.shape[0] / 2)
-        _, pos_data, _, pos_labels = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
+
+        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
+            test_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+        else:
+            test_dataset_size = data[:middle_pos].shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+
+        pos_data, _, pos_labels, _ = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=test_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
 
         return np.concatenate((pos_data, data[(data.shape[0] - pos_data.shape[0]) : ]), axis=0), \
                np.concatenate((pos_labels, labels[(data.shape[0] - pos_data.shape[0]) : ]), axis=0)
@@ -556,7 +569,7 @@ class Dataset:
         # We have to renumber user id's, because of using to_categorical()
         id = 0
         for user in users:
-            tmp_dataset = self.__load_positive_dataset(user, const.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            tmp_dataset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
             tmp_labels = self.__create_labels(tmp_dataset.shape[0], id)
 
             if method == stt.Method.TRAIN:
@@ -610,7 +623,12 @@ class Dataset:
                 np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
         """
         # Splitting dataset
-        trainX, _, trainy, _ = train_test_split(data, labels, test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
+        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
+            train_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+        else:
+            train_dataset_size = data.shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+
+        _, trainX, _, trainy = train_test_split(data, labels, test_size=train_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
         
         return trainX, trainy
 
@@ -628,7 +646,12 @@ class Dataset:
                 np.ndarray, np.array: splitted test dataset, splitted test labels for the dataset
         """
         # Splitting dataset
-        _, testX, _, testy = train_test_split(data, labels, test_size=const.TRAIN_TEST_SPLIT_VALUE, random_state=const.RANDOM_STATE, shuffle=False)
+        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
+            test_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+        else:
+            test_dataset_size = data.shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+
+        testX, _, testy, _ = train_test_split(data, labels, test_size=test_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
         
         return testX, testy
                
@@ -654,20 +677,16 @@ class Dataset:
 
     # Plotter ----------------------------------------------------------------------------------------------
 
+    def get_user_raw_data(self, user):
 
-    def get_user_preprocessed_dataset(self, user):
-        """ Retuns the given user preprocessed dataset, containing x, y and timestamp
+        df = self.__load_user_sessions(user, const.TRAIN_FILES_PATH)
+        # Filtering outliers
+        df = df[(df['x'] < const.MAX_WIDTH) & (df['y'] < const.MAX_HEIGHT)]
+        # Dropping the Scroll states
+        df = df.loc[~df['button'].isin(['Scroll'])]
+        df = df.loc[df['client timestamp'] - df.shift()['client timestamp'] > 0]
 
-            Parameters:
-                user (str) - username
-
-            Returns:
-                np.ndarray() - given user dataset
-        """ 
-        data = self.__filter_by_states( self.__load_user_sessions(user, const.TRAIN_FILES_PATH) )
-        data = self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], inf)
-    
-        return data
+        return df[['x', 'y', 'client timestamp']]
             
             
 if __name__ == "__main__":

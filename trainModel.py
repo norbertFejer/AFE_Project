@@ -144,7 +144,7 @@ class TrainModel:
             Returns:
                 None
         """
-        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
+        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.h5'
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
 

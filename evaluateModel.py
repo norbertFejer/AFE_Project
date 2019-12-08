@@ -129,7 +129,9 @@ class EvaluateModel:
 
 
     def evaluate_model(self):
-        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(const.BLOCK_NUM) + '_trained.h5'
+        self.results = {}
+        
+        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.h5'
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
 
@@ -175,6 +177,11 @@ class EvaluateModel:
             file.write(str(user) + ',')
             
             for value in values:
+
+                if type(value) is np.ndarray:
+                    value = str(value.tolist())
+                    value = value.replace(',', ' ')
+                
                 file.write(str(value) + ',')
 
             file.write('\n')

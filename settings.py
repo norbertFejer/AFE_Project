@@ -1,4 +1,5 @@
 from enum import Enum
+from math import inf
 
 
 class Model(Enum):
@@ -75,6 +76,12 @@ class NormalizationMethod(Enum):
     USER_DEFINED = 'user_defined'
 
 
+# Block size number from given user
+# If its value is inf then reads all samples.
+# If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
+BLOCK_NUM = inf
+
+
 # Defines the selected method
 sel_method = Method.EVALUATE
 
@@ -92,7 +99,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines what will be with the chunk samples
@@ -112,7 +119,7 @@ sel_train_user_number = TrainUserNumber.ALL
 # It is used for TRANSFER_LEARNING
 # If True model weights will be trainable
 # If False model weights will be non-trainable
-use_trainable_weights_for_transfer_learning = False
+use_trainable_weights_for_transfer_learning = True
 
 
 # It is used for TRAIN model

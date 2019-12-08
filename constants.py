@@ -1,5 +1,3 @@
-from math import inf
-
 import settings
 import timeDistributedModel
 import cnnModel
@@ -9,18 +7,12 @@ import cnnModel
 BLOCK_SIZE = 128
 
 
-# Block size number from given user
-# If its value is inf then reads all samples.
-# If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
-BLOCK_NUM = 300
-
-
 # Defines the used user name
 USER_NAME = 'user7'
 
 
 # Define the model name to initializing weights for transfer learning
-USED_MODEL_FOR_TRANSFER_LEARNING = 'identification_Model.CNN_Dataset.DFL_128_300_trained.h5'
+USED_MODEL_FOR_TRANSFER_LEARNING = 'User11_Model.CNN_Dataset.DFL_128_300_trained.h5'
 
 
 # Defines train-test split ratio.
@@ -57,6 +49,10 @@ TRAINED_MODELS_PATH = 'C:/Anaconda projects/Software_mod/trainedModels'
 
 # Results path
 RESULTS_PATH = 'C:/Anaconda projects/Software_mod/evaluationResults'
+
+
+# Saved images pah
+SAVED_IMAGES_PATH = 'C:/Anaconda projects/Software_mod/savedImages'
 
 
 # Defines random state to initialize environment
