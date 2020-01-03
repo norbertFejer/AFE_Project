@@ -44,7 +44,7 @@ class CNNmodel(base_model.BaseModel):
         self.model = Model(input_shape, out)
         optim = optimizers.Adam(lr=0.002, decay=1e-4)
 
-        # print(self.model.summary())
+        print(self.model.summary())
         self.model.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
 
         for l in self.model.layers:

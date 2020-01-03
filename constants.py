@@ -8,7 +8,7 @@ BLOCK_SIZE = 128
 
 
 # Defines the used user name
-USER_NAME = 'user7'
+USER_NAME = 'user35'
 
 
 # Define the model name to initializing weights for transfer learning

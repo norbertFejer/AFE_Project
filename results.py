@@ -18,11 +18,11 @@ def plt_1():
     p1 = plt.bar(x1, data1, width=width)
     p2 = plt.bar(x2, data2, width=width)
     plt.ylim(0, 80)
-    labels = ['plain', 'frozen weights', 'update', 'plain', 'frozen weights', 'update']
+    labels = ['plain', 'transfer', 'update', 'plain', 'transfer', 'update']
     x = [0, 1, 2, 4, 5, 6]
     plt.xticks(x, labels, rotation=15)
     plt.ylabel('Accuracy (%)', size=14)
-    plt.legend((p1[0], p2[0]), ('300 samples', 'All samples'))
+    plt.legend((p1[0], p2[0]), ('300 training samples', 'All training samples'))
     plt.title('Identification results on Balabit Dataset', size=16)
 
     for i in range(len(x)):
@@ -74,7 +74,7 @@ def plt_2():
     bp.set_ylabel('Value', size=14)
     bp.tick_params(labelsize=12)
     adjust_box_widths(fig, 0.9)
-    plt.title('Authentication result using 300 samples')
+    plt.title('Authentication result using 300 training samples', size=14)
     plt.show()
 
 
@@ -87,7 +87,7 @@ def plt_3():
     bp.set_ylabel('Value', size=14)
     bp.tick_params(labelsize=12)
     adjust_box_widths(fig, 0.9)
-    plt.title('Authentication result using all samples')
+    plt.title('Authentication result using all training samples', size=14)
     plt.show()
 
 
