@@ -82,6 +82,7 @@ You can use a model from given neural network models, see their architectures, m
 ## Authors
 
 **Margit Antal** - Sapientia Hungarian University of Transylvania Department of Mathematics– Informatics, Tirgu Mures
+
 **Norbert Fejér** - Sapientia Hungarian University of Transylvania Department of Electrical Engineering, Tirgu Mures
 
 ## Acknowledgements

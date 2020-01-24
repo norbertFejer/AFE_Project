@@ -9,3 +9,6 @@ evaluationResults
 *.xlsx
 *.csv
 *.png
+
+plotter.py 
+results.py
