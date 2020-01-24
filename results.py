@@ -81,7 +81,7 @@ def plt_2():
 def plt_3():
 
     fig = plt.figure()
-    df = pd.read_csv('C:/Anaconda projects/Software_mod/evaluationResults/res_aut_inf.csv')
+    df = pd.read_csv('C:/Anaconda projects/Software_mod/evaluationResults/res_aut_test.csv')
     bp = sns.boxplot(x="type", y="value", hue="metric", data=df)
     bp.set_xlabel('Measurement type', size=14)
     bp.set_ylabel('Value', size=14)

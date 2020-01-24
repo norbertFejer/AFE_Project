@@ -83,7 +83,7 @@ BLOCK_NUM = inf
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRANSFER_LEARNING
 
 
 # Defines which model will be used
