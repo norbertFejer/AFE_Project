@@ -39,7 +39,7 @@ You can use a model from given neural network models, see their architectures, m
 
 #### Define block size of given samples
 
-`BLOCK_SIZE = 128` gives the number of consecutive mouse movements (1 movement represents one row in the train.csv file).
+`BLOCK_SIZE = 128` gives the number of consecutive mouse events (1 event represents one row in the train.csv file).
 
 #### Define user name
 
