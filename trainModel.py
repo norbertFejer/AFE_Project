@@ -4,6 +4,7 @@ import settings as stt
 
 import timeDistributedModel
 import cnnModel
+import fcn
 
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
@@ -51,16 +52,11 @@ class TrainModel:
 
     def __fit_and_save_model(self, model, trainX, trainy):
 
-        if stt.sel_method == stt.Method.TRANSFER_LEARNING:
-            model.create_model(stt.use_trainable_weights_for_transfer_learning)
-        else:
-            model.create_model()
-
         model.train_model(trainX, trainy)
-        model.save_model()
+        #model.save_model()
 
 
-    def __get_model_0(self, trainX, trainy, model_name):
+    def __get_model_0(self, trainX, trainy, model_name, input_shape, nb_classes):
         """ Trains the CNN model
 
             Parameters:
@@ -71,11 +67,11 @@ class TrainModel:
             Returns:
                 None
         """
-        cnn_model = cnnModel.CNNmodel(model_name)
+        cnn_model = cnnModel.CNNmodel(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
         self.__fit_and_save_model(cnn_model, trainX, trainy)
 
 
-    def __get_model_1(self, trainX, trainy, model_name):
+    def __get_model_1(self, trainX, trainy, model_name, input_shape, nb_classes):
         """ Trains TIME_DISTRIBUTED model
 
             Parameters:
@@ -86,8 +82,23 @@ class TrainModel:
             Returns:
                 None
         """
-        time_distributed_model = timeDistributedModel.TimeDistributedModel(model_name)
+        time_distributed_model = timeDistributedModel.TimeDistributedModel(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
         self.__fit_and_save_model(time_distributed_model, trainX, trainy)
+
+
+    def __get_model_2(self, trainX, trainy, model_name, input_shape, nb_classes):
+        """ Trains Classifier_FCN model
+
+            Parameters:
+                np.ndarray - input dataset
+                np.ndarray - true labels
+                str - model name
+
+            Returns:
+                None
+        """
+        classifier_fcn = fcn.Classifier_FCN(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
+        self.__fit_and_save_model(classifier_fcn, trainX, trainy)
 
 
     def __train_selected_model(self, trainX, trainy, model_name):
@@ -104,11 +115,19 @@ class TrainModel:
         
         switcher = {
             0: self.__get_model_0,
-            1: self.__get_model_1
+            1: self.__get_model_1,
+            2: self.__get_model_2
         }
 
         train_model = switcher.get(stt.sel_model.value, lambda: 'Not a valid model name!')
-        train_model(trainX, trainy, model_name)
+
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
+            nb_classes = 2
+
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
+            nb_classes = len( stt.get_users() )
+
+        train_model(trainX, trainy, model_name, trainX.shape, nb_classes)
 
 
     def __train_model_single_user(self, model_name):
@@ -144,7 +163,7 @@ class TrainModel:
             Returns:
                 None
         """
-        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.h5'
+        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.hdf5'
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
 

@@ -18,6 +18,18 @@ Activating the environmet for usage:
 ```bash
 conda activate tensorflow_cpu
 ```
+
+## Creating virtual environment for GPU training
+```bash
+conda create --name tensorflow_gpu tensorflow-gpu==1.15
+conda install -c anaconda keras-gpu
+conda install -c nvidia -c rapidsai -c numba -c conda-forge -c defaults cudf
+conda install -c anaconda pandas
+conda install -c anaconda scikit-learn
+conda install -c conda-forge matplotlib
+conda install -c anaconda pylint
+```
+
 ## Initial Configuration
 
 After downloading the two separate datasets ([Balabit](https://github.com/balabit/Mouse-Dynamics-Challenge) and [DFL](https://ms.sapientia.ro/~manyi/DFL.html)), you need to specify these locations in the constants.py file.

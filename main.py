@@ -8,6 +8,7 @@ from numpy.random import seed
 seed(const.RANDOM_STATE)
 from tensorflow import set_random_seed
 set_random_seed(const.RANDOM_STATE)
+#tf.random.set_seed(const.RANDOM_STATE)
 
 
 def main():

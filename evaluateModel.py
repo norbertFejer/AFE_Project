@@ -34,14 +34,14 @@ class EvaluateModel:
     # Computes Area Under the Receiver Operating Characteristic Curve (ROC AUC) from predicted scores
     def __get_auc_result(self, model_name, testX, y_true):
 
-        y_scores = base_model.BaseModel.predict_with_pretrained_model(model_name, testX)
+        y_scores = base_model.BaseModel.predict_model(model_name, testX)
         return roc_auc_score(y_true, y_scores)
 
 
     # Computes Accuracy
     def __get_acc_result(self, model_name, testX, y_true):
 
-        y_pred = np.argmax( base_model.BaseModel.predict_with_pretrained_model(model_name, testX), axis=1)
+        y_pred = np.argmax( base_model.BaseModel.predict_model(model_name, testX), axis=1)
         y_true = np.argmax( y_true, axis=1)
         accuracy = accuracy_score(y_true, y_pred)
         
@@ -50,7 +50,7 @@ class EvaluateModel:
 
     def __get_confusion_matrix(self, model_name, testX, y_true):
 
-        y_pred = np.argmax( base_model.BaseModel.predict_with_pretrained_model(model_name, testX), axis=1)
+        y_pred = np.argmax( base_model.BaseModel.predict_model(model_name, testX), axis=1)
         y_true = np.argmax( y_true, axis=1)
         conf_matrix = confusion_matrix(y_true, y_pred)
 
@@ -90,6 +90,11 @@ class EvaluateModel:
         else:
             testX, y_true = self.dataset.create_test_dataset_for_identification()
         y_true = to_categorical(y_true)
+
+        # Reshapes data for TIME_DISTRIBUTED model input
+        if stt.sel_model == stt.Model.TIME_DISTRIBUTED:
+            n_steps, n_length = 4, int(testX.shape[1] / 4)
+            testX = testX.reshape((testX.shape[0], n_steps, n_length, testX.shape[2]))
 
         self.print_msg('\nTest dataset shape: ')
         self.print_msg(testX.shape)
@@ -131,7 +136,7 @@ class EvaluateModel:
     def evaluate_model(self):
         self.results = {}
         
-        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.h5'
+        model_name = str(stt.sel_model) + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.hdf5'
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
 

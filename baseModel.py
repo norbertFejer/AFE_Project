@@ -2,25 +2,26 @@ import settings as stt
 import constants as const
 
 import os
-from keras.models import load_model
+from tensorflow.keras.models import load_model
+from abc import abstractmethod
+import tensorflow.keras as keras
 
 
 class BaseModel:
 
 
-    def __init__(self, model_name):
+    def __init__(self, model_name, input_shape, nb_classes, is_trainable = True, build = True):
         self.model = None
         self.model_name = model_name
         self.is_trained_model = False
+        self.is_trainable = is_trainable
 
-        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
-            self.n_output = 2
-        
-        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            self.n_output = len( stt.get_users() )
+        if build == True:
+            self.model = self.build_model(input_shape, nb_classes)
 
 
-    def create_model(self, is_trainable):
+    @abstractmethod
+    def build_model(self, input_shape, nb_classes):
         """ Creates the given model. It has to be overwritten in derived class.
 
             Parameters:
@@ -29,7 +30,6 @@ class BaseModel:
             Returns:
                 None
         """ 
-        self.is_trainable = is_trainable
 
 
     def __set_weights_from_pretrained_model(self, model_path):
@@ -45,7 +45,7 @@ class BaseModel:
             old_model = load_model(model_path)
         except:
             raise Exception(model_path + ' model does not exist!')
-        print('belepett........................................................................')
+
         # The last layer weights will not be set
         for i in range(len(old_model.layers) - 1):
             self.model.layers[i].set_weights(old_model.layers[i].get_weights())
@@ -65,6 +65,16 @@ class BaseModel:
 
         if stt.sel_method == stt.Method.TRANSFER_LEARNING:
             self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + const.USED_MODEL_FOR_TRANSFER_LEARNING)
+
+        #es = keras.callbacks.EarlyStopping(monitor='val_acc', mode='max', patience=50, verbose=1, min_delta=0.1)
+        es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=50, verbose=1, min_delta=0.1)
+
+        reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50, min_lr=0.0001)
+
+        file_path = const.TRAINED_MODELS_PATH + "/" + self.model_name
+        model_checkpoint = keras.callbacks.ModelCheckpoint(filepath=file_path, monitor='loss', save_best_only=True, verbose=1)
+
+        self.callbacks = [reduce_lr, model_checkpoint, es]
     
     
     def get_trained_model(self):
@@ -98,7 +108,7 @@ class BaseModel:
 
 
     @staticmethod
-    def predict_with_pretrained_model(model_name, x_data):
+    def predict_model(model_name, x_data):
         """ Predicts model result for given dataset
 
             Parameters:
@@ -108,11 +118,7 @@ class BaseModel:
                 np.ndarry - the predicted dataset
         """
         model_path = const.TRAINED_MODELS_PATH + '/' + model_name
+        #model_path = "C:/Anaconda projects/Software_mod/trainedModels/best_user7_Model.CLASSIFIER_FCN_Dataset.BALABIT_128_300_trained.hdf5"
         model = load_model(model_path)
-
-        # Reshapes data for TIME_DISTRIBUTED model input
-        if stt.sel_model == stt.Model.TIME_DISTRIBUTED:
-            n_steps, n_length = 4, int(const.BLOCK_SIZE / 4)
-            x_data = x_data.reshape((x_data.shape[0], n_steps, n_length, 2))
 
         return model.predict(x_data)

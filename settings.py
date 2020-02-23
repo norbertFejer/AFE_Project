@@ -5,6 +5,7 @@ from math import inf
 class Model(Enum):
     CNN = 0
     TIME_DISTRIBUTED = 1
+    CLASSIFIER_FCN = 2
 
 
 class DatasetBalanceType(Enum):
@@ -79,11 +80,11 @@ class NormalizationMethod(Enum):
 # Block size number from given user
 # If its value is inf then reads all samples.
 # If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
-BLOCK_NUM = inf
+BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.TRANSFER_LEARNING
+sel_method = Method.EVALUATE
 
 
 # Defines which model will be used
