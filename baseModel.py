@@ -67,14 +67,16 @@ class BaseModel:
             self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + const.USED_MODEL_FOR_TRANSFER_LEARNING)
 
         #es = keras.callbacks.EarlyStopping(monitor='val_acc', mode='max', patience=50, verbose=1, min_delta=0.1)
-        es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=50, verbose=1, min_delta=0.1)
+        #es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=50, verbose=1, min_delta=0.1)
+        #es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=50, verbose=1)
+        #es = keras.callbacks.EarlyStopping(monitor='val_acc', mode='max', patience=80, verbose=1)
 
         reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50, min_lr=0.0001)
 
-        file_path = const.TRAINED_MODELS_PATH + "/" + self.model_name
+        file_path = const.TRAINED_MODELS_PATH + "/best_" + self.model_name
         model_checkpoint = keras.callbacks.ModelCheckpoint(filepath=file_path, monitor='loss', save_best_only=True, verbose=1)
 
-        self.callbacks = [reduce_lr, model_checkpoint, es]
+        self.callbacks = [reduce_lr, model_checkpoint]
     
     
     def get_trained_model(self):

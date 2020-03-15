@@ -11,7 +11,7 @@ set_random_seed(const.RANDOM_STATE)
 #tf.random.set_seed(const.RANDOM_STATE)
 
 
-def main():
+if __name__ == "__main__":
 
     if stt.sel_method == stt.Method.TRAIN or stt.sel_method == stt.Method.TRANSFER_LEARNING:
         tm = trainModel.TrainModel()
@@ -20,5 +20,4 @@ def main():
     if stt.sel_method == stt.Method.EVALUATE:
         em = evaluateModel.EvaluateModel()
         em.evaluate_model()
-
-main()
+        

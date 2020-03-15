@@ -5,6 +5,7 @@ import os
 import random
 from math import inf, ceil
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 
 # User defined imports
 import constants as const
@@ -109,105 +110,90 @@ class Dataset:
         complete_df, chunk_df = self.__handle_raw_data(df)
 
         if stt.sel_chunck_samples_handler == stt.ChunkSamplesHandler.CONCATENATE_CHUNKS:
-            ret_data = pd.concat([complete_df, chunk_df], axis=0)
-        else:
-            ret_data = complete_df
+            complete_df = pd.concat([complete_df, chunk_df], axis=0)
 
         row_num = const.BLOCK_SIZE * block_num
 
-        if row_num < ret_data.shape[0]:
-            return ret_data[:row_num]
+        if row_num < complete_df.shape[0]:
+            return complete_df[:row_num]
 
-        return ret_data
+        return complete_df
 
 
     def __handle_raw_data(self, df):
-        """ Separates the data (df) to compelete_df and chunk_df.
+        """ Separates the data (df) to complete_df and chunk_df.
             complete_df holds samples, that is equal or greater than BLOCK_NUM
             chunk_df holds samples, that is less than BLOCK_NUM
 
             Parameters:
-                df (DataFrame): input dataframe, that contains al user session
+                df (DataFrame): input dataframe, that contains all user session
 
             Returns:
                 DataFrame: df1 (DataFrame), df2 (DataFrame)
                     df1 contains the entire samples that with in given BLOCK_SIZE
-                    df2 contains the chunkc, which length is less than the BLOCK_SIZE
+                    df2 contains the chunk, which length is less than the BLOCK_SIZE
         """
         # Calculates the difference between two consecutive row
         df = df.diff()
-        df = df.rename(columns={'x': 'dx', 'y': 'dy', 'client timestamp': 'dt'})
+        # The first row values are NaN, because of using diff() 
+        df = df[1:].rename(columns={'x': 'dx', 'y': 'dy', 'client timestamp': 'dt'})
 
-        # Gets the index values, where dt is greater than STATELESS_TIME
-        outlays_index_list = np.where((df['dt'] > const.STATELESS_TIME) & (df['dt'] > 0))[0]
-        # -1 value is a pivot for using later in the code
-        outlays_index_list = np.append([outlays_index_list], [-1])
+        # Setting default value if dt == 0
+        df.loc[ df['dt'] <= 0.01 ] = 0.01
 
-        # Vectorization for better performance
-        df = df.values
-        # complete_samples are samples that are greater or equal than the BLOCK_SIZE
-        # chunk_samples has lenght less than BLOCK_SIZE
-        complete_samples, chunk_samples = [], []
-        row_start, row_end, ind = 1, 1 + const.BLOCK_SIZE, 0
+        df = df.reset_index(drop=True)
+        outlays_index_list = np.concatenate(([1], df.loc[ df['dt'] > const.STATELESS_TIME ].index), axis=0)
+        df.loc[ df['dt'] > const.STATELESS_TIME ] = 0.01
 
-        while row_end < df.shape[0]:
+        chunk_samples_indexes = []
+        for i in range(1, len(outlays_index_list)):
+            val = (outlays_index_list[i] - outlays_index_list[i - 1]) % const.BLOCK_SIZE
 
-            row_end = row_start + const.BLOCK_SIZE
+            if val != 0:
+                chunk_samples_indexes.extend(range(outlays_index_list[i] - val, outlays_index_list[i]))
 
-            # Checking if sample contains outlays
-            # or all outlays in the list processed yet
-            if row_end < outlays_index_list[ind] or outlays_index_list[ind] == -1:
-                complete_samples.append(df[row_start:row_end])
-                row_start = row_end
-            else:
-                chunk_samples.append(df[row_start:outlays_index_list[ind]])
-                # Next sample starts at the position of the actual outlay
-                row_start = outlays_index_list[ind]
-                ind += 1
-
-        # Checking if we have another chunks left
-        if row_end < df.shape[0]:
-            chunk_samples.append(df[row_end:df.shape[0]])
-
-        complete_samples = np.concatenate(complete_samples, axis=0) if len(complete_samples) != 0 else np.ndarray(shape=(0, 3))
-        chunk_samples = np.concatenate(chunk_samples, axis=0) if len(chunk_samples) != 0 else np.ndarray(shape=(0, 3))
-
-        # Return values as df with given column names
-        return pd.DataFrame(complete_samples, columns=['dx', 'dy', 'dt']), pd.DataFrame(chunk_samples, columns=['dx', 'dy', 'dt'])
+        # Return complete_samples and chunk_samples
+        return df.loc[~df.index.isin(chunk_samples_indexes)], df.iloc[chunk_samples_indexes]
 
 
-    def __normalize_data(self, df):
-        """ Normalize data with specified method
+    def __scale_data(self, arg, df):
+        """ Scale data with specified method
 
             Parameters:
                 df (DataFrame): input dataframe, that contains al user session
 
             Returns:
-                DataFrame: normalized dataframe
         """
-        if stt.sel_normalization_method == stt.NormalizationMethod.USER_DEFINED:
-            self.__normalize_data_user_defined(df)
-        else:
-            return 2
+        switcher = { 
+            0: self.__user_defined_scaler,
+            1: self.__min_max_scaler,
+            2: self.__max_abs_scaler
+        } 
+
+        func = switcher.get(arg, lambda: "Wrong evaluation metric!")
+        return func(df)
 
 
-    def __normalize_data_user_defined(self, df):
-        """ Makes max elem normalization along y axis
+    def __user_defined_scaler(self, df):
+        """ Makes max elem scaling along y axis
 
             Parameters:
                 df (DataFrame): input dataframe
 
             Returns:
-                DataFrame: normalized dataframe
+                DataFrame: scaled dataframe
         """
-
         df['v_x'] /= abs(df['v_x']).max()
         df['v_y'] /= abs(df['v_y']).max()
 
 
-    def __normalize_data_builtin(self, df):
-        # TODO
-        return 1
+    def __min_max_scaler(self, df):
+        print('min max scalers')
+
+
+    def __max_abs_scaler(self, df):
+        max_abs_scaler = preprocessing.MaxAbsScaler()
+        max_abs_scaler.fit_transform(df)
 
 
     def __get_velocity_from_data(self, df):
@@ -219,8 +205,6 @@ class Dataset:
             Returns:
                 DataFrame: x and y directional speed
         """
-        # Setting default value if dt == 0
-        df.loc[ df['dt'] <= 0 ] = 0.01
 
         df['v_x'] = df['dx'] / df['dt']
         df['v_y'] = df['dy'] / df['dt']
@@ -262,7 +246,18 @@ class Dataset:
             data = self.__filter_by_states( self.__load_user_sessions(user, files_path) )
 
         data = self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) )
-        self.__normalize_data(data)
+        print(data['v_x'].max(), ' before max vx')
+        print(data['v_x'].min(), ' before min vx')
+        print(data['v_y'].max(), ' before max vy')
+        print(data['v_y'].min(), ' before min vy')
+
+        self.__scale_data(stt.sel_scaling_method.value, data)
+        print(data.shape, '  after')
+
+        print(data['v_x'].max(), ' after max vx')
+        print(data['v_x'].min(), ' after min vx')
+        print(data['v_y'].max(), ' after max vy')
+        print(data['v_y'].min(), ' after min vy')
 
         # Checking if we have enough data
         if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
@@ -517,7 +512,7 @@ class Dataset:
                 np.ndarray, np.array: test dataset, test labels for the dataset
         """
         data, labels = self.__create_labeled_dataset(user)
-
+        
         return self.__split_dataset_to_test(data, labels)
 
     
@@ -574,7 +569,7 @@ class Dataset:
 
             if method == stt.Method.TRAIN:
                 tmp_dataset, tmp_labels = self.__split_positive_data_to_train_dataset(tmp_dataset, tmp_labels)
-            else:
+            if method == stt.Method.EVALUATE:
                 tmp_dataset, tmp_labels = self.__split_positive_data_to_test_dataset(tmp_dataset, tmp_labels)
 
             id = id + 1
@@ -583,6 +578,11 @@ class Dataset:
             dataset = np.concatenate((dataset, tmp_dataset), axis=0)
             labels = np.concatenate((labels, tmp_labels), axis=0)
     
+        print(dataset.shape)
+        np.savetxt("foo.csv", dataset[:, :, 0], delimiter=",")
+        print(np.max(dataset[:, :, 0]))
+        print(np.min(dataset[:, :, 0]))
+        print(np.average(dataset[:, :, 0]))
         return dataset, labels
 
 
@@ -691,4 +691,5 @@ class Dataset:
             
 if __name__ == "__main__":
     dataset = Dataset()
-    dataset.create_test_dataset_for_identification()
+    #dataset.create_test_dataset_for_identification()
+    dataset.print_all_user_dataset_shape()

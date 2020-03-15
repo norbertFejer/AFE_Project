@@ -5,6 +5,7 @@ import settings as stt
 import timeDistributedModel
 import cnnModel
 import fcn
+import resnet
 
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
@@ -53,7 +54,7 @@ class TrainModel:
     def __fit_and_save_model(self, model, trainX, trainy):
 
         model.train_model(trainX, trainy)
-        #model.save_model()
+        model.save_model()
 
 
     def __get_model_0(self, trainX, trainy, model_name, input_shape, nb_classes):
@@ -101,6 +102,21 @@ class TrainModel:
         self.__fit_and_save_model(classifier_fcn, trainX, trainy)
 
 
+    def __get_model_3(self, trainX, trainy, model_name, input_shape, nb_classes):
+        """ Trains Classifier_FCN model
+
+            Parameters:
+                np.ndarray - input dataset
+                np.ndarray - true labels
+                str - model name
+
+            Returns:
+                None
+        """
+        classifier_resnet = resnet.Classifier_RESNET(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
+        self.__fit_and_save_model(classifier_resnet, trainX, trainy)
+
+
     def __train_selected_model(self, trainX, trainy, model_name):
         """ Getting model by name and training it
 
@@ -116,7 +132,8 @@ class TrainModel:
         switcher = {
             0: self.__get_model_0,
             1: self.__get_model_1,
-            2: self.__get_model_2
+            2: self.__get_model_2,
+            3: self.__get_model_3
         }
 
         train_model = switcher.get(stt.sel_model.value, lambda: 'Not a valid model name!')

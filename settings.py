@@ -6,6 +6,7 @@ class Model(Enum):
     CNN = 0
     TIME_DISTRIBUTED = 1
     CLASSIFIER_FCN = 2
+    CLASSIFIER_RESNET = 3
 
 
 class DatasetBalanceType(Enum):
@@ -72,9 +73,10 @@ class ChunkSamplesHandler(Enum):
     DROP_CHUNKS = 'drop'
 
 
-class NormalizationMethod(Enum):
-    BUILTIN = 'builtin'
-    USER_DEFINED = 'user_defined'
+class ScalingMethod(Enum):
+    USER_DEFINED = 0
+    MIN_MAX_SCALER = 1
+    MAX_ABS_SCALER = 2
 
 
 # Block size number from given user
@@ -84,7 +86,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRAIN
 
 
 # Defines which model will be used
@@ -100,7 +102,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines what will be with the chunk samples
@@ -114,7 +116,7 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 
 # Defines how many user will be used
 # in case of model training
-sel_train_user_number = TrainUserNumber.ALL
+sel_train_user_number = TrainUserNumber.SINGLE
 
 
 # It is used for TRANSFER_LEARNING
@@ -146,8 +148,8 @@ sel_evaluation_type = EvaluationType.ACTION_BASED
 print_evaluation_results_to_file = True
 
 
-# Defines normalizaton method during creating the training dataset
-sel_normalization_method = NormalizationMethod.USER_DEFINED
+# Defines scaling method during creating the training dataset
+sel_scaling_method = ScalingMethod.MAX_ABS_SCALER
 
 
 def get_balabit_users():

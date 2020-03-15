@@ -1,0 +1,139 @@
+html, body {
+    height: 98%;
+}
+
+#outerContainer {
+    height: 100%;
+}
+
+#container {
+  width: 100%;
+  height: 100%;
+  background-color: #333;
+  display: flex;
+  overflow: hidden;
+  border-radius: 7px;
+  touch-action: none;
+}
+
+#circle {
+  width: 60px;
+  height: 60px;
+  background-color: rgb(245, 230, 99);
+  border: 10px solid rgba(136, 136, 136, .5);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  z-index: 2;
+  visibility: hidden;
+}
+
+#circle:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+
+#circle:hover {
+  cursor: pointer;
+  border-width: 20px;
+  width: 40px;
+  height: 40px;
+}
+
+#goal {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border: 10px solid rgba(136, 136, 136, .9);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+  text-align: center;
+}
+
+#square {
+  width: 60px;
+  height: 60px;
+  background-color: rgb(14, 32, 153);
+  border: 10px solid rgba(136, 136, 136, .5);
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 3;
+  visibility: hidden;
+}
+
+#square:hover {
+  cursor: pointer;
+}
+
+#triangle {
+  width: 0;
+  height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 80px solid rgba(3, 252, 28, .5);
+  position: absolute;
+  z-index: 4;
+  visibility: hidden;
+}
+
+#triangle:hover {
+  cursor: pointer;
+}
+
+#triangle2 {
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-bottom: 50px solid rgba(3, 252, 28);
+  margin-top: 20px;
+  margin-left: -25px;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 5;
+}
+
+#goalTitle {
+  padding-top: 5px;
+}
+
+#r_triangle {
+  width: 0;
+  height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-top: 80px solid rgba(235, 116, 52, .5);
+  position: absolute;
+  z-index: 6;
+  visibility: hidden;
+}
+
+#r_triangle2 {
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-top: 50px solid rgba(235, 116, 52);
+  margin-top: -70px;
+  margin-left: -25px;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+}
+
+#countDownTimer {
+  display: inline-block;
+  margin: 0px;
+  padding-left: 10px;
+}
+
+#download_csv {
+  margin-bottom: 5px;
+  margin-left: 2px;
+  cursor: pointer;
+}

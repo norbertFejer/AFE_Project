@@ -61,7 +61,7 @@ class EvaluateModel:
         switcher = { 
             1: self.__get_acc_result,
             2: self.__get_auc_result,
-            3: self.__get_confusion_matrix 
+            3: self.__get_confusion_matrix
         } 
     
         func = switcher.get(arg, lambda: "Wrong evaluation metric!")
