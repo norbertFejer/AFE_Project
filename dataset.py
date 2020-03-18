@@ -185,16 +185,21 @@ class Dataset:
         """
         df['v_x'] /= abs(df['v_x']).max()
         df['v_y'] /= abs(df['v_y']).max()
+        return df
 
 
     def __min_max_scaler(self, df):
-        print('min max scalers')
+        
+        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
+        data = min_max_scaler.fit_transform(df)
+        return pd.DataFrame({'v_x': data[:, 0], 'v_y': data[:, 1]})
 
 
     def __max_abs_scaler(self, df):
-        max_abs_scaler = preprocessing.MaxAbsScaler()
-        max_abs_scaler.fit_transform(df)
 
+        max_abs_scaler = preprocessing.MaxAbsScaler()
+        data = max_abs_scaler.fit_transform(df)
+        return pd.DataFrame({'v_x': data[:, 0], 'v_y': data[:, 1]})
 
     def __get_velocity_from_data(self, df):
         """ Returns velocity from raw data
@@ -246,18 +251,7 @@ class Dataset:
             data = self.__filter_by_states( self.__load_user_sessions(user, files_path) )
 
         data = self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) )
-        print(data['v_x'].max(), ' before max vx')
-        print(data['v_x'].min(), ' before min vx')
-        print(data['v_y'].max(), ' before max vy')
-        print(data['v_y'].min(), ' before min vy')
-
-        self.__scale_data(stt.sel_scaling_method.value, data)
-        print(data.shape, '  after')
-
-        print(data['v_x'].max(), ' after max vx')
-        print(data['v_x'].min(), ' after min vx')
-        print(data['v_y'].max(), ' after max vy')
-        print(data['v_y'].min(), ' after min vy')
+        data = self.__scale_data(stt.sel_scaling_method.value, data)
 
         # Checking if we have enough data
         if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
@@ -578,11 +572,6 @@ class Dataset:
             dataset = np.concatenate((dataset, tmp_dataset), axis=0)
             labels = np.concatenate((labels, tmp_labels), axis=0)
     
-        print(dataset.shape)
-        np.savetxt("foo.csv", dataset[:, :, 0], delimiter=",")
-        print(np.max(dataset[:, :, 0]))
-        print(np.min(dataset[:, :, 0]))
-        print(np.average(dataset[:, :, 0]))
         return dataset, labels
 
 

@@ -375,7 +375,7 @@ function startCounter(){
     if (distance < 0) {
       clearInterval(countDownTimer);
       document.getElementById("countDownTimer").innerHTML = "0m 0s left";
-      alert("Session finished!");
+      alert("Session finished!\nPress OK to save result into .csv file.");
       download_csv();
     }
   }, 1000);

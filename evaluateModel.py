@@ -100,7 +100,7 @@ class EvaluateModel:
         self.print_msg(testX.shape)
         self.print_msg(y_true.shape)
         
-        self.__evaluate_model_by_metrics(user, model_name, testX, y_true)
+        self.__evaluate_model_by_metrics(user, 'best_' + model_name, testX, y_true)
 
 
     def __evaluate_model_action_based_single_user(self, model_name):

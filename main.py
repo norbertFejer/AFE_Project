@@ -16,7 +16,7 @@ if __name__ == "__main__":
     if stt.sel_method == stt.Method.TRAIN or stt.sel_method == stt.Method.TRANSFER_LEARNING:
         tm = trainModel.TrainModel()
         tm.train_model()
-
+            
     if stt.sel_method == stt.Method.EVALUATE:
         em = evaluateModel.EvaluateModel()
         em.evaluate_model()

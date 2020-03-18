@@ -14,25 +14,34 @@ class CNNmodel(base_model.BaseModel):
 
     def build_model(self, input_shape, nb_classes):
 
-        input_shape = keras.layers.Input(shape=(input_shape[1], input_shape[2]), name='input_layer')
+        input_layer = keras.layers.Input(shape=(input_shape[1], input_shape[2]), name='input_layer')
 
-        tower_11 = keras.layers.Conv1D(filters=40, kernel_size=6, strides=2, activation='relu', trainable=self.is_trainable)(input_shape)
+        tower_11 = keras.layers.Conv1D(filters=40, kernel_size=6, strides=2, activation='relu', trainable=self.is_trainable)(input_layer)
         tower_12 = keras.layers.Conv1D(filters=60, kernel_size=3, strides=1, activation='relu', trainable=self.is_trainable)(tower_11)
         tower_1 = keras.layers.GlobalMaxPooling1D(trainable=self.is_trainable)(tower_12)
 
-        tower_21 = keras.layers.Conv1D(filters=40, kernel_size=4, strides=2, activation='relu', trainable=self.is_trainable)(input_shape)
+        tower_21 = keras.layers.Conv1D(filters=40, kernel_size=4, strides=2, activation='relu', trainable=self.is_trainable)(input_layer)
         tower_22 = keras.layers.Conv1D(filters=60, kernel_size=2, strides=1, activation='relu', trainable=self.is_trainable)(tower_21)
         tower_2 = keras.layers.GlobalMaxPooling1D(trainable=self.is_trainable)(tower_22)
 
         merged = keras.layers.concatenate([tower_1, tower_2], trainable=self.is_trainable)
         dropout = keras.layers.Dropout(0.15, trainable=self.is_trainable)(merged)
-        out = keras.layers.Dense(60, activation='relu', name='feature_layer', trainable=self.is_trainable)(dropout)
-        out = keras.layers.Dense(nb_classes, activation='sigmoid', name='output_layer')(out)
+        feature_layer = keras.layers.Dense(60, activation='relu', name='feature_layer', trainable=self.is_trainable)(dropout)
 
-        model = keras.models.Model(input_shape, out)
-        optim = keras.optimizers.Adam(lr=0.002, decay=1e-4)
+        if nb_classes == 2:
+            out_layer = keras.layers.Dense(nb_classes, activation='sigmoid', name='output_layer')(feature_layer)
+        else:
+            out_layer = keras.layers.Dense(nb_classes, activation='softmax', name='output_layer')(feature_layer)
 
-        model.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
+        model = keras.models.Model(input_layer, out_layer)
+        adam_optimizer = keras.optimizers.Adam(lr=0.002, decay=1e-4)
+
+        if nb_classes == 2:
+            model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['binary_accuracy'])
+            print('binACC--------------------------------------------------------------------------')
+        else:
+            model.compile(loss='categorical_crossentropy', optimizer=adam_optimizer, metrics=['categorical_accuracy'])
+            print('categACC--------------------------------------------------------------------------')
 
         if const.VERBOSE == True:
             model.summary()
@@ -43,10 +52,10 @@ class CNNmodel(base_model.BaseModel):
     def train_model(self, trainX, trainy):
         super().train_model()
 
-        nb_epochs, mini_batch_size = 1, 32
-
+        nb_epochs, mini_batch_size = 160, 32
+        
         # Fit network
-        history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, validation_split=0.3, shuffle=True,
+        history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, shuffle=True,
             verbose=const.VERBOSE, callbacks=self.callbacks)
         self.is_trained = True
 
