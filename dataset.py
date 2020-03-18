@@ -201,6 +201,7 @@ class Dataset:
         data = max_abs_scaler.fit_transform(df)
         return pd.DataFrame({'v_x': data[:, 0], 'v_y': data[:, 1]})
 
+
     def __get_velocity_from_data(self, df):
         """ Returns velocity from raw data
 
@@ -250,8 +251,8 @@ class Dataset:
         else:
             data = self.__filter_by_states( self.__load_user_sessions(user, files_path) )
 
-        data = self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) )
-        data = self.__scale_data(stt.sel_scaling_method.value, data)
+        data = self.__scale_data(stt.sel_scaling_method.value, 
+                            self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) ))
 
         # Checking if we have enough data
         if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
@@ -410,7 +411,24 @@ class Dataset:
         return np.full((length, 1), value)
 
 
-    def create_train_dataset(self, user):
+    def create_train_dataset_for_authentication(self, user):
+
+        if stt.sel_authentication_type == stt.AuthenticationType.BINARY_CLASSIFICATION:
+            return self.__create_train_dataset_authentication_for_binary_classification(user)
+
+        if stt.sel_authentication_type == stt.AuthenticationType.ONE_CLASS_CLASSIFICATION:
+            return self.__create_train_dataset_authentication_for_one_class_classification(user)
+
+
+    def __create_train_dataset_authentication_for_one_class_classification(self, user):
+
+        data = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
+        train_inliers, _, _, _ = train_test_split(data, data, test_size=0.33, random_state=const.RANDOM_STATE, shuffle=False)
+
+        return train_inliers
+
+
+    def __create_train_dataset_authentication_for_binary_classification(self, user):
         """ Returns the train dataset and the labels for the dataset
 
             Parameters:
@@ -428,7 +446,17 @@ class Dataset:
         return data, labels
 
 
-    def create_test_dataset(self, user):
+    def __create_test_dataset_authentication_for_one_class_classification(self, user):
+
+        outliers =  self.__load_negative_dataset(user, inf, const.TRAIN_FILES_PATH)
+        inliers = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
+        _, test_inliers, _, _ = train_test_split(inliers, inliers, test_size=0.33, random_state=const.RANDOM_STATE, shuffle=False)
+
+        return np.concatenate((test_inliers, outliers), axis=0), np.concatenate((self.__create_labels(test_inliers.shape[0], 0), 
+                                                                                    self.__create_labels(outliers.shape[0], 1)))
+
+
+    def create_test_dataset_for_authentication(self, user):
         """ Returns the test dataset and the labels for the dataset
 
             Parameters:
@@ -437,10 +465,15 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: test dataset, test labels for the dataset
         """
-        if stt.sel_dataset_type == stt.DatasetType.TRAIN_TEST_AVAILABLE:
-            return self.__get_train_test_available_test_dataset(user)
-        else:
-            return self.__get_train_available_test_dataset(user)
+        if stt.sel_authentication_type == stt.AuthenticationType.BINARY_CLASSIFICATION:
+
+            if stt.sel_dataset_type == stt.DatasetType.TRAIN_TEST_AVAILABLE:
+                return self.__get_train_test_available_test_dataset(user)
+            if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
+                return self.__get_train_available_test_dataset(user)
+
+        if stt.sel_authentication_type == stt.AuthenticationType.ONE_CLASS_CLASSIFICATION:
+            return self.__create_test_dataset_authentication_for_one_class_classification(user)
         
 
 
@@ -681,4 +714,8 @@ class Dataset:
 if __name__ == "__main__":
     dataset = Dataset()
     #dataset.create_test_dataset_for_identification()
-    dataset.print_all_user_dataset_shape()
+    #dataset.print_all_user_dataset_shape()
+    #x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
+    x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
+    print(x_test.shape, ' x_test shape')
+    print(y_test.shape, ' y_tets shape')

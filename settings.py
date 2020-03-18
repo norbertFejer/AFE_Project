@@ -79,6 +79,11 @@ class ScalingMethod(Enum):
     MAX_ABS_SCALER = 2
 
 
+class AuthenticationType(Enum):
+    BINARY_CLASSIFICATION = 'binary_class'
+    ONE_CLASS_CLASSIFICATION = 'one_class'
+
+
 # Block size number from given user
 # If its value is inf then reads all samples.
 # If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
@@ -98,11 +103,14 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # Defines used dataset
-sel_dataset = Dataset.DFL
+sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
 sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
+
+
+sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
 
 
 # Defines what will be with the chunk samples

@@ -86,7 +86,7 @@ class EvaluateModel:
     def __evaluate_model_by_method(self, user, model_name):
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
-            testX, y_true = self.dataset.create_test_dataset(user)
+            testX, y_true = self.dataset.create_test_dataset_for_authentication(user)
         else:
             testX, y_true = self.dataset.create_test_dataset_for_identification()
         y_true = to_categorical(y_true)

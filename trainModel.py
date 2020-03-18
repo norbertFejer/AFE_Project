@@ -38,7 +38,7 @@ class TrainModel:
         self.print_msg('Loading train dataset...\n')
         
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
-            trainX, trainy = self.dataset.create_train_dataset(user)
+            trainX, trainy = self.dataset.create_train_dataset_for_authentication(user)
         else:
             trainX, trainy = self.dataset.create_train_dataset_for_identification()
         trainy = to_categorical(trainy)
