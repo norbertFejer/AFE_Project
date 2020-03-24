@@ -47,7 +47,7 @@ class Dataset:
         print_msg = lambda msg: None
 
 
-    def __load_session(self, session_path):
+    def __load_session(self, session_path, n_rows = None):
         """ Reads the given columns from .csv file
 
             Parameters: session_path (str): the full path of the given session
@@ -56,12 +56,17 @@ class Dataset:
                 DataFrame: returning value
         """
         try:
-            return pd.read_csv(session_path, usecols=['x', 'y', 'client timestamp', 'button'])[['x', 'y', 'client timestamp', 'button']]
+
+            if n_rows is not None:
+                return pd.read_csv(session_path, usecols=['x', 'y', 'client timestamp', 'button'], nrows=n_rows)[['x', 'y', 'client timestamp', 'button']]
+            else:
+                return pd.read_csv(session_path, usecols=['x', 'y', 'client timestamp', 'button'])[['x', 'y', 'client timestamp', 'button']]
+
         except BaseException:
             raise Exception("Can't open file " + session_path)
 
 
-    def __load_user_sessions(self, user, files_path):
+    def __load_user_sessions(self, user, block_num, files_path):
         """ Loads a given user all sessions
             
             Parameters: 
@@ -71,10 +76,21 @@ class Dataset:
             Returns:
                 DataFrame: returning value
         """
+        # Maximum number of rows to read
+        # We multiply the value by 3, because of the unknown chunk samples size
+        if block_num == inf:
+            n_rows = None
+        else:
+            n_rows = 3 * const.BLOCK_SIZE * block_num
+
         sessions_data_df = pd.DataFrame()
         # Iterate through all user sessions
         for session_path in glob(files_path + '/' + user + '/*'):
-            sessions_data_df = pd.concat([sessions_data_df, self.__load_session(session_path)])
+            sessions_data_df = pd.concat([sessions_data_df, self.__load_session(session_path, n_rows)])
+
+            # If we collected enough data than we stop reading further sessions
+            if n_rows is not None and sessions_data_df.shape[0] > n_rows:
+                break
 
         if sessions_data_df.empty:
             raise Exception("Can't iterate through files: " + files_path + '/' + user)
@@ -124,10 +140,8 @@ class Dataset:
         """ Separates the data (df) to complete_df and chunk_df.
             complete_df holds samples, that is equal or greater than BLOCK_NUM
             chunk_df holds samples, that is less than BLOCK_NUM
-
             Parameters:
                 df (DataFrame): input dataframe, that contains all user session
-
             Returns:
                 DataFrame: df1 (DataFrame), df2 (DataFrame)
                     df1 contains the entire samples that with in given BLOCK_SIZE
@@ -139,18 +153,21 @@ class Dataset:
         df = df[1:].rename(columns={'x': 'dx', 'y': 'dy', 'client timestamp': 'dt'})
 
         # Setting default value if dt == 0
-        df.loc[ df['dt'] <= 0.01 ] = 0.01
+        df.loc[ df['dt'] <= 0.01 ] = 0.016
 
         df = df.reset_index(drop=True)
         outlays_index_list = np.concatenate(([1], df.loc[ df['dt'] > const.STATELESS_TIME ].index), axis=0)
-        df.loc[ df['dt'] > const.STATELESS_TIME ] = 0.01
+
+        # Resetting the outlayer values
+        df.loc[ df['dt'] > const.STATELESS_TIME ] = 0.016
 
         chunk_samples_indexes = []
         for i in range(1, len(outlays_index_list)):
-            val = (outlays_index_list[i] - outlays_index_list[i - 1]) % const.BLOCK_SIZE
+            reminder = (outlays_index_list[i] - outlays_index_list[i - 1]) % const.BLOCK_SIZE
+            quotient = (outlays_index_list[i] - outlays_index_list[i - 1]) / const.BLOCK_SIZE
 
-            if val != 0:
-                chunk_samples_indexes.extend(range(outlays_index_list[i] - val, outlays_index_list[i]))
+            if (reminder != 0) or quotient.is_integer():
+                chunk_samples_indexes.extend(range(outlays_index_list[i] - reminder, outlays_index_list[i] + 1))
 
         # Return complete_samples and chunk_samples
         return df.loc[~df.index.isin(chunk_samples_indexes)], df.iloc[chunk_samples_indexes]
@@ -247,9 +264,9 @@ class Dataset:
         """
         # If the user is None it means that we only need to read one given session, specified with files_path parameter
         if user == None:
-            data = self.__filter_by_states( self.__load_session(files_path) )
+            data = self.__filter_by_states( self.__load_session(files_path, inf) )
         else:
-            data = self.__filter_by_states( self.__load_user_sessions(user, files_path) )
+            data = self.__filter_by_states( self.__load_user_sessions(user, block_num, files_path) )
 
         data = self.__scale_data(stt.sel_scaling_method.value, 
                             self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) ))
@@ -257,6 +274,7 @@ class Dataset:
         # Checking if we have enough data
         if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
             data = self.__get_augmentated_dataset(data, block_num)
+            print('Data augmented for user: ', user, ' ####################################')
 
         # Slicing array to fit in the given shape
         row_num_end = int(data.shape[0] / const.BLOCK_SIZE) * const.BLOCK_SIZE
@@ -701,7 +719,7 @@ class Dataset:
 
     def get_user_raw_data(self, user):
 
-        df = self.__load_user_sessions(user, const.TRAIN_FILES_PATH)
+        df = self.__load_user_sessions(user, inf, const.TRAIN_FILES_PATH)
         # Filtering outliers
         df = df[(df['x'] < const.MAX_WIDTH) & (df['y'] < const.MAX_HEIGHT)]
         # Dropping the Scroll states
@@ -709,6 +727,76 @@ class Dataset:
         df = df.loc[df['client timestamp'] - df.shift()['client timestamp'] > 0]
 
         return df[['x', 'y', 'client timestamp']]
+
+
+    def print_preprocessed_identification_dataset(self):
+        trainX, trainy = dataset.create_train_dataset_for_identification()
+
+        file_name = str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) + ".csv"
+        f = open(file_name, "w")
+
+        #_users = ['user12', 'user15', 'user16', 'user20', 'user21', 'user23', 'user29', 'user35', 'user7', 'user9']
+        users = ['User1', 'User10', 'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19', 'User2',
+            'User20', 'User21', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9']
+        pos = -1
+        id = -1
+
+        for data in trainX:
+            pos = pos + 1
+
+            if pos % 460 == 0:
+                id = id + 1
+            
+            for i in range(0, const.BLOCK_SIZE):
+                f.write(str(data[i][0]) + ',')
+            f.write('vx,' + users[id] + '\n')
+
+            for i in range(0, const.BLOCK_SIZE):
+                f.write(str(data[i][1]) + ',')
+            f.write('vy,' + users[id] + '\n')
+
+        f.close()
+
+    def print_preprocessed_identification_dataset_vx_vy_separate(self):
+        trainX, trainy = dataset.create_train_dataset_for_identification()
+
+        vx_file_name = str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) + "_vx.csv"
+        f = open(vx_file_name, "w")
+
+        #users = ['user12', 'user15', 'user16', 'user20', 'user21', 'user23', 'user29', 'user35', 'user7', 'user9']
+        users = ['User1', 'User10', 'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19', 'User2',
+            'User20', 'User21', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9']
+        pos = -1
+        id = -1
+
+        for data in trainX:
+            pos = pos + 1
+
+            if pos % 230 == 0:
+                id = id + 1
+            
+            for i in range(0, const.BLOCK_SIZE):
+                f.write(str(data[i][0]) + ',')
+            f.write(users[id] + '\n')
+
+        f.close()
+        vy_file_name = str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) + "_vy.csv"
+        g = open(vy_file_name, "w")
+
+        pos = -1
+        id = -1
+
+        for data in trainX:
+            pos = pos + 1
+
+            if pos % 230 == 0:
+                id = id + 1
+            
+            for i in range(0, const.BLOCK_SIZE):
+                g.write(str(data[i][1]) + ',')
+            g.write(users[id] + '\n')
+
+        g.close()
             
             
 if __name__ == "__main__":
@@ -716,6 +804,10 @@ if __name__ == "__main__":
     #dataset.create_test_dataset_for_identification()
     #dataset.print_all_user_dataset_shape()
     #x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
-    x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
-    print(x_test.shape, ' x_test shape')
-    print(y_test.shape, ' y_tets shape')
+    #x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
+    #print(x_test.shape, ' x_test shape')
+    #print(y_test.shape, ' y_tets shape')
+    #dataset.print_preprocessed_identification_dataset()
+    #dataset.print_preprocessed_identification_dataset_vx_vy_separate()
+    trainX, trainy = dataset.create_train_dataset_for_identification()
+    print(trainX.shape, ' trainX shape')

@@ -91,11 +91,11 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRAIN
 
 
 # Defines which model will be used
-sel_model = Model.CNN
+sel_model = Model.CLASSIFIER_RESNET
 
 
 # Defines the type of samples negative/positive balance rate
@@ -107,10 +107,11 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
+sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
-sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
+# It is relevant only for authentication measurement
+sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
 
 
 # Defines what will be with the chunk samples

@@ -11,12 +11,11 @@ from sklearn import metrics
 def func():
     dataset = dset.Dataset()
     x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
+    X = x_train.transpose(0, 2, 1).reshape(x_train.shape[0] * 2, const.BLOCK_SIZE)
     x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
-    print('train data shape ', x_train.shape)
-    print('test data shape ',y_test.shape)
 
-    clf = OneClassSVM(gamma='auto').fit(x_train)
-    y_pred = clf.predict(x_test)
+    clf = OneClassSVM(gamma='auto').fit(X)
+    #y_pred = clf.predict(x_test)
     
 
 def plot_ROC(userid, fpr, tpr, roc_auc):
