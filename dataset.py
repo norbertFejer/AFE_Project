@@ -184,10 +184,11 @@ class Dataset:
         switcher = { 
             0: self.__user_defined_scaler,
             1: self.__min_max_scaler,
-            2: self.__max_abs_scaler
+            2: self.__max_abs_scaler,
+            3: self.__no_scaler
         } 
 
-        func = switcher.get(arg, lambda: "Wrong evaluation metric!")
+        func = switcher.get(arg, lambda: "Wrong scaler!")
         return func(df)
 
 
@@ -217,6 +218,10 @@ class Dataset:
         max_abs_scaler = preprocessing.MaxAbsScaler()
         data = max_abs_scaler.fit_transform(df)
         return pd.DataFrame({'v_x': data[:, 0], 'v_y': data[:, 1]})
+
+    
+    def __no_scaler(self, df):
+        return df
 
 
     def __get_velocity_from_data(self, df):
@@ -268,13 +273,14 @@ class Dataset:
         else:
             data = self.__filter_by_states( self.__load_user_sessions(user, block_num, files_path) )
 
-        data = self.__scale_data(stt.sel_scaling_method.value, 
-                            self.__get_velocity_from_data( self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num) ))
+        data = self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num)
 
         # Checking if we have enough data
         if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
+            print('Data augmented for user: ', user, '####################################')
             data = self.__get_augmentated_dataset(data, block_num)
-            print('Data augmented for user: ', user, ' ####################################')
+
+        data = self.__scale_data(stt.sel_scaling_method.value, self.__get_velocity_from_data( data ))
 
         # Slicing array to fit in the given shape
         row_num_end = int(data.shape[0] / const.BLOCK_SIZE) * const.BLOCK_SIZE
@@ -713,101 +719,41 @@ class Dataset:
         for user in users:
             dataset = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
             print('Dataset shape for user:', user , '-', dataset.shape)
-
-
-    # Plotter ----------------------------------------------------------------------------------------------
-
-    def get_user_raw_data(self, user):
-
-        df = self.__load_user_sessions(user, inf, const.TRAIN_FILES_PATH)
-        # Filtering outliers
-        df = df[(df['x'] < const.MAX_WIDTH) & (df['y'] < const.MAX_HEIGHT)]
-        # Dropping the Scroll states
-        df = df.loc[~df['button'].isin(['Scroll'])]
-        df = df.loc[df['client timestamp'] - df.shift()['client timestamp'] > 0]
-
-        return df[['x', 'y', 'client timestamp']]
-
-
-    def print_preprocessed_identification_dataset(self):
-        trainX, trainy = dataset.create_train_dataset_for_identification()
-
-        file_name = str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) + ".csv"
-        f = open(file_name, "w")
-
-        #_users = ['user12', 'user15', 'user16', 'user20', 'user21', 'user23', 'user29', 'user35', 'user7', 'user9']
-        users = ['User1', 'User10', 'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19', 'User2',
-            'User20', 'User21', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9']
-        pos = -1
-        id = -1
-
-        for data in trainX:
-            pos = pos + 1
-
-            if pos % 460 == 0:
-                id = id + 1
             
-            for i in range(0, const.BLOCK_SIZE):
-                f.write(str(data[i][0]) + ',')
-            f.write('vx,' + users[id] + '\n')
-
-            for i in range(0, const.BLOCK_SIZE):
-                f.write(str(data[i][1]) + ',')
-            f.write('vy,' + users[id] + '\n')
-
-        f.close()
-
-    def print_preprocessed_identification_dataset_vx_vy_separate(self):
-        trainX, trainy = dataset.create_train_dataset_for_identification()
-
-        vx_file_name = str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) + "_vx.csv"
-        f = open(vx_file_name, "w")
-
-        #users = ['user12', 'user15', 'user16', 'user20', 'user21', 'user23', 'user29', 'user35', 'user7', 'user9']
-        users = ['User1', 'User10', 'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19', 'User2',
-            'User20', 'User21', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9']
-        pos = -1
-        id = -1
-
-        for data in trainX:
-            pos = pos + 1
-
-            if pos % 230 == 0:
-                id = id + 1
             
-            for i in range(0, const.BLOCK_SIZE):
-                f.write(str(data[i][0]) + ',')
-            f.write(users[id] + '\n')
+    def __get_raw_user_data(self, user, block_num, files_path):
 
-        f.close()
-        vy_file_name = str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) + "_vy.csv"
-        g = open(vy_file_name, "w")
+        data = self.__filter_by_states( self.__load_user_sessions(user, block_num, files_path) )
+        data = self.__get_handled_raw_data(data[['x', 'y', 'client timestamp']], block_num)
 
-        pos = -1
-        id = -1
+        # Checking if we have enough data
+        if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
+            print('Data augmented for user: ', user, '####################################')
+            data = self.__get_augmentated_dataset(data, block_num)
 
-        for data in trainX:
-            pos = pos + 1
 
-            if pos % 230 == 0:
-                id = id + 1
-            
-            for i in range(0, const.BLOCK_SIZE):
-                g.write(str(data[i][1]) + ',')
-            g.write(users[id] + '\n')
+        # Slicing array to fit in the given shape
+        row_num_end = int(data.shape[0] / const.BLOCK_SIZE) * const.BLOCK_SIZE
 
-        g.close()
+        return data[:row_num_end].values
+
+
+    def get_raw_identification_data(self):
+        
+        return self.__get_raw_user_data('user12', const.BLOCK_SIZE, const.TRAIN_FILES_PATH)
+
+
             
             
 if __name__ == "__main__":
     dataset = Dataset()
     #dataset.create_test_dataset_for_identification()
-    #dataset.print_all_user_dataset_shape()
+    dataset.print_all_user_dataset_shape()
     #x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
     #x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
     #print(x_test.shape, ' x_test shape')
     #print(y_test.shape, ' y_tets shape')
     #dataset.print_preprocessed_identification_dataset()
     #dataset.print_preprocessed_identification_dataset_vx_vy_separate()
-    trainX, trainy = dataset.create_train_dataset_for_identification()
-    print(trainX.shape, ' trainX shape')
+    #trainX, trainy = dataset.create_train_dataset_for_identification()
+    #print(trainX.shape, ' trainX shape')

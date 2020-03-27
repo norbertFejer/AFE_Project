@@ -38,10 +38,8 @@ class CNNmodel(base_model.BaseModel):
 
         if nb_classes == 2:
             model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['binary_accuracy'])
-            print('binACC--------------------------------------------------------------------------')
         else:
             model.compile(loss='categorical_crossentropy', optimizer=adam_optimizer, metrics=['categorical_accuracy'])
-            print('categACC--------------------------------------------------------------------------')
 
         if const.VERBOSE == True:
             model.summary()

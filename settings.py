@@ -77,6 +77,7 @@ class ScalingMethod(Enum):
     USER_DEFINED = 0
     MIN_MAX_SCALER = 1
     MAX_ABS_SCALER = 2
+    NO_SCALING = 3
 
 
 class AuthenticationType(Enum):
@@ -95,7 +96,7 @@ sel_method = Method.TRAIN
 
 
 # Defines which model will be used
-sel_model = Model.CLASSIFIER_RESNET
+sel_model = Model.CNN
 
 
 # Defines the type of samples negative/positive balance rate

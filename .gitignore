@@ -8,10 +8,9 @@ evaluationResults
 oldMeasurement/
 savedImages/
 DFL/
+normalizedDataset/
+generatedCSVData/
 
 *.xlsx
 *.csv
 *.png
-
-plotter.py 
-results.py
