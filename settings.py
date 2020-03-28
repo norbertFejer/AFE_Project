@@ -104,7 +104,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # Defines used dataset
-sel_dataset = Dataset.BALABIT
+sel_dataset = Dataset.DFL
 
 
 # Defines the selected recognition type

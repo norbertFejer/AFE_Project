@@ -123,13 +123,7 @@ class GenerateCSV:
         f.close()
 
 
-    def test(self):
-        return self.__dataset.get_raw_identification_data()
-
-
 
 if __name__ == "__main__":
     gen_csv = GenerateCSV()
     gen_csv.save_preprocessed_dataset(SaveValues.VX)
-    #data = gen_csv.test()
-    #print(data.shape)

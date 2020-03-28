@@ -735,12 +735,12 @@ class Dataset:
         # Slicing array to fit in the given shape
         row_num_end = int(data.shape[0] / const.BLOCK_SIZE) * const.BLOCK_SIZE
 
-        return data[:row_num_end].values
+        return data[:row_num_end]
 
 
     def get_raw_identification_data(self):
         
-        return self.__get_raw_user_data('user12', const.BLOCK_SIZE, const.TRAIN_FILES_PATH)
+        return self.__get_raw_user_data('user9', stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
 
             

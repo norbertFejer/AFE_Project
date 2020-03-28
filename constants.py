@@ -72,4 +72,4 @@ MAX_HEIGHT = 4000
 if settings.sel_dataset == settings.Dataset.DFL:
     TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
-    STATELESS_TIME = 2000
+    STATELESS_TIME = STATELESS_TIME * 1000
