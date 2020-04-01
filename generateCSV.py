@@ -19,7 +19,7 @@ class GenerateCSV:
         self.__saved_values_folder_name = "generatedCSVData"
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            self.__dataset_dataset_for_identicitaion()
+            self.__get_dataset_for_identicitaion()
 
         self.__create_users_list()
 
@@ -27,7 +27,7 @@ class GenerateCSV:
             os.makedirs(self.__saved_values_folder_name)
 
 
-    def __dataset_dataset_for_identicitaion(self):
+    def __get_dataset_for_identicitaion(self):
         
         if stt.sel_method == stt.Method.TRAIN:
             self.__block_num = stt.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
