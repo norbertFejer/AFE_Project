@@ -17,10 +17,9 @@ class GenerateCSV:
     def __init__(self):
         self.__dataset = dset.Dataset()
         self.__saved_values_folder_name = "generatedCSVData"
-        self.__block_num = stt.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            self.__create_train_dataset_for_identicitaion()
+            self.__dataset_dataset_for_identicitaion()
 
         self.__create_users_list()
 
@@ -28,8 +27,14 @@ class GenerateCSV:
             os.makedirs(self.__saved_values_folder_name)
 
 
-    def __create_train_dataset_for_identicitaion(self):
-        self.__trainX, _ = self.__dataset.create_train_dataset_for_identification()
+    def __dataset_dataset_for_identicitaion(self):
+        
+        if stt.sel_method == stt.Method.TRAIN:
+            self.__block_num = stt.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
+            self.__dataset, _ = self.__dataset.create_train_dataset_for_identification()
+        else:
+            self.__block_num = const.TRAIN_TEST_SPLIT_VALUE
+            self.__dataset, _ = self.__dataset.create_test_dataset_for_identification()
 
 
     def __create_users_list(self):
@@ -55,14 +60,14 @@ class GenerateCSV:
 
 
     def __save_preprocessed_identification_dataset_vx_vy(self):
-        file_name = self.__saved_values_folder_name + '/' + str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) \
-                        + "_vx_vy_" + str(const.STATELESS_TIME) + "s_stateless_time.csv"
+        file_name = self.__saved_values_folder_name + '/' + str(stt.sel_dataset) + '_' +  str(stt.sel_method) + '_' \
+                        + str(stt.sel_scaling_method) + "_vx_vy_" + str(const.STATELESS_TIME) + "s_stateless_time.csv"
 
         pos = -1
         id = -1
 
         f = open(file_name, "w")
-        for data in self.__trainX:
+        for data in self.__dataset:
             pos = pos + 1
 
             if pos % self.__block_num == 0:
@@ -80,14 +85,14 @@ class GenerateCSV:
 
 
     def __save_preprocessed_identification_dataset_vx(self):
-        file_name = self.__saved_values_folder_name + '/' + str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) \
-                        + "_vx_" + str(const.STATELESS_TIME) + "s_stateless_time.csv"
+        file_name = self.__saved_values_folder_name + '/' + str(stt.sel_dataset) + '_' +  str(stt.sel_method) + '_' \
+                        + str(stt.sel_scaling_method) + "_vx_" + str(const.STATELESS_TIME) + "s_stateless_time.csv"
 
         pos = -1
         id = -1
 
         f = open(file_name, "w")
-        for data in self.__trainX:
+        for data in self.__dataset:
             pos = pos + 1
 
             if pos % self.__block_num == 0:
@@ -102,14 +107,14 @@ class GenerateCSV:
 
 
     def __save_preprocessed_identification_dataset_vy(self):
-        file_name = self.__saved_values_folder_name + '/' + str(stt.sel_dataset) + '_' + str(stt.sel_scaling_method) \
-                        + "_vy_" + str(const.STATELESS_TIME) + "s_stateless_time.csv"
+        file_name = self.__saved_values_folder_name + '/' + str(stt.sel_dataset) + '_' +  str(stt.sel_method) + '_' \
+                        + str(stt.sel_scaling_method) + "_vy_" + str(const.STATELESS_TIME) + "s_stateless_time.csv"
 
         pos = -1
         id = -1
 
         f = open(file_name, "w")
-        for data in self.__trainX:
+        for data in self.__dataset:
             pos = pos + 1
 
             if pos % self.__block_num == 0:
@@ -126,4 +131,4 @@ class GenerateCSV:
 
 if __name__ == "__main__":
     gen_csv = GenerateCSV()
-    gen_csv.save_preprocessed_dataset(SaveValues.VX)
+    gen_csv.save_preprocessed_dataset(SaveValues.VX_VY)
