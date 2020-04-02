@@ -4,6 +4,9 @@ import settings as stt
 
 from enum import Enum
 import os
+import numpy as np
+
+np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
 class SaveValues(Enum):
     VX = 1
@@ -32,7 +35,8 @@ class GenerateCSV:
         if stt.sel_method == stt.Method.TRAIN:
             self.__block_num = stt.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
             self.__dataset, _ = self.__dataset.create_train_dataset_for_identification()
-        else:
+        
+        if stt.sel_method == stt.Method.EVALUATE:
             self.__block_num = const.TRAIN_TEST_SPLIT_VALUE
             self.__dataset, _ = self.__dataset.create_test_dataset_for_identification()
 
@@ -131,4 +135,4 @@ class GenerateCSV:
 
 if __name__ == "__main__":
     gen_csv = GenerateCSV()
-    gen_csv.save_preprocessed_dataset(SaveValues.VX_VY)
+    gen_csv.save_preprocessed_dataset(SaveValues.VX)

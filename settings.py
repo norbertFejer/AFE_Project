@@ -92,7 +92,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.TRAIN
+sel_method = Method.EVALUATE
 
 
 # Defines which model will be used
@@ -104,7 +104,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # Defines used dataset
-sel_dataset = Dataset.BALABIT
+sel_dataset = Dataset.DFL
 
 
 # Defines the selected recognition type
@@ -159,7 +159,7 @@ print_evaluation_results_to_file = True
 
 
 # Defines scaling method during creating the training dataset
-sel_scaling_method = ScalingMethod.NO_SCALING
+sel_scaling_method = ScalingMethod.MIN_MAX_SCALER
 
 
 def get_balabit_users():

@@ -4,7 +4,7 @@ import dataset as dset
 import baseModel as base_model
 
 from keras.utils import to_categorical
-from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score
+from sklearn.metrics import roc_curve, confusion_matrix, accuracy_score, auc
 import numpy as np
 import os
 
@@ -34,8 +34,19 @@ class EvaluateModel:
     # Computes Area Under the Receiver Operating Characteristic Curve (ROC AUC) from predicted scores
     def __get_auc_result(self, model_name, testX, y_true):
 
-        y_scores = base_model.BaseModel.predict_model(model_name, testX)
-        return roc_auc_score(y_true, y_scores)
+        y_pred = base_model.BaseModel.predict_model(model_name, testX)
+        y_true = np.argmax( y_true, axis=1)
+        pred = np.empty(shape=(0, 1))
+
+        for i in range(y_true.shape[0]):
+            pred = np.append(pred, y_pred[i, y_true[i]])
+            y_true[i] = y_true[i] + 1
+
+        user_num = len( stt.get_users() )
+        print(user_num, ' usernum')
+        fpr, tpr, thresholds = roc_curve(y_true, pred, pos_label=user_num)
+
+        return auc(fpr, tpr)
 
 
     # Computes Accuracy

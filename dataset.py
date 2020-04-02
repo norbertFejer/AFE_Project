@@ -149,17 +149,19 @@ class Dataset:
         """
         # Calculates the difference between two consecutive row
         df = df.diff()
+
         # The first row values are NaN, because of using diff() 
         df = df[1:].rename(columns={'x': 'dx', 'y': 'dy', 'client timestamp': 'dt'})
 
+        default_time = 0.016
         # Setting default value if dt == 0
-        df.loc[ df['dt'] <= 0.01 ] = 0.016
+        df.loc[ df['dt'] <= 0.01, 'dt' ] = default_time
 
         df = df.reset_index(drop=True)
-        outlays_index_list = np.concatenate(([1], df.loc[ df['dt'] > const.STATELESS_TIME ].index), axis=0)
+        outlays_index_list = np.concatenate(([0], df.loc[ df['dt'] > const.STATELESS_TIME ].index), axis=0)
 
         # Resetting the outlayer values
-        df.loc[ df['dt'] > const.STATELESS_TIME ] = 0.016
+        df.loc[ df['dt'] > const.STATELESS_TIME, 'dt' ] = default_time
 
         chunk_samples_indexes = []
         for i in range(1, len(outlays_index_list)):
@@ -167,7 +169,10 @@ class Dataset:
             quotient = (outlays_index_list[i] - outlays_index_list[i - 1]) / const.BLOCK_SIZE
 
             if (reminder != 0) or quotient.is_integer():
-                chunk_samples_indexes.extend(range(outlays_index_list[i] - reminder, outlays_index_list[i] + 1))
+                chunk_samples_indexes.extend(range(outlays_index_list[i] - reminder, outlays_index_list[i]))
+
+        #for i in range(len(chunk_samples_indexes)):
+        #    chunk_samples_indexes[i] = chunk_samples_indexes[i] - 1
 
         # Return complete_samples and chunk_samples
         return df.loc[~df.index.isin(chunk_samples_indexes)], df.iloc[chunk_samples_indexes]
@@ -748,11 +753,12 @@ class Dataset:
 if __name__ == "__main__":
     dataset = Dataset()
     #dataset.create_test_dataset_for_identification()
-    dataset.print_all_user_dataset_shape()
+    #dataset.print_all_user_dataset_shape()
     #x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
-    #x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
-    #print(x_test.shape, ' x_test shape')
-    #print(y_test.shape, ' y_tets shape')
+    x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
+    print(x_test.shape, ' x_test shape')
+    print(y_test.shape, ' y_tets shape')
+
     #dataset.print_preprocessed_identification_dataset()
     #dataset.print_preprocessed_identification_dataset_vx_vy_separate()
     #trainX, trainy = dataset.create_train_dataset_for_identification()

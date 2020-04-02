@@ -120,7 +120,6 @@ class BaseModel:
                 np.ndarry - the predicted dataset
         """
         model_path = const.TRAINED_MODELS_PATH + '/' + model_name
-        #model_path = "C:/Anaconda projects/Software_mod/trainedModels/best_user7_Model.CLASSIFIER_FCN_Dataset.BALABIT_128_300_trained.hdf5"
         model = load_model(model_path)
 
         return model.predict(x_data)
