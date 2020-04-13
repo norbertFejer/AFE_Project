@@ -37,15 +37,7 @@ class EvaluateModel:
 
         y_pred = base_model.BaseModel.predict_model(model_name, testX)
         y_true = np.argmax( y_true, axis=1)
-        pred = np.empty(shape=(0, 1))
-
-        for i in range(y_true.shape[0]):
-            pred = np.append(pred, y_pred[i, y_true[i]])
-            y_true[i] = y_true[i] + 1
-
-        user_num = len( stt.get_users() )
-        print(user_num, ' usernum')
-        fpr, tpr, thresholds = roc_curve(y_true, pred, pos_label=user_num)
+        fpr, tpr, thresholds = roc_curve(y_true, y_pred[:, 0], pos_label=0)
 
         return auc(fpr, tpr)
 

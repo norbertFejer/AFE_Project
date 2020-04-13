@@ -79,6 +79,7 @@ class Dataset:
         """
         # Maximum number of rows to read
         # We multiply the value by 3, because of the unknown chunk samples size
+        # It will be an overestimation of the useful
         if block_num == inf:
             n_rows = None
         else:
@@ -191,14 +192,21 @@ class Dataset:
             0: self.__user_defined_scaler,
             1: self.__min_max_scaler,
             2: self.__max_abs_scaler,
-            3: self.__no_scaler
+            3: self.__no_scaler,
+            4: self.__standard_scaler
         } 
 
+        # args defines the actual raw feature type
+        # args[0] contains 'dx' or 'vx' based on stt.sel_raw_feature_type value
+        # args[0] contains 'dy' or 'vy' based on stt.sel_raw_feature_type value
+        # It is only important for using the proper header in the df
+        args = stt.sel_raw_feature_type.value.split('_')
+
         func = switcher.get(arg, lambda: "Wrong scaler!")
-        return func(df)
+        return func(df, args)
 
 
-    def __user_defined_scaler(self, df):
+    def __user_defined_scaler(self, df, args):
         """ Makes max elem scaling along y axis
 
             Parameters:
@@ -207,27 +215,40 @@ class Dataset:
             Returns:
                 DataFrame: scaled dataframe
         """
-        df['v_x'] /= abs(df['v_x']).max()
-        df['v_y'] /= abs(df['v_y']).max()
+        df[args[0]] /= abs(df[args[0]]).max()
+        df[args[1]] /= abs(df[args[1]]).max()
+
         return df
 
 
-    def __min_max_scaler(self, df):
+    def __min_max_scaler(self, df, args):
         
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
         data = min_max_scaler.fit_transform(df)
-        return pd.DataFrame({'v_x': data[:, 0], 'v_y': data[:, 1]})
+
+        return pd.DataFrame({args[0]: data[:, 0], args[1]: data[:, 1]})
 
 
-    def __max_abs_scaler(self, df):
+    def __max_abs_scaler(self, df, args):
 
         max_abs_scaler = preprocessing.MaxAbsScaler()
         data = max_abs_scaler.fit_transform(df)
-        return pd.DataFrame({'v_x': data[:, 0], 'v_y': data[:, 1]})
+
+        return pd.DataFrame({args[0]: data[:, 0], args[1]: data[:, 1]})
 
     
-    def __no_scaler(self, df):
+    def __no_scaler(self, df, args):
         return df
+
+
+    def __standard_scaler(self, df, args):
+
+        mean0 = df[args[0]].mean()
+        std0 = df[args[0]].std()
+        mean1 = df[args[1]].mean()
+        std1 = df[args[1]].std()
+
+        return pd.DataFrame({ args[0]: ( (df[args[0]] - mean0) / std0 ), args[1]: ( (df[args[1]] - mean1) / std1 ) })
 
 
     def __get_velocity_from_data(self, df):
@@ -240,10 +261,23 @@ class Dataset:
                 DataFrame: x and y directional speed
         """
 
-        df['v_x'] = df['dx'] / df['dt']
-        df['v_y'] = df['dy'] / df['dt']
+        df['vx'] = df['dx'] / df['dt']
+        df['vy'] = df['dy'] / df['dt']
 
-        return pd.concat([df['v_x'], df['v_y']], axis=1)
+        return pd.concat([df['vx'], df['vy']], axis=1)
+
+
+    def __get_shift_from_data(self, df):
+        """ Returns velocity from raw data
+
+            Parameters:
+                df (DataFrame): input dataframe, it contains dx, dy and dt
+
+            Returns:
+                DataFrame: horizontal and vertical shift components
+        """
+
+        return pd.concat([df['dx'], df['dy']], axis=1)
 
 
     def __get_shaped_dataset_by_user(self, user, block_num, files_path):
@@ -286,7 +320,13 @@ class Dataset:
             print('Data augmented for user: ', user, '####################################')
             data = self.__get_augmentated_dataset(data, block_num)
 
-        data = self.__scale_data(stt.sel_scaling_method.value, self.__get_velocity_from_data( data ))
+        if stt.sel_raw_feature_type == stt.RawFeatureType.VX_VY:
+            data = self.__get_velocity_from_data( data )
+
+        if stt.sel_raw_feature_type == stt.RawFeatureType.DX_DY:
+            data = self.__get_shift_from_data( data )
+
+        data = self.__scale_data(stt.sel_scaling_method.value, data)
 
         # Slicing array to fit in the given shape
         row_num_end = int(data.shape[0] / const.BLOCK_SIZE) * const.BLOCK_SIZE

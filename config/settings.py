@@ -78,11 +78,17 @@ class ScalingMethod(Enum):
     MIN_MAX_SCALER = 1
     MAX_ABS_SCALER = 2
     NO_SCALING = 3
+    STANDARD_SCALER = 4
 
 
 class AuthenticationType(Enum):
     BINARY_CLASSIFICATION = 'binary_class'
     ONE_CLASS_CLASSIFICATION = 'one_class'
+
+
+class RawFeatureType(Enum):
+    DX_DY = 'dx_dy'
+    VX_VY = 'vx_vy'
 
 
 # Block size number from given user
@@ -99,10 +105,6 @@ sel_method = Method.EVALUATE
 sel_model = Model.CNN
 
 
-# Defines the type of samples negative/positive balance rate
-sel_balance_type = DatasetBalanceType.POSITIVE
-
-
 # Defines used dataset
 sel_dataset = Dataset.BALABIT
 
@@ -111,11 +113,25 @@ sel_dataset = Dataset.BALABIT
 sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
+# Defines the model input type
+# VX_VY - horizontal and vertical velocity components
+# DX_DY - horizontal and vertical shift components
+sel_raw_feature_type = RawFeatureType.DX_DY
+
+
+# Defines scaling method during creating the training dataset
+sel_scaling_method = ScalingMethod.STANDARD_SCALER
+
+
+# Defines the type of samples negative/positive balance rate
+sel_balance_type = DatasetBalanceType.POSITIVE
+
+
 # It is relevant only for authentication measurement
 sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
 
 
-# Defines what will be with the chunk samples
+# Defines how we handle the chunk samples
 sel_chunck_samples_handler = ChunkSamplesHandler.DROP_CHUNKS
 
 
@@ -156,10 +172,6 @@ sel_evaluation_type = EvaluationType.ACTION_BASED
 
 # Defines saving evaluation results to file
 print_evaluation_results_to_file = True
-
-
-# Defines scaling method during creating the training dataset
-sel_scaling_method = ScalingMethod.NO_SCALING
 
 
 def get_balabit_users():
