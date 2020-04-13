@@ -1,8 +1,8 @@
-import constants as const
-import baseModel as base_model
-import settings as stt
-
 import tensorflow.keras as keras
+
+import config.constants as const
+import config.settings as stt
+import models.baseModel as base_model
 
 
 class CNNmodel(base_model.BaseModel):

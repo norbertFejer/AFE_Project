@@ -1,12 +1,13 @@
-import constants as const
-import settings as stt
-import dataset as dset
-import baseModel as base_model
+import os
 
+import numpy as np
 from keras.utils import to_categorical
 from sklearn.metrics import roc_curve, confusion_matrix, accuracy_score, auc
-import numpy as np
-import os
+
+import config.settings as stt
+import config.constants as const
+import src.dataset as dset
+import models.baseModel as base_model
 
 
 class EvaluateModel:

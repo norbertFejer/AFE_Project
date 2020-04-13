@@ -2,7 +2,7 @@
 
 ## Mouse Dynamics based User Recognition using Deep Learning
 
-Behavioural biometrics provides an extra layer of security for user authentication mechanisms. Among behavioural biometrics, mouse dynamics provides a non-intrusive layer of security. In this project we propose novel convolutional neural networks for extracting the features from the time series of users' mouse movements.
+Behavioural biometrics provides an extra layer of security for user authentication mechanisms. Among behavioural biometrics, mouse dynamics provides a non-intrusive layer of security. In this project we propose novel convolutional neural networks for extracting the features from the time series of users’ mouse movements.
 
 ## Installation
 
@@ -35,11 +35,6 @@ conda install -c anaconda pylint
 After downloading the two separate datasets ([Balabit](https://github.com/balabit/Mouse-Dynamics-Challenge) and [DFL](https://ms.sapientia.ro/~manyi/DFL.html)), you need to specify these locations in the constants.py file.
 
 ## Building
-
-First of all, in the root directory, run:
-```bash
-pip install -e .
-```
 
 Using the Anaconda Prompt you simply run the command:
 ```bash

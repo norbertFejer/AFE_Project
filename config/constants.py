@@ -1,7 +1,10 @@
-import settings
-import timeDistributedModel
-import cnnModel
+import config.settings as stt
 
+
+""" 
+    Global constant values
+    ##################################
+"""
 
 # Defines the samples number, that represents a movement
 BLOCK_SIZE = 128
@@ -24,23 +27,6 @@ TRAIN_TEST_SPLIT_VALUE = 70
 
 # Defines the batch size
 BATCH_SIZE = 32
-
-
-# Defines the interval when no user interaction occurred.
-# It is measured in seconds.
-STATELESS_TIME = 2
-
-
-# Test files location
-TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/test_files/'
-
-
-# Test labels location
-TEST_LABELS_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/public_labels.csv'
-
-
-# Training files location
-TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/training_files'
 
 
 # Trained models location
@@ -68,8 +54,28 @@ MAX_WIDTH = 4000
 MAX_HEIGHT = 4000
 
 
-# For DFL dataset we use different settings
-if settings.sel_dataset == settings.Dataset.DFL:
+""" 
+    Specific constants for each dataset
+    ##################################
+"""
+
+
+if stt.sel_dataset == stt.Dataset.BALABIT:
+    # Defines the interval when no user interaction occurred.
+    # It is measured in seconds.
+    STATELESS_TIME = 2
+
+    # Test files location
+    TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/test_files/'
+
+    # Test labels location
+    TEST_LABELS_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/public_labels.csv'
+
+    # Training files location
+    TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/MouseDynamics/training_files'
+
+
+if stt.sel_dataset == stt.Dataset.DFL:
     TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     STATELESS_TIME = STATELESS_TIME * 1000

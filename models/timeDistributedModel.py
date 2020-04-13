@@ -1,6 +1,3 @@
-import constants as const
-import baseModel as base_model
-
 from keras.models import Sequential
 from keras.layers import TimeDistributed
 from keras.layers import LSTM
@@ -9,6 +6,9 @@ from keras.layers.convolutional import MaxPooling1D
 from keras.layers import Dropout
 from keras.layers import Dense
 from keras.layers import Flatten
+
+import config.constants as const
+import models.baseModel as base_model
 
 
 class TimeDistributedModel(base_model.BaseModel):

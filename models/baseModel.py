@@ -1,10 +1,11 @@
-import settings as stt
-import constants as const
-
 import os
-from tensorflow.keras.models import load_model
 from abc import abstractmethod
+
+from tensorflow.keras.models import load_model
 import tensorflow.keras as keras
+
+import config.settings as stt
+import config.constants as const
 
 
 class BaseModel:

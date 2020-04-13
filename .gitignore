@@ -4,12 +4,13 @@ __pycache__
 
 MouseDynamics/
 trainedModels/
-evaluationResults
+evaluationResults/
 oldMeasurement/
 savedImages/
 DFL/
 normalizedDataset/
 generatedCSVData/
+afe_pkg.egg-info/
 
 *.xlsx
 *.csv

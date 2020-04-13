@@ -1,9 +1,11 @@
-import dataset as dset
-import constants as const
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+
+import src.dataset as dset
+import config.constants as const
+
 
 class Plotter:
 

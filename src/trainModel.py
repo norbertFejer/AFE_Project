@@ -1,15 +1,16 @@
-import dataset as dset
-import constants as const
-import settings as stt
-
-import timeDistributedModel
-import cnnModel
-import fcn
-import resnet
+import os
 
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
-import os
+
+import src.dataset as dset
+import config.constants as const
+import config.settings as stt
+
+import models.timeDistributedModel as timeDistributedModel
+import models.cnnModel as cnnModel
+import models.fcn as fcn
+import models.resnet as resnet
 
 
 class TrainModel:

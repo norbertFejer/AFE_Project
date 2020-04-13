@@ -1,10 +1,11 @@
-import dataset as dset
-import constants as const
-import settings as stt
-
 from enum import Enum
 import os
+
 import numpy as np
+
+import src.dataset as dset
+import config.constants as const
+import config.settings as stt
 
 np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 

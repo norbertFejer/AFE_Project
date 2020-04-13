@@ -1,15 +1,16 @@
+import os
+import random
+
 import pandas as pd
 import numpy as np
 from glob import glob
-import os
-import random
 from math import inf, ceil
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 
 # User defined imports
-import constants as const
-import settings as stt
+import config.settings as stt
+import config.constants as const
 
 class Dataset:
     __instance = None

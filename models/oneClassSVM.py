@@ -1,11 +1,11 @@
-import dataset as dset
-import settings as stt
-import constants as const
-
 from sklearn.svm import OneClassSVM
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import metrics
+
+import config.settings as stt
+import config.constants as const
+import src.dataset as dset
 
 
 def func():

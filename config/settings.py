@@ -104,7 +104,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # Defines used dataset
-sel_dataset = Dataset.DFL
+sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
@@ -159,7 +159,7 @@ print_evaluation_results_to_file = True
 
 
 # Defines scaling method during creating the training dataset
-sel_scaling_method = ScalingMethod.MIN_MAX_SCALER
+sel_scaling_method = ScalingMethod.NO_SCALING
 
 
 def get_balabit_users():

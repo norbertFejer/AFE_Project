@@ -1,7 +1,7 @@
-import settings as stt
-import constants as const
-import trainModel
-import evaluateModel
+import config.settings as stt
+import config.constants as const
+import src.trainModel as trainModel
+import src.evaluateModel as evaluateModel
 
 # Setting random states to get reproducible results
 from numpy.random import seed
