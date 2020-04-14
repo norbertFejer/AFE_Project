@@ -103,7 +103,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRAIN
 
 
 # Defines which model will be used
@@ -121,11 +121,11 @@ sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 # Defines the model input type
 # VX_VY - horizontal and vertical velocity components
 # DX_DY - horizontal and vertical shift components
-sel_raw_feature_type = RawFeatureType.DX_DY
+sel_raw_feature_type = RawFeatureType.VX_VY
 
 
 # Defines scaling method during creating the training dataset
-sel_scaling_method = ScalingMethod.STANDARD_SCALER
+sel_scaling_method = ScalingMethod.USER_DEFINED
 
 
 # Defines the type of samples negative/positive balance rate
@@ -184,7 +184,7 @@ print_evaluation_results_to_file = True
 # Defines setting source location
 # FROM_PY_FILE means that we use settings from settings.py and constants.py
 # FROM_XML_FILE means that we use settings from config.xml
-sel_settings_source = SettingsSource.FROM_XML_FILE
+sel_settings_source = SettingsSource.FROM_PY_FILE
 
 
 def get_balabit_users():

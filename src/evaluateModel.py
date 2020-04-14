@@ -78,6 +78,7 @@ class EvaluateModel:
 
         if type(stt.sel_evaluation_metrics) != type([]):
             stt.sel_evaluation_metrics = [stt.sel_evaluation_metrics]
+            
         # Evaluating model with all selected metrics
         for metric in stt.sel_evaluation_metrics:
             self.print_msg('\n' + str(metric) + ' value:')

@@ -12,6 +12,11 @@ from sklearn import preprocessing
 import config.settings as stt
 import config.constants as const
 
+# 0 - valid user (is legal)
+POSITIVE_CLASS = 0
+# 1 - intruder (is illegal)
+NEGATIVE_CLASS = 1
+
 class Dataset:
     __instance = None
 
@@ -180,77 +185,6 @@ class Dataset:
         return df.loc[~df.index.isin(chunk_samples_indexes)], df.iloc[chunk_samples_indexes]
 
 
-    def __scale_data(self, arg, df):
-        """ Scale data with specified method
-
-            Parameters:
-                df (DataFrame): input dataframe, that contains al user session
-
-            Returns:
-        """
-        switcher = { 
-            0: self.__user_defined_scaler,
-            1: self.__min_max_scaler,
-            2: self.__max_abs_scaler,
-            3: self.__no_scaler,
-            4: self.__standard_scaler
-        } 
-
-        # args defines the actual raw feature type
-        # args[0] contains 'dx' or 'vx' based on stt.sel_raw_feature_type value
-        # args[0] contains 'dy' or 'vy' based on stt.sel_raw_feature_type value
-        # It is only important for using the proper header in the df
-        args = stt.sel_raw_feature_type.value.split('_')
-
-        func = switcher.get(arg, lambda: "Wrong scaler!")
-        return func(df, args)
-
-
-    def __user_defined_scaler(self, df, args):
-        """ Makes max elem scaling along y axis
-
-            Parameters:
-                df (DataFrame): input dataframe
-
-            Returns:
-                DataFrame: scaled dataframe
-        """
-        df[args[0]] /= abs(df[args[0]]).max()
-        df[args[1]] /= abs(df[args[1]]).max()
-
-        return df
-
-
-    def __min_max_scaler(self, df, args):
-        
-        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-        data = min_max_scaler.fit_transform(df)
-
-        return pd.DataFrame({args[0]: data[:, 0], args[1]: data[:, 1]})
-
-
-    def __max_abs_scaler(self, df, args):
-
-        max_abs_scaler = preprocessing.MaxAbsScaler()
-        data = max_abs_scaler.fit_transform(df)
-
-        return pd.DataFrame({args[0]: data[:, 0], args[1]: data[:, 1]})
-
-    
-    def __no_scaler(self, df, args):
-        return df
-
-
-    def __standard_scaler(self, df, args):
-
-        mean0 = df[args[0]].mean()
-        std0 = df[args[0]].std()
-        mean1 = df[args[1]].mean()
-        std1 = df[args[1]].std()
-
-        return pd.DataFrame({ args[0]: ( (df[args[0]] - mean0) / std0 ), args[1]: ( (df[args[1]] - mean1) / std1 ) })
-
-
     def __get_velocity_from_data(self, df):
         """ Returns velocity from raw data
 
@@ -320,18 +254,23 @@ class Dataset:
             print('Data augmented for user: ', user, '####################################')
             data = self.__get_augmentated_dataset(data, block_num)
 
-        if stt.sel_raw_feature_type == stt.RawFeatureType.VX_VY:
-            data = self.__get_velocity_from_data( data )
-
-        if stt.sel_raw_feature_type == stt.RawFeatureType.DX_DY:
-            data = self.__get_shift_from_data( data )
-
-        data = self.__scale_data(stt.sel_scaling_method.value, data)
+        data = self.__get_features_from_raw_data(data)
 
         # Slicing array to fit in the given shape
         row_num_end = int(data.shape[0] / const.BLOCK_SIZE) * const.BLOCK_SIZE
 
         return data[:row_num_end].values
+
+
+    def __get_features_from_raw_data(self, df):
+
+        if stt.sel_raw_feature_type == stt.RawFeatureType.VX_VY:
+            data = self.__get_velocity_from_data( df )
+
+        if stt.sel_raw_feature_type == stt.RawFeatureType.DX_DY:
+            data = self.__get_shift_from_data( df )
+
+        return data
 
 
     def __get_augmentated_dataset(self, df, block_num):
@@ -463,7 +402,7 @@ class Dataset:
 
         # 0 - valid user (is legal)
         # 1 - intruder (is illegal)
-        labels = np.concatenate((self.__create_labels(int(data.shape[0] / 2), 0), self.__create_labels(int(data.shape[0] / 2), 1)))
+        labels = np.concatenate((self.__create_labels(int(data.shape[0] / 2), POSITIVE_CLASS), self.__create_labels(int(data.shape[0] / 2), NEGATIVE_CLASS)))
 
         return data, labels
 
@@ -491,11 +430,7 @@ class Dataset:
 
 
     def __create_train_dataset_authentication_for_one_class_classification(self, user):
-
-        data = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
-        train_inliers, _, _, _ = train_test_split(data, data, test_size=0.33, random_state=const.RANDOM_STATE, shuffle=False)
-
-        return train_inliers
+        pass
 
 
     def __create_train_dataset_authentication_for_binary_classification(self, user):
@@ -508,22 +443,17 @@ class Dataset:
                 np.ndarray, np.array: train dataset, train labels for the dataset
         """
         data, labels = self.__create_labeled_dataset(user)
+        print(data.shape)
 
         # If we only have train dataset we split into train and test data
         if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
-            data, labels = self.__split_dataset_to_train(data, labels)
+            data, labels = self.__split_and_scale_dateset(data, labels)
 
         return data, labels
 
 
     def __create_test_dataset_authentication_for_one_class_classification(self, user):
-
-        outliers =  self.__load_negative_dataset(user, inf, const.TRAIN_FILES_PATH)
-        inliers = self.__load_positive_dataset(user, inf, const.TRAIN_FILES_PATH)
-        _, test_inliers, _, _ = train_test_split(inliers, inliers, test_size=0.33, random_state=const.RANDOM_STATE, shuffle=False)
-
-        return np.concatenate((test_inliers, outliers), axis=0), np.concatenate((self.__create_labels(test_inliers.shape[0], 0), 
-                                                                                    self.__create_labels(outliers.shape[0], 1)))
+        pass
 
 
     def create_test_dataset_for_authentication(self, user):
@@ -544,10 +474,121 @@ class Dataset:
 
         if stt.sel_authentication_type == stt.AuthenticationType.ONE_CLASS_CLASSIFICATION:
             return self.__create_test_dataset_authentication_for_one_class_classification(user)
+
+
+    def __split_and_scale_dateset(self, data, labels):
+
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
+            X_train, X_test, y_train, y_test = self.__split_data_authentication(data, labels)
         
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
+            X_train, X_test, y_train, y_test = self.__split_data_identification(data, labels)
+
+        X_train, X_test = self.__scale_dataset(X_train, X_test)
+
+        if stt.sel_method == stt.Method.TRAIN:
+            return X_train, y_train
+
+        if stt.sel_method == stt.Method.EVALUATE:
+            return X_test, y_test
 
 
-    def __split_dataset_to_train(self, data, labels):
+    def __scale_dataset(self, X_train, X_test):
+        return self.__scale_data_with_selected_scaler(stt.sel_scaling_method.value, X_train, X_test)
+
+
+    def __scale_data_with_selected_scaler(self, arg, X_train, X_test):
+        """ Scale data with specified method
+
+            Parameters:
+                df (DataFrame): input dataframe, that contains al user session
+
+            Returns:
+        """
+        switcher = { 
+            0: self.__user_defined_scaler,
+            1: self.__min_max_scaler,
+            2: self.__max_abs_scaler,
+            3: self.__no_scaler,
+            4: self.__standard_scaler
+        } 
+
+        func = switcher.get(arg, lambda: "Wrong scaler!")
+        return func(X_train, X_test)
+
+
+    def __user_defined_scaler(self, X_train, X_test):
+        """ Makes max elem scaling along y axis
+
+            Parameters:
+                df (DataFrame): input dataframe
+
+            Returns:
+                DataFrame: scaled dataframe
+        """
+        max_x = np.max( np.absolute(X_train[:, :, 0]) )
+        max_y = np.max( np.absolute(X_train[:, :, 1]) )
+        
+        X_train[:, :, 0] = X_train[:, :, 0] / max_x
+        X_train[:, :, 1] = X_train[:, :, 1] / max_y
+        X_test[:, :, 0] = X_test[:, :, 0] / max_x
+        X_test[:, :, 1] = X_test[:, :, 1] / max_y
+
+        return X_train, X_test
+
+
+    def __min_max_scaler(self, X_train, X_test):
+
+        min_max_scaler_x = preprocessing.MinMaxScaler(feature_range=(0, 1))
+        min_max_scaler_y = preprocessing.MinMaxScaler(feature_range=(0, 1))
+
+        min_max_scaler_x.fit(X_train[:, :, 0])
+        X_train[:, :, 0] = min_max_scaler_x.transform(X_train[:, :, 0])
+        min_max_scaler_y.fit(X_train[:, :, 1])
+        X_train[:, :, 1] = min_max_scaler_y.transform(X_train[:, :, 1])
+
+        X_test[:, :, 0] = min_max_scaler_x.transform(X_test[:, :, 0])
+        X_test[:, :, 1] = min_max_scaler_y.transform(X_test[:, :, 1])
+
+        return X_train, X_test
+
+
+    def __max_abs_scaler(self, X_train, X_test):
+
+        max_abs_scaler_x = preprocessing.MaxAbsScaler()
+        max_abs_scaler_y = preprocessing.MaxAbsScaler()
+
+        max_abs_scaler_x.fit(X_train[:, :, 0])
+        X_train[:, :, 0] = max_abs_scaler_x.transform(X_train[:, :, 0])
+        max_abs_scaler_y.fit(X_train[:, :, 1])
+        X_train[:, :, 1] = max_abs_scaler_y.transform(X_train[:, :, 1])
+
+        X_test[:, :, 0] = max_abs_scaler_x.transform(X_test[:, :, 0])
+        X_test[:, :, 1] = max_abs_scaler_y.transform(X_test[:, :, 1])
+
+        return X_train, X_test
+
+    
+    def __no_scaler(self, X_train, X_test):
+        return X_train, X_test
+
+
+    def __standard_scaler(self, X_train, X_test):
+
+        mean_x = np.mean(X_train[:, :, 0], axis=0)
+        std_x = np.std(X_train[:, :, 0], axis=0)
+        mean_y = np.mean(X_train[:, :, 1], axis=0)
+        std_y = np.std(X_train[:, :, 1], axis=0)
+
+        X_train[:, :, 0] = (X_train[:, :, 0] - mean_x) / std_x
+        X_train[:, :, 1] = (X_train[:, :, 1] - mean_y) / std_y
+        X_test[:, :, 0] = (X_test[:, :, 0] - mean_x) / std_x
+        X_test[:, :, 1] = (X_test[:, :, 1] - mean_y) / std_y
+
+        return X_train, X_test
+
+
+    def __split_data_authentication(self, data, labels):
         """ Splits data and labels with a predifined ratio
 
             Parameters:
@@ -558,45 +599,48 @@ class Dataset:
                 np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
         """
         # Getting the barrier position between positive and negative dataset
-        # data[:middel_pos] contains the positive dataset
-        # data[middel_pos:] contains the negative dataset
+        # data[middel_pos:, :, :] contains the positive dataset
+        # data[:middel_pos, :, :] contains the negative dataset
         middle_pos = int(data.shape[0] / 2)
-        # Splitting the positive dataset
 
         # Inverting train_test_split() to get test data from the beginning of the dataset
         if const.TRAIN_TEST_SPLIT_VALUE <= 1:
-            train_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+            test_size = 1 - int(const.TRAIN_TEST_SPLIT_VALUE / 2)
         else:
-            train_dataset_size = data[:middle_pos].shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+            test_size = middle_pos - int(const.TRAIN_TEST_SPLIT_VALUE / 2)
+        # We divide by 2, because of the positive and negative samples
 
-        _, pos_data, _, pos_labels = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=train_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
-        
-        return np.concatenate((pos_data, data[middle_pos : (middle_pos + pos_data.shape[0])]), axis=0), \
-               np.concatenate((pos_labels, labels[middle_pos: (middle_pos + pos_data.shape[0])]), axis=0)
+        X_train_pos, X_test_pos, y_train_pos, y_test_pos = train_test_split(data[middle_pos:], labels[middle_pos:], test_size=test_size, random_state=const.RANDOM_STATE, shuffle=False)
+        X_train_neg, X_test_neg, y_train_neg, y_test_neg = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=test_size, random_state=const.RANDOM_STATE, shuffle=False)
+
+        X_train = np.concatenate((X_test_pos, X_test_neg), axis=0)
+        X_test = np.concatenate((X_train_pos, X_train_neg), axis=0)
+        y_train = np.concatenate((y_test_pos, y_test_neg), axis=0)
+        y_test = np.concatenate((y_train_pos, y_train_neg), axis=0)
+
+        return X_train, X_test, y_train, y_test
 
 
-    def __split_dataset_to_test(self, data, labels):
+    def __split_data_identification(self, data, labels):
         """ Splits data and labels with a predifined ratio
-            Dataset contains both positive and negative samples
+            Dataset contains only positive samples
+            Used for creating train dataset
 
             Parameters:
                 data (np.ndarray): dataset
                 labels (np.ndarray): labels for the given dataset
 
             Returns:
-                np.ndarray, np.array: splitted test dataset, splitted test labels for the dataset
+                np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
         """
-        middle_pos = int(data.shape[0] / 2)
-
         if const.TRAIN_TEST_SPLIT_VALUE <= 1:
-            test_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+            test_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
         else:
-            test_dataset_size = data[:middle_pos].shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+            test_size = data.shape[0] - const.TRAIN_TEST_SPLIT_VALUE
 
-        pos_data, _, pos_labels, _ = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=test_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
+        X_test, X_train, y_test, y_train = train_test_split(data, labels, test_size=test_size, random_state=const.RANDOM_STATE, shuffle=False)
 
-        return np.concatenate((pos_data, data[(data.shape[0] - pos_data.shape[0]) : ]), axis=0), \
-               np.concatenate((pos_labels, labels[(data.shape[0] - pos_data.shape[0]) : ]), axis=0)
+        return X_train, X_test, y_train, y_test
 
 
     def __get_train_available_test_dataset(self, user):
@@ -610,7 +654,7 @@ class Dataset:
         """
         data, labels = self.__create_labeled_dataset(user)
         
-        return self.__split_dataset_to_test(data, labels)
+        return self.__split_and_scale_dateset(data, labels)
 
     
     def __get_train_test_available_test_dataset(self, user):
@@ -644,7 +688,7 @@ class Dataset:
         return dataset, labels
 
 
-    def __create_identification_dataset_by_method(self, method):
+    def __create_identification_dataset(self):
         """ Returns the identification dataset defined with method
 
             Parameters:
@@ -658,16 +702,13 @@ class Dataset:
         dataset = np.ndarray(shape=(0, const.BLOCK_SIZE, 2))
         labels = np.ndarray(shape=(0, 1))
 
-        # We have to renumber user id's, because of using to_categorical()
+        # We have to renumber user ids, because of using to_categorical()
         id = 0
         for user in users:
             tmp_dataset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
             tmp_labels = self.__create_labels(tmp_dataset.shape[0], id)
 
-            if method == stt.Method.TRAIN:
-                tmp_dataset, tmp_labels = self.__split_positive_data_to_train_dataset(tmp_dataset, tmp_labels)
-            if method == stt.Method.EVALUATE:
-                tmp_dataset, tmp_labels = self.__split_positive_data_to_test_dataset(tmp_dataset, tmp_labels)
+            tmp_dataset, tmp_labels = self.__split_and_scale_dateset(tmp_dataset, tmp_labels)
 
             id = id + 1
             self.print_msg('Dataset shape from user: ' +  user + ' - ' + str(tmp_dataset.shape))
@@ -687,7 +728,7 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: train dataset, train labels for the identification
         """
-        return self.__create_identification_dataset_by_method(stt.Method.TRAIN)
+        return self.__create_identification_dataset()
 
 
     def create_test_dataset_for_identification(self):
@@ -699,53 +740,7 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: test dataset, test labels for the identification
         """
-        return self.__create_identification_dataset_by_method(stt.Method.EVALUATE)
-
-
-    def __split_positive_data_to_train_dataset(self, data, labels):
-        """ Splits data and labels with a predifined ratio
-            Dataset contains only positive samples
-            Used for creating train dataset
-
-            Parameters:
-                data (np.ndarray): dataset
-                labels (np.ndarray): labels for the given dataset
-
-            Returns:
-                np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
-        """
-        # Splitting dataset
-        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
-            train_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
-        else:
-            train_dataset_size = data.shape[0] - const.TRAIN_TEST_SPLIT_VALUE
-
-        _, trainX, _, trainy = train_test_split(data, labels, test_size=train_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
-        
-        return trainX, trainy
-
-
-    def __split_positive_data_to_test_dataset(self, data, labels):
-        """ Splits data and labels with a predifined ratio
-            Dataset contains only positive samples
-            Used for creating test dataset
-
-            Parameters:
-                data (np.ndarray): dataset
-                labels (np.ndarray): labels for the given dataset
-
-            Returns:
-                np.ndarray, np.array: splitted test dataset, splitted test labels for the dataset
-        """
-        # Splitting dataset
-        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
-            test_dataset_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
-        else:
-            test_dataset_size = data.shape[0] - const.TRAIN_TEST_SPLIT_VALUE
-
-        testX, _, testy, _ = train_test_split(data, labels, test_size=test_dataset_size, random_state=const.RANDOM_STATE, shuffle=False)
-        
-        return testX, testy
+        return self.__create_identification_dataset()
                
 
     # Statistics ----------------------------------------------------------------------------------------------
@@ -785,20 +780,20 @@ class Dataset:
 
 
     def get_raw_identification_data(self):
-        
         return self.__get_raw_user_data('user9', stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
 
             
-            
 if __name__ == "__main__":
     dataset = Dataset()
-    #dataset.create_test_dataset_for_identification()
+    #x_train, y_train = dataset.create_train_dataset_for_identification()
     #dataset.print_all_user_dataset_shape()
     #x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
-    x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)
-    print(x_test.shape, ' x_test shape')
-    print(y_test.shape, ' y_tets shape')
+    x_train, y_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
+    #print(x_train[0], ' x_test shape')
+    #print(y_test.shape, ' y_tets shape')
+    print(type(x_train))
+    print(x_train.shape)
 
     #dataset.print_preprocessed_identification_dataset()
     #dataset.print_preprocessed_identification_dataset_vx_vy_separate()
