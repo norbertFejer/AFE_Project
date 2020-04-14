@@ -91,6 +91,11 @@ class RawFeatureType(Enum):
     VX_VY = 'vx_vy'
 
 
+class SettingsSource(Enum):
+    FROM_PY_FILE = 'from_py_file'
+    FROM_XML_FILE = 'from_xml_file'
+
+
 # Block size number from given user
 # If its value is inf then reads all samples.
 # If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
@@ -163,6 +168,8 @@ sel_evaluate_user_number = EvaluateUserNumber.ALL
 
 
 # Defines the evaluation metrics
+# If we use multiple metrics we have to put into a list, as:  [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
+# If we use only one metric we define as: EvaluationMetric.ACC
 sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
 
 
@@ -172,6 +179,12 @@ sel_evaluation_type = EvaluationType.ACTION_BASED
 
 # Defines saving evaluation results to file
 print_evaluation_results_to_file = True
+
+
+# Defines setting source location
+# FROM_PY_FILE means that we use settings from settings.py and constants.py
+# FROM_XML_FILE means that we use settings from config.xml
+sel_settings_source = SettingsSource.FROM_XML_FILE
 
 
 def get_balabit_users():
@@ -214,3 +227,30 @@ def get_users():
   
     func = switcher.get(sel_dataset.value, lambda: "Wrong dataset name!")
     return func()
+
+
+def setter(property_name, args):
+    
+    if len(args) == 1:
+
+        if args[0].isdigit():
+            value = int(args[0])
+        else:
+            if args[0] == 'inf':
+                value = inf
+            else:
+                value = eval(args[0])
+
+        globals()[property_name] = value
+
+    if len(args) == 2:
+        globals()[property_name] = eval(args[0])[args[1]]
+
+    if len(args) > 2:
+        tmp = ' '.join(args)
+        tmp = tmp[1 : -1]
+        tmp = tmp.split(', ')
+        globals()[property_name] = []
+        for metric in tmp:
+            metric = metric.split(' ')
+            globals()[property_name].append( eval(metric[0])[metric[1]] )

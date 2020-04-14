@@ -9,7 +9,7 @@ import src.dataset as dset
 
 
 def func():
-    dataset = dset.Dataset()
+    dataset = dset.Dataset.getInstance()
     x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
     X = x_train.transpose(0, 2, 1).reshape(x_train.shape[0] * 2, const.BLOCK_SIZE)
     x_test, y_test = dataset.create_test_dataset_for_authentication(const.USER_NAME)

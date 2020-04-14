@@ -26,12 +26,12 @@ class Dataset:
 
 
     def __init__(self):
-      """ Virtually private constructor. 
-      """
-      if Dataset.__instance != None:
-        raise Exception("This class is a singleton!")
-      else:
-        Dataset.__instance = self
+        """ Virtually private constructor. 
+        """
+        if Dataset.__instance != None:
+            raise Exception("This class is a singleton!")
+        else:
+            Dataset.__instance = self
 
 
     if const.VERBOSE:

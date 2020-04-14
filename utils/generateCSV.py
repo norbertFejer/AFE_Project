@@ -19,7 +19,7 @@ class GenerateCSV:
 
 
     def __init__(self):
-        self.__dataset = dset.Dataset()
+        self.__dataset = dset.Dataset.getInstance()
         self.__saved_values_folder_name = "generatedCSVData"
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:

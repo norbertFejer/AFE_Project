@@ -11,7 +11,7 @@ class Plotter:
 
     
     def __init__(self):
-        self.dataset = dset.Dataset()
+        self.dataset = dset.Dataset.getInstance()
 
 
     def plot_user_raw_blocks(self):

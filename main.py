@@ -11,7 +11,7 @@ set_random_seed(const.RANDOM_STATE)
 #tf.random.set_seed(const.RANDOM_STATE)
 
 
-if __name__ == "__main__":
+def main():
 
     if stt.sel_method == stt.Method.TRAIN or stt.sel_method == stt.Method.TRANSFER_LEARNING:
         tm = trainModel.TrainModel()
@@ -20,4 +20,18 @@ if __name__ == "__main__":
     if stt.sel_method == stt.Method.EVALUATE:
         em = evaluateModel.EvaluateModel()
         em.evaluate_model()
+
+
+if __name__ == "__main__":
+
+    if stt.sel_settings_source == stt.SettingsSource.FROM_PY_FILE:
+        main()
+
+    if stt.sel_settings_source == stt.SettingsSource.FROM_XML_FILE:
+        import config.parser as pars
+    
+        parser = pars.Parser.getInstance()
         
+        while parser.has_next_action():
+            parser.execute_next_action()
+            main()

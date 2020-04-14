@@ -41,6 +41,10 @@ RESULTS_PATH = 'C:/Anaconda projects/Software_mod/evaluationResults'
 SAVED_IMAGES_PATH = 'C:/Anaconda projects/Software_mod/savedImages'
 
 
+# Config file location for the automated sript
+CONFIG_XML_FILE_LOCATION = './config/config.xml'
+
+
 # Defines random state to initialize environment
 RANDOM_STATE = 42
 
@@ -79,3 +83,16 @@ if stt.sel_dataset == stt.Dataset.DFL:
     TEST_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     TRAIN_FILES_PATH = 'C:/Anaconda projects/Software_mod/DFL'
     STATELESS_TIME = STATELESS_TIME * 1000
+
+
+def setter(property_name, arg):
+    
+    if arg[0].isdigit():
+        value = int(arg[0])
+    else:
+        if arg[0] == 'True' or arg[0] == 'False':
+            value = eval(arg[0])
+        else:
+            value = arg[0]
+
+    globals()[property_name] = value

@@ -16,7 +16,7 @@ import models.resnet as resnet
 class TrainModel:
 
     def __init__(self):
-        self.dataset = dset.Dataset()
+        self.dataset = dset.Dataset.getInstance()
 
 
     if const.VERBOSE:
