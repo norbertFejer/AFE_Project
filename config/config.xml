@@ -1,24 +1,19 @@
 <config>
 
 	<action>
-
 		<settings>
 			<property name="sel_method">Method.TRAIN</property>
         	<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
-
 	    <constants>
 	    </constants>
-
 	</action>
 
 	<action>
-
 		<settings>
 			<property name="sel_method">Method.EVALUATE</property>
 			<property name="sel_evaluation_metrics">[EvaluationMetric.ACC, EvaluationMetric.AUC]</property>
 	    </settings>
-
 	</action>
 
 </config>
