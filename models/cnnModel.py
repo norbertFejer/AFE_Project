@@ -50,7 +50,7 @@ class CNNmodel(base_model.BaseModel):
     def train_model(self, trainX, trainy):
         super().train_model()
 
-        nb_epochs, mini_batch_size = 10, 32
+        nb_epochs, mini_batch_size = 160, 32
         
         # Fit network
         history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, shuffle=True,

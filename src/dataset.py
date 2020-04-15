@@ -447,7 +447,7 @@ class Dataset:
 
         # If we only have train dataset we split into train and test data
         if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
-            data, labels = self.__split_and_scale_dateset(data, labels)
+            data, labels = self.__split_and_scale_dataset(data, labels)
 
         return data, labels
 
@@ -476,7 +476,7 @@ class Dataset:
             return self.__create_test_dataset_authentication_for_one_class_classification(user)
 
 
-    def __split_and_scale_dateset(self, data, labels):
+    def __split_and_scale_dataset(self, data, labels):
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
             X_train, X_test, y_train, y_test = self.__split_data_authentication(data, labels)
@@ -494,10 +494,10 @@ class Dataset:
 
 
     def __scale_dataset(self, X_train, X_test):
-        return self.__scale_data_with_selected_scaler(stt.sel_scaling_method.value, X_train, X_test)
+        return self.__scale_data_with_selected_scaler(X_train, X_test)
 
 
-    def __scale_data_with_selected_scaler(self, arg, X_train, X_test):
+    def __get_selected_scaler(self, arg):
         """ Scale data with specified method
 
             Parameters:
@@ -514,8 +514,24 @@ class Dataset:
         } 
 
         func = switcher.get(arg, lambda: "Wrong scaler!")
-        return func(X_train, X_test)
+        return func
 
+
+    def __scale_data_with_selected_scaler(self, X_train, X_test):
+
+        scaler = self.__get_selected_scaler(stt.sel_scaling_method.value)
+
+        X_train_shape = X_train.shape
+        X_test_shape = X_test.shape
+
+        X_train = np.reshape(X_train, (X_train_shape[0] * X_train_shape[1], X_train_shape[2]))
+        X_test = np.reshape(X_test, (X_test_shape[0] * X_test_shape[1], X_test_shape[2]))
+            
+        X_train, X_test = scaler(X_train, X_test)
+
+        return np.reshape(X_train, (X_train_shape[0], X_train_shape[1], X_train_shape[2])),\
+                np.reshape(X_test, (X_test_shape[0], X_test_shape[1], X_test_shape[2]))
+    
 
     def __user_defined_scaler(self, X_train, X_test):
         """ Makes max elem scaling along y axis
@@ -526,45 +542,32 @@ class Dataset:
             Returns:
                 DataFrame: scaled dataframe
         """
-        max_x = np.max( np.absolute(X_train[:, :, 0]) )
-        max_y = np.max( np.absolute(X_train[:, :, 1]) )
+        max_val = np.max( np.absolute(X_train), axis=0 )
         
-        X_train[:, :, 0] = X_train[:, :, 0] / max_x
-        X_train[:, :, 1] = X_train[:, :, 1] / max_y
-        X_test[:, :, 0] = X_test[:, :, 0] / max_x
-        X_test[:, :, 1] = X_test[:, :, 1] / max_y
+        X_train = X_train / max_val
+        X_test = X_test / max_val
 
         return X_train, X_test
 
 
     def __min_max_scaler(self, X_train, X_test):
 
-        min_max_scaler_x = preprocessing.MinMaxScaler(feature_range=(0, 1))
-        min_max_scaler_y = preprocessing.MinMaxScaler(feature_range=(0, 1))
+        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
+        min_max_scaler.fit(X_train)
 
-        min_max_scaler_x.fit(X_train[:, :, 0])
-        X_train[:, :, 0] = min_max_scaler_x.transform(X_train[:, :, 0])
-        min_max_scaler_y.fit(X_train[:, :, 1])
-        X_train[:, :, 1] = min_max_scaler_y.transform(X_train[:, :, 1])
-
-        X_test[:, :, 0] = min_max_scaler_x.transform(X_test[:, :, 0])
-        X_test[:, :, 1] = min_max_scaler_y.transform(X_test[:, :, 1])
+        X_train = min_max_scaler.transform(X_train)
+        X_test = min_max_scaler.transform(X_test)
 
         return X_train, X_test
 
 
     def __max_abs_scaler(self, X_train, X_test):
 
-        max_abs_scaler_x = preprocessing.MaxAbsScaler()
-        max_abs_scaler_y = preprocessing.MaxAbsScaler()
+        max_abs_scaler = preprocessing.MaxAbsScaler()
+        max_abs_scaler.fit(X_train)
 
-        max_abs_scaler_x.fit(X_train[:, :, 0])
-        X_train[:, :, 0] = max_abs_scaler_x.transform(X_train[:, :, 0])
-        max_abs_scaler_y.fit(X_train[:, :, 1])
-        X_train[:, :, 1] = max_abs_scaler_y.transform(X_train[:, :, 1])
-
-        X_test[:, :, 0] = max_abs_scaler_x.transform(X_test[:, :, 0])
-        X_test[:, :, 1] = max_abs_scaler_y.transform(X_test[:, :, 1])
+        X_train = max_abs_scaler.transform(X_train)
+        X_test = max_abs_scaler.transform(X_test)
 
         return X_train, X_test
 
@@ -575,15 +578,16 @@ class Dataset:
 
     def __standard_scaler(self, X_train, X_test):
 
-        mean_x = np.mean(X_train[:, :, 0], axis=0)
-        std_x = np.std(X_train[:, :, 0], axis=0)
-        mean_y = np.mean(X_train[:, :, 1], axis=0)
-        std_y = np.std(X_train[:, :, 1], axis=0)
+        mean_val = np.mean(X_train, axis=0)
+        std_val = np.std(X_train, axis=0)
 
-        X_train[:, :, 0] = (X_train[:, :, 0] - mean_x) / std_x
-        X_train[:, :, 1] = (X_train[:, :, 1] - mean_y) / std_y
-        X_test[:, :, 0] = (X_test[:, :, 0] - mean_x) / std_x
-        X_test[:, :, 1] = (X_test[:, :, 1] - mean_y) / std_y
+        if std_val[0] == 0:
+            std_val[0] = 0.0001
+        if std_val[1] == 0:
+            std_val[1] = 0.0001
+
+        X_train = (X_train - mean_val) / std_val
+        X_test = (X_test - mean_val) / std_val
 
         return X_train, X_test
 
@@ -654,7 +658,7 @@ class Dataset:
         """
         data, labels = self.__create_labeled_dataset(user)
         
-        return self.__split_and_scale_dateset(data, labels)
+        return self.__split_and_scale_dataset(data, labels)
 
     
     def __get_train_test_available_test_dataset(self, user):
@@ -708,7 +712,7 @@ class Dataset:
             tmp_dataset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
             tmp_labels = self.__create_labels(tmp_dataset.shape[0], id)
 
-            tmp_dataset, tmp_labels = self.__split_and_scale_dateset(tmp_dataset, tmp_labels)
+            tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels)
 
             id = id + 1
             self.print_msg('Dataset shape from user: ' +  user + ' - ' + str(tmp_dataset.shape))

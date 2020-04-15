@@ -41,13 +41,13 @@ class Parser:
         
         if settings != None:
             for value in settings:
-                stt.setter(value.get('name'), value.text.split('.'))
+                stt.setter(value.get('name').strip(), value.text.strip().split('.'))
 
         constants = self.__root[root_num].find('constants')
 
         if constants != None:
             for value in constants:
-                const.setter(value.get('name'), value.text.split('.'))
+                const.setter(value.get('name').strip(), value.text.strip().split('.'))
 
         self.__action_num = self.__action_num + 1
         

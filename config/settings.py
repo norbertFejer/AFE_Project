@@ -115,7 +115,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines the model input type
@@ -125,7 +125,7 @@ sel_raw_feature_type = RawFeatureType.VX_VY
 
 
 # Defines scaling method during creating the training dataset
-sel_scaling_method = ScalingMethod.USER_DEFINED
+sel_scaling_method = ScalingMethod.STANDARD_SCALER
 
 
 # Defines the type of samples negative/positive balance rate
@@ -184,7 +184,7 @@ print_evaluation_results_to_file = True
 # Defines setting source location
 # FROM_PY_FILE means that we use settings from settings.py and constants.py
 # FROM_XML_FILE means that we use settings from config.xml
-sel_settings_source = SettingsSource.FROM_PY_FILE
+sel_settings_source = SettingsSource.FROM_XML_FILE
 
 
 def get_balabit_users():
