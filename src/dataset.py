@@ -7,6 +7,7 @@ from glob import glob
 from math import inf, ceil
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
+from importlib import reload
 
 # User defined imports
 import config.settings as stt
@@ -25,6 +26,7 @@ class Dataset:
     def getInstance():
         """ Static access method. 
         """
+        reload(const)
         if Dataset.__instance == None:
             Dataset()
         return Dataset.__instance
@@ -331,6 +333,7 @@ class Dataset:
                 np.ndarray: given shape of ndarray
         """
         users = os.listdir(files_path)
+
         # Remove the current user from the list
         users.remove(user)
         

@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from enum import Enum
+from importlib import reload
 
 import config.settings as stt
 import config.constants as const

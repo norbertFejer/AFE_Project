@@ -176,7 +176,7 @@ class EvaluateModel:
         if not os.path.exists(const.RESULTS_PATH):
             os.makedirs(const.RESULTS_PATH)
 
-        file_name = file_name[:len(file_name) - 3]
+        file_name = file_name[:len(file_name) - 13] + '_' + stt.sel_raw_feature_type.value
         file = open(const.RESULTS_PATH + '/' + file_name + '.csv', 'w')
         file.write('username,')
 

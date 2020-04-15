@@ -62,7 +62,7 @@ MAX_HEIGHT = 4000
     Specific constants for each dataset
     ##################################
 """
-
+STATELESS_TIME = 2
 
 if stt.sel_dataset == stt.Dataset.BALABIT:
     # Defines the interval when no user interaction occurred.

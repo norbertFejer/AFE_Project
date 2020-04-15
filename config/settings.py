@@ -103,7 +103,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.TRAIN
+sel_method = Method.EVALUATE
 
 
 # Defines which model will be used
@@ -111,7 +111,7 @@ sel_model = Model.CNN
 
 
 # Defines used dataset
-sel_dataset = Dataset.BALABIT
+sel_dataset = Dataset.DFL
 
 
 # Defines the selected recognition type
@@ -121,7 +121,7 @@ sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 # Defines the model input type
 # VX_VY - horizontal and vertical velocity components
 # DX_DY - horizontal and vertical shift components
-sel_raw_feature_type = RawFeatureType.VX_VY
+sel_raw_feature_type = RawFeatureType.DX_DY
 
 
 # Defines scaling method during creating the training dataset
@@ -184,7 +184,7 @@ print_evaluation_results_to_file = True
 # Defines setting source location
 # FROM_PY_FILE means that we use settings from settings.py and constants.py
 # FROM_XML_FILE means that we use settings from config.xml
-sel_settings_source = SettingsSource.FROM_XML_FILE
+sel_settings_source = SettingsSource.FROM_PY_FILE
 
 
 def get_balabit_users():
