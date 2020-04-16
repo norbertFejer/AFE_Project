@@ -19,11 +19,11 @@ class GenerateCSV:
 
 
     def __init__(self):
-        self.__dataset = dset.Dataset.getInstance()
+        self.__data_source = dset.Dataset.getInstance()
         self.__saved_values_folder_name = "generatedCSVData"
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            self.__get_dataset_for_identicitaion()
+            self.__get_dataset_for_identification()
 
         self.__create_users_list()
 
@@ -31,15 +31,15 @@ class GenerateCSV:
             os.makedirs(self.__saved_values_folder_name)
 
 
-    def __get_dataset_for_identicitaion(self):
+    def __get_dataset_for_identification(self):
         
+        self.__block_num = stt.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
+
         if stt.sel_method == stt.Method.TRAIN:
-            self.__block_num = stt.BLOCK_NUM - const.TRAIN_TEST_SPLIT_VALUE
-            self.__dataset, _ = self.__dataset.create_train_dataset_for_identification()
+            self.__data, _ = self.__data_source.create_train_dataset_for_identification()
         
         if stt.sel_method == stt.Method.EVALUATE:
-            self.__block_num = const.TRAIN_TEST_SPLIT_VALUE
-            self.__dataset, _ = self.__dataset.create_test_dataset_for_identification()
+            self.__data, _ = self.__data_source.create_test_dataset_for_identification()
 
 
     def __create_users_list(self):
@@ -72,7 +72,7 @@ class GenerateCSV:
         id = -1
 
         f = open(file_name, "w")
-        for data in self.__dataset:
+        for data in self.__data:
             pos = pos + 1
 
             if pos % self.__block_num == 0:
@@ -97,7 +97,7 @@ class GenerateCSV:
         id = -1
 
         f = open(file_name, "w")
-        for data in self.__dataset:
+        for data in self.__data:
             pos = pos + 1
 
             if pos % self.__block_num == 0:
@@ -119,7 +119,7 @@ class GenerateCSV:
         id = -1
 
         f = open(file_name, "w")
-        for data in self.__dataset:
+        for data in self.__data:
             pos = pos + 1
 
             if pos % self.__block_num == 0:
@@ -136,4 +136,4 @@ class GenerateCSV:
 
 if __name__ == "__main__":
     gen_csv = GenerateCSV()
-    gen_csv.save_preprocessed_dataset(SaveValues.VX)
+    gen_csv.save_preprocessed_dataset(SaveValues.VY)

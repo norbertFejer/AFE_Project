@@ -11,11 +11,11 @@ BLOCK_SIZE = 128
 
 
 # Defines the used user name
-USER_NAME = 'user35'
+USER_NAME = 'user9'
 
 
 # Define the model name to initializing weights for transfer learning
-USED_MODEL_FOR_TRANSFER_LEARNING = 'best_identification_Model.CLASSIFIER_FCN_Dataset.DFL_128_2200_trained.hdf5'
+USED_MODEL_FOR_TRANSFER_LEARNING = 'best_identification_Model.CNN_Dataset.DFL_128_300_trained.hdf5'
 
 
 # Defines train-test split ratio.

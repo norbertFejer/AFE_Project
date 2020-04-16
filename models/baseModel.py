@@ -46,11 +46,12 @@ class BaseModel:
             old_model = load_model(model_path)
         except:
             raise Exception(model_path + ' model does not exist!')
-
+        
         # The last layer weights will not be set
         for i in range(len(old_model.layers) - 1):
             self.model.layers[i].set_weights(old_model.layers[i].get_weights())
-
+        print('setting weights###########################################################################################')
+        print(stt.use_trainable_weights_for_transfer_learning)
 
     def train_model(self):
         """ Trains the actual model

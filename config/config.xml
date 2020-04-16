@@ -6,9 +6,10 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
 			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	    <constants>
+		
 	    </constants>
 	</action>
 
@@ -18,7 +19,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
 			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	</action>
 
@@ -28,7 +29,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
 			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	</action>
 
@@ -38,7 +39,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
 			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	</action>
 	
@@ -48,7 +49,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
 			<property name="sel_dataset">Dataset.DFL</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	    <constants>
 	    </constants>
@@ -60,7 +61,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
 			<property name="sel_dataset">Dataset.DFL</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	</action>
 
@@ -70,7 +71,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
 			<property name="sel_dataset">Dataset.DFL</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	</action>
 
@@ -80,7 +81,7 @@
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
 			<property name="sel_dataset">Dataset.DFL</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.DX_DY</property>
+			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
 	    </settings>
 	</action>
 

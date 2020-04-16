@@ -96,6 +96,13 @@ class SettingsSource(Enum):
     FROM_XML_FILE = 'from_xml_file'
 
 
+class OCCFeatures(Enum):
+    RAW_X_DIR = 'raw_x_dir'
+    RAW_Y_DIR = 'raw_y_dir'
+    RAW_X_Y_DIR = 'raw_x_y_dir'
+    FEATURES_FROM_CNN = 'features_from_cnn'
+
+
 # Block size number from given user
 # If its value is inf then reads all samples.
 # If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
@@ -103,7 +110,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRAIN
 
 
 # Defines which model will be used
@@ -111,7 +118,7 @@ sel_model = Model.CNN
 
 
 # Defines used dataset
-sel_dataset = Dataset.DFL
+sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
@@ -121,7 +128,7 @@ sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 # Defines the model input type
 # VX_VY - horizontal and vertical velocity components
 # DX_DY - horizontal and vertical shift components
-sel_raw_feature_type = RawFeatureType.DX_DY
+sel_raw_feature_type = RawFeatureType.VX_VY
 
 
 # Defines scaling method during creating the training dataset
@@ -133,7 +140,10 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # It is relevant only for authentication measurement
-sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
+sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
+
+
+sel_occ_features = OCCFeatures.FEATURES_FROM_CNN
 
 
 # Defines how we handle the chunk samples
@@ -150,16 +160,17 @@ sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 sel_train_user_number = TrainUserNumber.ALL
 
 
+# It is used for TRAIN
+# If True and given model already exists the training process will use the pretrained weights
+# If False the model weights will be initialized randomly
+# With this option we can retrain our model with the previously (pre)trained model weights
+use_pretrained_weights_for_training_model = False
+
+
 # It is used for TRANSFER_LEARNING
 # If True model weights will be trainable
 # If False model weights will be non-trainable
 use_trainable_weights_for_transfer_learning = True
-
-
-# It is used for TRAIN model
-# If True and given model already exists the training process will use the pretrained weights
-# If False the model weights will be initialized randomly
-use_pretrained_weights_for_training_model = False
 
 
 # Defines how many user will be used 

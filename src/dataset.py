@@ -4,10 +4,14 @@ import random
 import pandas as pd
 import numpy as np
 from glob import glob
-from math import inf, ceil
+from math import inf, floor
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 from importlib import reload
+
+from tensorflow.keras.models import load_model
+from keras.models import Model
+from keras import backend as K
 
 # User defined imports
 import config.settings as stt
@@ -336,12 +340,36 @@ class Dataset:
 
         # Remove the current user from the list
         users.remove(user)
-        
         dataset = np.ndarray(shape=(0, const.BLOCK_SIZE, 2), dtype=float)
-        for user in users:
-            dataset = np.concatenate((dataset, self.__load_positive_dataset(user, block_num, files_path)), axis=0)
+        labels = np.ndarray(shape=(0, 1), dtype=int)
 
-        return dataset
+        train_test_split_value = round(const.TRAIN_TEST_SPLIT_VALUE / 2 / len(users))
+        final_block_num = block_num + train_test_split_value
+
+        for user in users[:-1]:
+            tmp_dataset = self.__load_positive_dataset(user, final_block_num, files_path)
+            tmp_labels = self.__create_labels(tmp_dataset.shape[0], NEGATIVE_CLASS)
+
+            if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
+                tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels, train_test_split_value)
+
+            dataset = np.concatenate((dataset, tmp_dataset), axis=0)
+            labels = np.concatenate((labels, tmp_labels), axis=0)
+
+        # We gather all of the remaining required data from the last user
+        last_block_num = ( stt.BLOCK_NUM - int(const.TRAIN_TEST_SPLIT_VALUE / 2) ) -  block_num * len(users[:-1])
+        final_block_num = last_block_num + train_test_split_value
+
+        tmp_dataset = self.__load_positive_dataset(users[-1], final_block_num, files_path)
+        tmp_labels = self.__create_labels(tmp_dataset.shape[0], NEGATIVE_CLASS)
+
+        if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
+            tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels, train_test_split_value)
+
+        dataset = np.concatenate((dataset, tmp_dataset), axis=0)
+        labels = np.concatenate((labels, tmp_labels), axis=0)
+
+        return dataset, labels
 
 
     def __load_positive_balanced_dataset(self, user, block_num, files_path):
@@ -356,19 +384,19 @@ class Dataset:
             Returns:
                 np.ndarray: positive and negative data concatenation
         """
-        dset_positive = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
+        pos_dset = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
+        pos_labels = self.__create_labels(pos_dset.shape[0], POSITIVE_CLASS)
 
         # Calculates how many block_num has to read from users
         user_num = len(os.listdir(files_path)) - 1
         # We take greater or equal block_num from users than the current user's block_num
-        negative_block_num = ceil(dset_positive.shape[0] / user_num)
-        dset_negative = self.__load_negative_dataset(user, negative_block_num, files_path)
+        negative_block_num = floor( ( stt.BLOCK_NUM - int(const.TRAIN_TEST_SPLIT_VALUE / 2 ) ) / user_num)
+        neg_dset, neg_labels = self.__load_negative_dataset(user, negative_block_num, files_path)
 
-        # Checking if we selected more data then the required
-        if dset_positive.shape[0] < dset_negative.shape[0]:
-            dset_negative = dset_negative[:dset_positive.shape[0]]
+        if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
+            pos_dset, pos_labels = self.__split_and_scale_dataset(pos_dset, pos_labels, int(const.TRAIN_TEST_SPLIT_VALUE / 2))
 
-        return np.concatenate((dset_positive, dset_negative), axis=0)
+        return np.concatenate((pos_dset, neg_dset), axis=0), np.concatenate((pos_labels, neg_labels), axis=0)
 
 
     def __load_negative_balanced_dataset(self, user, block_num, files_path):
@@ -383,10 +411,11 @@ class Dataset:
             Returns:
                 np.ndarray: positive and negative data concatenation
         """
-        dset_negative = self.__load_negative_dataset(user, block_num, files_path)
-        dset_positive = self.__load_positive_dataset(user, dset_negative.shape[0], files_path)
+        neg_dset, neg_labels = self.__load_negative_dataset(user, block_num, files_path)
+        pos_dset = self.__load_positive_dataset(user, neg_dset.shape[0], files_path)
+        pos_labels = self.__create_labels(pos_dset.shape[0], POSITIVE_CLASS)
 
-        return np.concatenate((dset_positive, dset_negative), axis=0)
+        return np.concatenate((pos_dset, neg_dset), axis=0), np.concatenate((pos_labels, neg_labels), axis=0)
 
 
     def __create_labeled_dataset(self, user):
@@ -399,13 +428,9 @@ class Dataset:
                 np.ndarray, np.ndarray: dataset, labels
         """
         if stt.sel_balance_type == stt.DatasetBalanceType.POSITIVE:
-            data = self.__load_positive_balanced_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
+            data, labels = self.__load_positive_balanced_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
         else:
-            data = self.__load_negative_balanced_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
-
-        # 0 - valid user (is legal)
-        # 1 - intruder (is illegal)
-        labels = np.concatenate((self.__create_labels(int(data.shape[0] / 2), POSITIVE_CLASS), self.__create_labels(int(data.shape[0] / 2), NEGATIVE_CLASS)))
+            data, labels = self.__load_negative_balanced_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
         return data, labels
 
@@ -433,7 +458,76 @@ class Dataset:
 
 
     def __create_train_dataset_authentication_for_one_class_classification(self, user):
-        pass
+
+        pos_dset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
+        pos_labels = self.__create_labels(pos_dset.shape[0], 1)
+        pos_dset, pos_labels = self.__split_and_scale_dataset(pos_dset, pos_labels, const.TRAIN_TEST_SPLIT_VALUE)
+
+        dataset = np.reshape(pos_dset, (pos_dset.shape[0] * pos_dset.shape[1], 2))
+        labels = self.__create_labels(pos_dset.shape[0] * const.BLOCK_SIZE, 1)
+
+        return self.__get_occ_input_features(dataset, labels)
+
+
+    def __create_test_authentication_dataset_for_one_class_classification(self, user):
+
+        files_path = const.TRAIN_FILES_PATH
+        pos_data = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
+        pos_labels = self.__create_labels(pos_data.shape[0], 1)
+        pos_data, pos_labels = self.__split_and_scale_dataset(pos_data, pos_labels, const.TRAIN_TEST_SPLIT_VALUE)
+        pos_labels = self.__create_labels(pos_data.shape[0] * const.BLOCK_SIZE, 1)
+
+        users = os.listdir(files_path)
+        # Remove the current user from the list
+        users.remove(user)
+
+        neg_data = np.ndarray(shape=(0, const.BLOCK_SIZE, 2))
+        neg_labels = np.ndarray(shape=(0, 1))
+
+        for user in users:
+            tmp_dataset = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
+            tmp_labels = self.__create_labels(tmp_dataset.shape[0], -1)
+            tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels, const.TRAIN_TEST_SPLIT_VALUE)
+
+            tmp_labels = self.__create_labels(tmp_dataset.shape[0] * const.BLOCK_SIZE, -1)
+
+            neg_data = np.concatenate((neg_data, tmp_dataset), axis=0)
+            neg_labels = np.concatenate((neg_labels, tmp_labels), axis=0)
+
+        dataset = np.concatenate((pos_data, neg_data), axis=0)
+        labels = np.concatenate((pos_labels, neg_labels), axis=0)
+
+        return self.__get_occ_input_features(dataset.reshape(dataset.shape[0] * const.BLOCK_SIZE, 2), labels)
+
+    
+    def __get_occ_input_features(self, dataset, labels):
+
+        if stt.sel_occ_features == stt.OCCFeatures.RAW_X_Y_DIR:
+            return dataset, labels
+
+        if stt.sel_occ_features == stt.OCCFeatures.RAW_X_DIR:
+            return dataset[:, 0].reshape(-1, 1), labels
+
+        if stt.sel_occ_features == stt.OCCFeatures.RAW_Y_DIR:
+            return dataset[:, 1].reshape(-1, 1), labels
+
+        if stt.sel_occ_features == stt.OCCFeatures.FEATURES_FROM_CNN:
+            dataset = np.reshape( dataset, (int(dataset.shape[0] / const.BLOCK_SIZE), const.BLOCK_SIZE, 2) ) 
+            pos_labels = self.__create_labels(int(dataset.shape[0] / len(stt.get_users())), 1) 
+            neg_labels = self.__create_labels(dataset.shape[0] - pos_labels.shape[0], -1) 
+            return self.__get_cnn_model_output_features(dataset), np.concatenate((pos_labels, neg_labels), axis=0)
+
+
+    def __get_cnn_model_output_features(self, data):
+        
+        model_name = 'best_' + const.USER_NAME + '_Model.CNN_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.hdf5'
+        model_path = const.TRAINED_MODELS_PATH + '/' + model_name
+
+        model = load_model(model_path)
+        model._layers.pop()
+        model.outputs = [model.layers[-1].output]
+
+        return model.predict(data)
 
 
     def __create_train_dataset_authentication_for_binary_classification(self, user):
@@ -445,18 +539,8 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: train dataset, train labels for the dataset
         """
-        data, labels = self.__create_labeled_dataset(user)
-        print(data.shape)
 
-        # If we only have train dataset we split into train and test data
-        if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
-            data, labels = self.__split_and_scale_dataset(data, labels)
-
-        return data, labels
-
-
-    def __create_test_dataset_authentication_for_one_class_classification(self, user):
-        pass
+        return self.__create_labeled_dataset(user)
 
 
     def create_test_dataset_for_authentication(self, user):
@@ -476,20 +560,16 @@ class Dataset:
                 return self.__get_train_available_test_dataset(user)
 
         if stt.sel_authentication_type == stt.AuthenticationType.ONE_CLASS_CLASSIFICATION:
-            return self.__create_test_dataset_authentication_for_one_class_classification(user)
+            return self.__create_test_authentication_dataset_for_one_class_classification(user)
 
 
-    def __split_and_scale_dataset(self, data, labels):
+    def __split_and_scale_dataset(self, data, labels, train_test_split_value):
 
-        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
-            X_train, X_test, y_train, y_test = self.__split_data_authentication(data, labels)
-        
-        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            X_train, X_test, y_train, y_test = self.__split_data_identification(data, labels)
+        X_train, X_test, y_train, y_test = self.__split_data(data, labels, train_test_split_value)
 
         X_train, X_test = self.__scale_dataset(X_train, X_test)
 
-        if stt.sel_method == stt.Method.TRAIN:
+        if stt.sel_method == stt.Method.TRAIN or stt.sel_method == stt.Method.TRANSFER_LEARNING:
             return X_train, y_train
 
         if stt.sel_method == stt.Method.EVALUATE:
@@ -595,40 +675,7 @@ class Dataset:
         return X_train, X_test
 
 
-    def __split_data_authentication(self, data, labels):
-        """ Splits data and labels with a predifined ratio
-
-            Parameters:
-                data (np.ndarray): dataset
-                labels (np.ndarray): labels for the given dataset
-
-            Returns:
-                np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
-        """
-        # Getting the barrier position between positive and negative dataset
-        # data[middel_pos:, :, :] contains the positive dataset
-        # data[:middel_pos, :, :] contains the negative dataset
-        middle_pos = int(data.shape[0] / 2)
-
-        # Inverting train_test_split() to get test data from the beginning of the dataset
-        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
-            test_size = 1 - int(const.TRAIN_TEST_SPLIT_VALUE / 2)
-        else:
-            test_size = middle_pos - int(const.TRAIN_TEST_SPLIT_VALUE / 2)
-        # We divide by 2, because of the positive and negative samples
-
-        X_train_pos, X_test_pos, y_train_pos, y_test_pos = train_test_split(data[middle_pos:], labels[middle_pos:], test_size=test_size, random_state=const.RANDOM_STATE, shuffle=False)
-        X_train_neg, X_test_neg, y_train_neg, y_test_neg = train_test_split(data[:middle_pos], labels[:middle_pos], test_size=test_size, random_state=const.RANDOM_STATE, shuffle=False)
-
-        X_train = np.concatenate((X_test_pos, X_test_neg), axis=0)
-        X_test = np.concatenate((X_train_pos, X_train_neg), axis=0)
-        y_train = np.concatenate((y_test_pos, y_test_neg), axis=0)
-        y_test = np.concatenate((y_train_pos, y_train_neg), axis=0)
-
-        return X_train, X_test, y_train, y_test
-
-
-    def __split_data_identification(self, data, labels):
+    def __split_data(self, data, labels, train_test_split_value):
         """ Splits data and labels with a predifined ratio
             Dataset contains only positive samples
             Used for creating train dataset
@@ -640,10 +687,10 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
         """
-        if const.TRAIN_TEST_SPLIT_VALUE <= 1:
-            test_size = 1 - const.TRAIN_TEST_SPLIT_VALUE
+        if train_test_split_value <= 1:
+            test_size = 1 - train_test_split_value
         else:
-            test_size = data.shape[0] - const.TRAIN_TEST_SPLIT_VALUE
+            test_size = data.shape[0] - train_test_split_value
 
         X_test, X_train, y_test, y_train = train_test_split(data, labels, test_size=test_size, random_state=const.RANDOM_STATE, shuffle=False)
 
@@ -659,9 +706,8 @@ class Dataset:
             Returns:
                 np.ndarray, np.array: test dataset, test labels for the dataset
         """
-        data, labels = self.__create_labeled_dataset(user)
         
-        return self.__split_and_scale_dataset(data, labels)
+        return self.__create_labeled_dataset(user)
 
     
     def __get_train_test_available_test_dataset(self, user):
@@ -715,7 +761,7 @@ class Dataset:
             tmp_dataset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
             tmp_labels = self.__create_labels(tmp_dataset.shape[0], id)
 
-            tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels)
+            tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels, const.TRAIN_TEST_SPLIT_VALUE)
 
             id = id + 1
             self.print_msg('Dataset shape from user: ' +  user + ' - ' + str(tmp_dataset.shape))
@@ -793,10 +839,10 @@ class Dataset:
             
 if __name__ == "__main__":
     dataset = Dataset()
-    #x_train, y_train = dataset.create_train_dataset_for_identification()
+    x_train, y_train = dataset.create_train_dataset_for_identification()
     #dataset.print_all_user_dataset_shape()
-    #x_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
-    x_train, y_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
+    #x_train, y_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
+    #x_train, y_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
     #print(x_train[0], ' x_test shape')
     #print(y_test.shape, ' y_tets shape')
     print(type(x_train))
