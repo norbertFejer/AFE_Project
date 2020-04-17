@@ -10,6 +10,9 @@ import config.settings as stt
 BLOCK_SIZE = 128
 
 
+AGGREGATE_BLOCK_NUM = 1
+
+
 # Defines the used user name
 USER_NAME = 'user9'
 

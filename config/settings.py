@@ -110,7 +110,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.TRAIN
+sel_method = Method.EVALUATE
 
 
 # Defines which model will be used
@@ -122,7 +122,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
+sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
 # Defines the model input type
@@ -140,7 +140,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # It is relevant only for authentication measurement
-sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
+sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
 
 
 sel_occ_features = OCCFeatures.FEATURES_FROM_CNN
@@ -175,7 +175,7 @@ use_trainable_weights_for_transfer_learning = True
 
 # Defines how many user will be used 
 # in case of model evaluation
-sel_evaluate_user_number = EvaluateUserNumber.ALL
+sel_evaluate_user_number = EvaluateUserNumber.SINGLE
 
 
 # Defines the evaluation metrics

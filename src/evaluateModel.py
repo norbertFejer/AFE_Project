@@ -32,12 +32,25 @@ class EvaluateModel:
         print_msg = lambda msg: None
 
 
+    def __aggregate_blocks(self, y_pred):
+
+        if const.AGGREGATE_BLOCK_NUM == 1:
+            return y_pred
+
+        y_pred = y_pred.astype(float)
+        for i in range(len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
+            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM])
+
+        return y_pred
+
+
     # Computes Area Under the Receiver Operating Characteristic Curve (ROC AUC) from predicted scores
     def __get_auc_result(self, model_name, testX, y_true):
 
         y_pred = base_model.BaseModel.predict_model(model_name, testX)
+        y_pred = self.__aggregate_blocks(y_pred[:, 0])
         y_true = np.argmax( y_true, axis=1)
-        fpr, tpr, thresholds = roc_curve(y_true, y_pred[:, 0], pos_label=0)
+        fpr, tpr, thresholds = roc_curve(y_true, y_pred, pos_label=0)
 
         return auc(fpr, tpr)
 
