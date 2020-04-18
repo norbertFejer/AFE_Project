@@ -31,7 +31,7 @@ class Classifier(Enum):
 results = {}
 classifier = None
 
-sel_classifier = Classifier.EllipticEnvelope
+sel_classifier = Classifier.IFOREST
 
 
 def fit_selected_classifier(X_data):
@@ -48,6 +48,18 @@ def fit_selected_classifier(X_data):
 
     if sel_classifier == Classifier.LocalOutlierFactor:
         classifier = LocalOutlierFactor(contamination=0.1, novelty=True).fit(X_data)
+
+
+def aggregate_blocks(y_pred):
+
+        if const.AGGREGATE_BLOCK_NUM == 1:
+            return y_pred
+
+        y_pred = y_pred.astype(float)
+        for i in range(len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
+            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM])
+
+        return y_pred
 
 
 def train_test_classifier(user):
@@ -68,6 +80,8 @@ def train_test_classifier(user):
 
     print('Evaluate model', sel_classifier.value, '...')
     y_pred = classifier.predict(X_data)
+
+    y_pred = aggregate_blocks(y_pred)
 
     fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred, pos_label=1)
     results[user] = metrics.auc(fpr, tpr)

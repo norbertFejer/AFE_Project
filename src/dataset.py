@@ -1,6 +1,8 @@
 import os
 import random
 
+random.seed( 42 )
+
 import pandas as pd
 import numpy as np
 from glob import glob

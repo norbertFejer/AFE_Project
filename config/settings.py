@@ -175,7 +175,7 @@ use_trainable_weights_for_transfer_learning = True
 
 # Defines how many user will be used 
 # in case of model evaluation
-sel_evaluate_user_number = EvaluateUserNumber.SINGLE
+sel_evaluate_user_number = EvaluateUserNumber.ALL
 
 
 # Defines the evaluation metrics

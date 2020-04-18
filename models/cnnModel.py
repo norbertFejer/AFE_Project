@@ -53,8 +53,8 @@ class CNNmodel(base_model.BaseModel):
         nb_epochs, mini_batch_size = 160, 32
         
         # Fit network
-        history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, shuffle=True,
-                                    verbose=const.VERBOSE, callbacks=self.callbacks)
+        history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, shuffle=False,
+                                verbose=const.VERBOSE, callbacks=self.callbacks)
         self.is_trained = True
 
         return history

@@ -136,4 +136,4 @@ class GenerateCSV:
 
 if __name__ == "__main__":
     gen_csv = GenerateCSV()
-    gen_csv.save_preprocessed_dataset(SaveValues.VY)
+    gen_csv.save_preprocessed_dataset(SaveValues.VX_VY)

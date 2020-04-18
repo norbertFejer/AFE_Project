@@ -39,7 +39,7 @@ class EvaluateModel:
 
         y_pred = y_pred.astype(float)
         for i in range(len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
-            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM])
+            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
 
         return y_pred
 
@@ -58,7 +58,9 @@ class EvaluateModel:
     # Computes Accuracy
     def __get_acc_result(self, model_name, testX, y_true):
 
-        y_pred = np.argmax( base_model.BaseModel.predict_model(model_name, testX), axis=1)
+        y_pred = base_model.BaseModel.predict_model(model_name, testX)
+        y_pred = self.__aggregate_blocks(y_pred)
+        y_pred = np.argmax( y_pred, axis=1)
         y_true = np.argmax( y_true, axis=1)
         accuracy = accuracy_score(y_true, y_pred)
         
@@ -67,7 +69,9 @@ class EvaluateModel:
 
     def __get_confusion_matrix(self, model_name, testX, y_true):
 
-        y_pred = np.argmax( base_model.BaseModel.predict_model(model_name, testX), axis=1)
+        y_pred = base_model.BaseModel.predict_model(model_name, testX)
+        y_pred = self.__aggregate_blocks(y_pred)
+        y_pred = np.argmax( y_pred, axis=1)
         y_true = np.argmax( y_true, axis=1)
         conf_matrix = confusion_matrix(y_true, y_pred)
 
