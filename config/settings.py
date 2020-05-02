@@ -81,6 +81,11 @@ class ScalingMethod(Enum):
     STANDARD_SCALER = 4
 
 
+class ScalingType(Enum):
+    ACTION_BASED = 'action_based'
+    SESSION_BASED = 'session_based'
+
+
 class AuthenticationType(Enum):
     BINARY_CLASSIFICATION = 'binary_class'
     ONE_CLASS_CLASSIFICATION = 'one_class'
@@ -110,7 +115,7 @@ BLOCK_NUM = 300
 
 
 # Defines the selected method
-sel_method = Method.EVALUATE
+sel_method = Method.TRAIN
 
 
 # Defines which model will be used
@@ -122,7 +127,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines the model input type
@@ -131,8 +136,12 @@ sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 sel_raw_feature_type = RawFeatureType.VX_VY
 
 
-# Defines scaling method during creating the training dataset
+# Defines scaling method during creating dataset
 sel_scaling_method = ScalingMethod.STANDARD_SCALER
+
+
+# Defines scaling type during creating dataset
+sel_scaling_type = ScalingType.ACTION_BASED
 
 
 # Defines the type of samples negative/positive balance rate
@@ -140,7 +149,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # It is relevant only for authentication measurement
-sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
+sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
 
 
 sel_occ_features = OCCFeatures.FEATURES_FROM_CNN

@@ -10,11 +10,11 @@ import config.settings as stt
 BLOCK_SIZE = 128
 
 
-AGGREGATE_BLOCK_NUM = 10
+AGGREGATE_BLOCK_NUM = 5
 
 
 # Defines the used user name
-USER_NAME = 'user9'
+USER_NAME = 'user15'
 
 
 # Define the model name to initializing weights for transfer learning

@@ -462,22 +462,18 @@ class Dataset:
     def __create_train_dataset_authentication_for_one_class_classification(self, user):
 
         pos_dset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
-        pos_labels = self.__create_labels(pos_dset.shape[0], 1)
+        pos_labels = self.__create_labels(pos_dset.shape[0], POSITIVE_CLASS)
         pos_dset, pos_labels = self.__split_and_scale_dataset(pos_dset, pos_labels, const.TRAIN_TEST_SPLIT_VALUE)
 
-        dataset = np.reshape(pos_dset, (pos_dset.shape[0] * pos_dset.shape[1], 2))
-        labels = self.__create_labels(pos_dset.shape[0] * const.BLOCK_SIZE, 1)
-
-        return self.__get_occ_input_features(dataset, labels)
+        return self.__get_occ_input_features(pos_dset, pos_labels)
 
 
     def __create_test_authentication_dataset_for_one_class_classification(self, user):
 
         files_path = const.TRAIN_FILES_PATH
         pos_data = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
-        pos_labels = self.__create_labels(pos_data.shape[0], 1)
+        pos_labels = self.__create_labels(pos_data.shape[0], POSITIVE_CLASS)
         pos_data, pos_labels = self.__split_and_scale_dataset(pos_data, pos_labels, const.TRAIN_TEST_SPLIT_VALUE)
-        pos_labels = self.__create_labels(pos_data.shape[0] * const.BLOCK_SIZE, 1)
 
         users = os.listdir(files_path)
         # Remove the current user from the list
@@ -488,10 +484,8 @@ class Dataset:
 
         for user in users:
             tmp_dataset = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
-            tmp_labels = self.__create_labels(tmp_dataset.shape[0], -1)
+            tmp_labels = self.__create_labels(tmp_dataset.shape[0], NEGATIVE_CLASS)
             tmp_dataset, tmp_labels = self.__split_and_scale_dataset(tmp_dataset, tmp_labels, const.TRAIN_TEST_SPLIT_VALUE)
-
-            tmp_labels = self.__create_labels(tmp_dataset.shape[0] * const.BLOCK_SIZE, -1)
 
             neg_data = np.concatenate((neg_data, tmp_dataset), axis=0)
             neg_labels = np.concatenate((neg_labels, tmp_labels), axis=0)
@@ -499,25 +493,22 @@ class Dataset:
         dataset = np.concatenate((pos_data, neg_data), axis=0)
         labels = np.concatenate((pos_labels, neg_labels), axis=0)
 
-        return self.__get_occ_input_features(dataset.reshape(dataset.shape[0] * const.BLOCK_SIZE, 2), labels)
+        return self.__get_occ_input_features(dataset, labels)
 
     
     def __get_occ_input_features(self, dataset, labels):
 
         if stt.sel_occ_features == stt.OCCFeatures.RAW_X_Y_DIR:
-            return dataset, labels
+            return np.concatenate((dataset[:, :, 0], dataset[:, :, 1]), axis=1), labels
 
         if stt.sel_occ_features == stt.OCCFeatures.RAW_X_DIR:
-            return dataset[:, 0].reshape(-1, 1), labels
+            return dataset[:, :, 0], labels
 
         if stt.sel_occ_features == stt.OCCFeatures.RAW_Y_DIR:
-            return dataset[:, 1].reshape(-1, 1), labels
+            return dataset[:, :, 1], labels
 
         if stt.sel_occ_features == stt.OCCFeatures.FEATURES_FROM_CNN:
-            dataset = np.reshape( dataset, (int(dataset.shape[0] / const.BLOCK_SIZE), const.BLOCK_SIZE, 2) ) 
-            pos_labels = self.__create_labels(int(dataset.shape[0] / len(stt.get_users())), 1) 
-            neg_labels = self.__create_labels(dataset.shape[0] - pos_labels.shape[0], -1) 
-            return self.__get_cnn_model_output_features(dataset), np.concatenate((pos_labels, neg_labels), axis=0)
+            return self.__get_cnn_model_output_features(dataset), labels
 
 
     def __get_cnn_model_output_features(self, data):
@@ -606,6 +597,32 @@ class Dataset:
 
         scaler = self.__get_selected_scaler(stt.sel_scaling_method.value)
 
+        if stt.sel_scaling_type == stt.ScalingType.SESSION_BASED:
+            return self.__session_based_scaling(scaler, X_train, X_test)
+
+        if stt.sel_scaling_type == stt.ScalingType.ACTION_BASED:
+            return self.__action_based_scaling(scaler, X_train, X_test)
+
+
+    def __action_based_scaling(self, scaler, X_train, X_test):
+
+        # Here X_test[0] it is a dummy variable
+        # It is necessary for the sintax
+        if stt.sel_method == stt.Method.TRAIN:
+
+            for i in range(X_train.shape[0]):
+                X_train[i], _ = scaler(X_train[i], X_test[0])
+
+        if stt.sel_method == stt.Method.EVALUATE:
+
+            for i in range(X_test.shape[0]):
+                X_test[i], _ = scaler(X_test[i], X_test[0])
+
+        return X_train, X_test
+
+
+    def __session_based_scaling(self, scaler, X_train, X_test):
+
         X_train_shape = X_train.shape
         X_test_shape = X_test.shape
 
@@ -628,6 +645,9 @@ class Dataset:
                 DataFrame: scaled dataframe
         """
         max_val = np.max( np.absolute(X_train), axis=0 )
+
+        if max_val == 0:
+            max_val = 0.0001
         
         X_train = X_train / max_val
         X_test = X_test / max_val

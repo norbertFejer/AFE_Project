@@ -1,4 +1,5 @@
 import os
+import csv
 
 from sklearn.svm import OneClassSVM
 from sklearn.ensemble import IsolationForest
@@ -31,14 +32,15 @@ class Classifier(Enum):
 results = {}
 classifier = None
 
-sel_classifier = Classifier.IFOREST
+sel_classifier = Classifier.OCSVM
 
 
 def fit_selected_classifier(X_data):
     global classifier
 
     if sel_classifier == Classifier.OCSVM:
-        classifier = OneClassSVM(kernel='sigmoid', gamma='scale', nu=0.1).fit(X_data)
+        #classifier = OneClassSVM(kernel='sigmoid', gamma='scale', nu=0.1).fit(X_data)
+        classifier = OneClassSVM(gamma='scale').fit(X_data)
 
     if sel_classifier == Classifier.IFOREST:
         classifier = IsolationForest(random_state=0, contamination=0.1).fit(X_data)
@@ -57,9 +59,18 @@ def aggregate_blocks(y_pred):
 
         y_pred = y_pred.astype(float)
         for i in range(len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
-            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM])
+            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
 
         return y_pred
+
+
+def get_auc_result(testX, y_true):
+
+        y_pred = classifier.score_samples(testX)
+        y_pred = aggregate_blocks(y_pred)
+        fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred, pos_label=0)
+
+        return metrics.auc(fpr, tpr)
 
 
 def train_test_classifier(user):
@@ -69,9 +80,10 @@ def train_test_classifier(user):
 
     stt.sel_method = stt.Method.TRAIN
     X_data, _ = dataset.create_train_dataset_for_authentication(user)
+    print_dataset_to_csv(X_data)
     print('Train dataset shape: ', X_data.shape)
 
-    print('Training model', sel_classifier.value, 'for user', user, '...')
+    print('Training model', sel_classifier.value, 'for user:', user, '...')
     fit_selected_classifier(X_data)
 
     stt.sel_method = stt.Method.EVALUATE
@@ -79,12 +91,7 @@ def train_test_classifier(user):
     print('Test dataset shape:', X_data.shape)
 
     print('Evaluate model', sel_classifier.value, '...')
-    y_pred = classifier.predict(X_data)
-
-    y_pred = aggregate_blocks(y_pred)
-
-    fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred, pos_label=1)
-    results[user] = metrics.auc(fpr, tpr)
+    results[user] = get_auc_result(X_data, y_true)
     print('Evaluated AUC for user:', user, ' ', results[user], '\n')
 
 
@@ -100,6 +107,23 @@ def print_result_to_file(file_name):
         file.write(str(user) + ',' + str(value) + '\n')
 
     file.close()
+
+
+def print_dataset_to_csv(data):
+
+    with open('occ_dataset.csv', 'w', newline='') as f:
+ 
+        for i in range(data.shape[0]):
+
+            for j in range(data.shape[1]):
+                f.write(str(data[i, j]))
+                f.write(',')
+
+            f.write('\n')
+
+
+def read_dataset(filename):
+    return pd.read_csv(filename)
 
 
 def main():
