@@ -10,7 +10,7 @@ import config.settings as stt
 BLOCK_SIZE = 128
 
 
-AGGREGATE_BLOCK_NUM = 5
+AGGREGATE_BLOCK_NUM = 10
 
 
 # Defines the used user name
@@ -18,7 +18,7 @@ USER_NAME = 'user15'
 
 
 # Define the model name to initializing weights for transfer learning
-USED_MODEL_FOR_TRANSFER_LEARNING = 'best_identification_Model.CNN_Dataset.DFL_128_300_trained.hdf5'
+USED_MODEL_FOR_TRANSFER_LEARNING = 'best_User11_Model.CNN_Dataset.DFL_128_300_trained.hdf5'
 
 
 # Defines train-test split ratio.

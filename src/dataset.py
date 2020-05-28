@@ -391,12 +391,21 @@ class Dataset:
 
         # Calculates how many block_num has to read from users
         user_num = len(os.listdir(files_path)) - 1
+
+        # if BLOCK_NUM is inf we have to set the maximum limit
+        # for calculating with this value as numeric
+        original_BLOCK_NUM = stt.BLOCK_NUM
+        stt.BLOCK_NUM = pos_dset.shape[0]
+
         # We take greater or equal block_num from users than the current user's block_num
         negative_block_num = floor( ( stt.BLOCK_NUM - int(const.TRAIN_TEST_SPLIT_VALUE / 2 ) ) / user_num)
         neg_dset, neg_labels = self.__load_negative_dataset(user, negative_block_num, files_path)
 
         if stt.sel_dataset_type == stt.DatasetType.TRAIN_AVAILABLE:
             pos_dset, pos_labels = self.__split_and_scale_dataset(pos_dset, pos_labels, int(const.TRAIN_TEST_SPLIT_VALUE / 2))
+
+        # Reseting the original BLOCK_NUM value
+        stt.BLOCK_NUM = original_BLOCK_NUM
 
         return np.concatenate((pos_dset, neg_dset), axis=0), np.concatenate((pos_labels, neg_labels), axis=0)
 
@@ -616,7 +625,7 @@ class Dataset:
         if stt.sel_method == stt.Method.EVALUATE:
 
             for i in range(X_test.shape[0]):
-                X_test[i], _ = scaler(X_test[i], X_test[0])
+                X_test[i], _ = scaler(X_test[i], X_train[0])
 
         return X_train, X_test
 
@@ -645,9 +654,7 @@ class Dataset:
                 DataFrame: scaled dataframe
         """
         max_val = np.max( np.absolute(X_train), axis=0 )
-
-        if max_val == 0:
-            max_val = 0.0001
+        max_val[max_val == 0] = 0.0001
         
         X_train = X_train / max_val
         X_test = X_test / max_val
@@ -857,20 +864,42 @@ class Dataset:
     def get_raw_identification_data(self):
         return self.__get_raw_user_data('user9', stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
+    
+    def get_user_all_preprocessed_data(self, username):
+        return self.__load_positive_dataset(username, inf, const.TRAIN_FILES_PATH)
+
+
+    def get_user_all_raw_data(self, username):
+        return self.__load_user_sessions(username, inf, const.TRAIN_FILES_PATH)
+
+
+    # Plotter ----------------------------------------------------------------------------------------------
+    
+    def get_user_raw_data(self, username):
+        return self.__load_user_sessions(username, const.BLOCK_SIZE, const.TRAIN_FILES_PATH)
+
+    
+    def get_session_from_user(self, session_name):
+        return self.__load_session(session_name)
+
+    def get_user_preprocessed_dataset(self, user):
+        return self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
+
 
             
 if __name__ == "__main__":
     dataset = Dataset()
-    x_train, y_train = dataset.create_train_dataset_for_identification()
+    #x_train, y_train = dataset.create_train_dataset_for_identification()
     #dataset.print_all_user_dataset_shape()
     #x_train, y_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
     #x_train, y_train = dataset.create_train_dataset_for_authentication(const.USER_NAME)
     #print(x_train[0], ' x_test shape')
     #print(y_test.shape, ' y_tets shape')
-    print(type(x_train))
-    print(x_train.shape)
+    #print(type(x_train))
+    #print(x_train.shape)
 
     #dataset.print_preprocessed_identification_dataset()
     #dataset.print_preprocessed_identification_dataset_vx_vy_separate()
     #trainX, trainy = dataset.create_train_dataset_for_identification()
     #print(trainX.shape, ' trainX shape')
+    dataset.print_all_user_dataset_shape()

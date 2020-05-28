@@ -127,7 +127,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
+sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
 
 
 # Defines the model input type
@@ -137,11 +137,11 @@ sel_raw_feature_type = RawFeatureType.VX_VY
 
 
 # Defines scaling method during creating dataset
-sel_scaling_method = ScalingMethod.STANDARD_SCALER
+sel_scaling_method = ScalingMethod.MIN_MAX_SCALER
 
 
 # Defines scaling type during creating dataset
-sel_scaling_type = ScalingType.ACTION_BASED
+sel_scaling_type = ScalingType.SESSION_BASED
 
 
 # Defines the type of samples negative/positive balance rate
@@ -149,10 +149,10 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 
 
 # It is relevant only for authentication measurement
-sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
+sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
 
 
-sel_occ_features = OCCFeatures.FEATURES_FROM_CNN
+sel_occ_features = OCCFeatures.RAW_X_Y_DIR
 
 
 # Defines how we handle the chunk samples

@@ -2,54 +2,11 @@
 
 	<action>
 		<settings>
-			<property name="sel_method">Method.TRAIN</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
-			<property name="sel_dataset">Dataset.BALABIT</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
-	    </settings>
-	    <constants>
-		
-	    </constants>
-	</action>
-
-	<action>
-		<settings>
-			<property name="sel_method">Method.EVALUATE</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
-			<property name="sel_dataset">Dataset.BALABIT</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
-	    </settings>
-	</action>
-
-	<action>
-		<settings>
-			<property name="sel_method">Method.TRAIN</property>
+			<property name="sel_method">Method.TRANSFER_LEARNING</property>
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
 			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
-	    </settings>
-	</action>
-
-	<action>
-		<settings>
-			<property name="sel_method">Method.EVALUATE</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
-			<property name="sel_dataset">Dataset.BALABIT</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
-	    </settings>
-	</action>
-	
-	<action>
-		<settings>
-			<property name="sel_method">Method.TRAIN</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
-			<property name="sel_dataset">Dataset.DFL</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
+			<property name="BLOCK_NUM">300</property>
 	    </settings>
 	    <constants>
 	    </constants>
@@ -58,31 +15,13 @@
 	<action>
 		<settings>
 			<property name="sel_method">Method.EVALUATE</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.IDENTIFICATION</property>
-			<property name="sel_dataset">Dataset.DFL</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
-	    </settings>
-	</action>
-
-	<action>
-		<settings>
-			<property name="sel_method">Method.TRAIN</property>
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
-			<property name="sel_dataset">Dataset.DFL</property>
+			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
+			<property name="BLOCK_NUM">300</property>
 	    </settings>
-	</action>
-
-	<action>
-		<settings>
-			<property name="sel_method">Method.EVALUATE</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
-			<property name="sel_dataset">Dataset.DFL</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="sel_raw_feature_type">RawFeatureType.VX_VY</property>
-	    </settings>
+	    <constants>
+	    </constants>
 	</action>
 
 </config>

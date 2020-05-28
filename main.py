@@ -44,7 +44,7 @@ def main():
         tm.train_model()
             
     if stt.sel_method == stt.Method.EVALUATE:
-        em = evaluateModel.EvaluateModel()
+        em = evaluateModel.EvaluateModel()  
         em.evaluate_model()
 
 

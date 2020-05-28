@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
@@ -150,13 +151,13 @@ class TrainModel:
 
     def __train_model_single_user(self, model_name):
         self.print_msg('\nTraining model for user: ' + const.USER_NAME + '...\n')
-        model_name = const.USER_NAME + '_' + model_name
-        self.__train_model_by_method(const.USER_NAME, model_name)
+        tmp_model_name = const.USER_NAME + '_' + model_name
+        self.__train_model_by_method(const.USER_NAME, tmp_model_name)
         self.print_msg('\nTraining model for user: ' + const.USER_NAME + ' finished.\n')
 
 
     def __train_model_all_user(self, model_name):
-        usersArr = stt.get_users()
+        usersArr = stt.get_users()        
 
         for user in usersArr:
             self.print_msg('\nTraining model for user: ' + user + '\n')

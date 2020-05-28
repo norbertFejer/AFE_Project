@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from enum import Enum
-from importlib import reload
 
 import config.settings as stt
 import config.constants as const
@@ -60,15 +59,18 @@ if __name__ == "__main__":
     print(stt.sel_method)
     print(stt.sel_raw_feature_type)
     print(const.USER_NAME)
+    print(const.BLOCK_SIZE)
 
     print('elso')
     parser.execute_next_action()
     print(stt.sel_method)
     print(stt.sel_raw_feature_type)
     print(const.USER_NAME)
+    print(const.BLOCK_SIZE)
 
     print('masodik')
     parser.execute_next_action()
     print(stt.sel_method)
     print(stt.sel_raw_feature_type)
     print(const.USER_NAME)
+    print(const.BLOCK_SIZE)

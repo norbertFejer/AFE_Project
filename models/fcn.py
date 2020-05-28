@@ -45,7 +45,7 @@ class Classifier_FCN(base_model.BaseModel):
         mini_batch_size = int(min(trainX.shape[0]/10, batch_size))
 
         # Fit network
-        history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, validation_split=0.3, shuffle=True,
+        history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, validation_split=0.15, shuffle=False,
             verbose=const.VERBOSE, callbacks=self.callbacks)
         self.is_trained = True
 
