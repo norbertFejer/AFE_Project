@@ -348,8 +348,8 @@ if __name__ == "__main__":
     #plot_block_size_evaluation_results()
 
     #plot_occ_balabit_results_boxplot()
-    plot_occ_dfl_results_boxplot()
-    #plot_binary_classification_balabit_results_boxplot()
+    #plot_occ_dfl_results_boxplot()
+    plot_binary_classification_balabit_results_boxplot()
     #plot_binary_classification_dfl_results_boxplot()
     #plot_occ_balabit_results_barplot()
     #plot_occ_dfl_results_barplot()
