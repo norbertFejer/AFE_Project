@@ -32,7 +32,10 @@ class Classifier_FCN(base_model.BaseModel):
         output_layer = keras.layers.Dense(nb_classes, activation='softmax')(gap_layer)
         model = keras.models.Model(inputs=input_layer, outputs=output_layer)
 
-        model.compile(loss='categorical_crossentropy', optimizer = keras.optimizers.Adam(), metrics=['accuracy'])
+        if nb_classes == 2:
+            model.compile(loss='binary_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['binary_accuracy'])
+        else:
+            model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['categorical_accuracy'])
 
         return model
 
@@ -46,7 +49,7 @@ class Classifier_FCN(base_model.BaseModel):
 
         # Fit network
         history = self.model.fit(trainX, trainy, batch_size=mini_batch_size, epochs=nb_epochs, validation_split=0.15, shuffle=False,
-            verbose=const.VERBOSE, callbacks=self.callbacks)
+                                    verbose=const.VERBOSE, callbacks=self.callbacks)
         self.is_trained = True
 
         return history

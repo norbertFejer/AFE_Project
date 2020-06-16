@@ -9,6 +9,8 @@ import config.constants as const
 import src.dataset as dset
 import models.baseModel as base_model
 
+import matplotlib.pyplot as plt
+
 
 class EvaluateModel:
 
@@ -36,10 +38,17 @@ class EvaluateModel:
 
         if const.AGGREGATE_BLOCK_NUM == 1:
             return y_pred
+        
+        if stt.sel_authentication_type == stt.AuthenticationType.BINARY_CLASSIFICATION:
 
-        y_pred = y_pred.astype(float)
-        for i in range(len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
-            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
+            pos_pred_tail = int(const.TRAIN_TEST_SPLIT_VALUE / 2)
+
+            y_pred = y_pred.astype(float)
+            for i in range(pos_pred_tail - const.AGGREGATE_BLOCK_NUM + 1):
+                y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
+
+            for i in range(pos_pred_tail, len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
+                y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
 
         return y_pred
 
@@ -49,10 +58,26 @@ class EvaluateModel:
 
         y_pred = base_model.BaseModel.predict_model(model_name, testX)
         y_pred = self.__aggregate_blocks(y_pred[:, 0])
-        y_true = np.argmax( y_true, axis=1)
+        y_true = np.argmax( y_true, axis=1 )
         fpr, tpr, thresholds = roc_curve(y_true, y_pred, pos_label=0)
 
         return auc(fpr, tpr)
+
+    def plot_ROC(self, userid, fpr, tpr, roc_auc):
+        plt.figure()
+        lw = 2
+        plt.plot(fpr, tpr, color='red', linewidth=4,
+            lw=lw, label='ROC görbe (terület = %0.3f)' % roc_auc)
+        plt.plot([0, 1], [0, 1], color='navy', linewidth=4, lw=lw, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('Hamis pozitív arány (FPR)', fontsize=28,)
+        plt.ylabel('Igaz pozitív arány (TPR)', fontsize=28,)
+        plt.title('ResNet modellel mért ROC görbe user9 felhasználóra', fontsize=30)
+        plt.legend(fontsize=28, loc="lower right")
+        plt.xticks(fontsize=28)
+        plt.yticks(fontsize=28)
+        plt.show()
 
 
     # Computes Accuracy
@@ -84,7 +109,7 @@ class EvaluateModel:
             2: self.__get_auc_result,
             3: self.__get_confusion_matrix
         } 
-    
+
         func = switcher.get(arg, lambda: "Wrong evaluation metric!")
         return func(model_name, testX, y_true)
 

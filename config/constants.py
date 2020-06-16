@@ -10,15 +10,19 @@ import config.settings as stt
 BLOCK_SIZE = 128
 
 
-AGGREGATE_BLOCK_NUM = 10
+AGGREGATE_BLOCK_NUM = 1
 
 
 # Defines the used user name
-USER_NAME = 'user15'
+USER_NAME = 'user9'
 
 
 # Define the model name to initializing weights for transfer learning
 USED_MODEL_FOR_TRANSFER_LEARNING = 'best_User11_Model.CNN_Dataset.DFL_128_300_trained.hdf5'
+
+
+# It is relevant for OCC
+USED_MODEL_FOR_OCC_FEATURE_EXTRACTION = 'dfl_2000_ResNet.hdf5'
 
 
 # Defines train-test split ratio.

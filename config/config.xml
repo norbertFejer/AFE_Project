@@ -2,26 +2,17 @@
 
 	<action>
 		<settings>
-			<property name="sel_method">Method.TRANSFER_LEARNING</property>
+			<property name="sel_method">Method.TRAIN</property>
 			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
 			<property name="sel_dataset">Dataset.BALABIT</property>
 			<property name="sel_model">Model.CNN</property>
 			<property name="BLOCK_NUM">300</property>
 	    </settings>
 	    <constants>
-	    </constants>
-	</action>
-
-	<action>
-		<settings>
-			<property name="sel_method">Method.EVALUATE</property>
-			<property name="sel_user_recognition_type">UserRecognitionType.AUTHENTICATION</property>
-			<property name="sel_dataset">Dataset.BALABIT</property>
-			<property name="sel_model">Model.CNN</property>
-			<property name="BLOCK_NUM">300</property>
-	    </settings>
-	    <constants>
+			<property name="BLOCK_SIZE">128</property>
 	    </constants>
 	</action>
 
 </config>
+
+

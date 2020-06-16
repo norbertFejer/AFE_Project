@@ -5,6 +5,7 @@ import random
 import seaborn as sns
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
+import pandas as pd 
 
 import src.dataset as dset
 import config.constants as const
@@ -182,10 +183,177 @@ def plot_block_size_evaluation_results():
     plt.show()
 
 
+def plot_occ_balabit_results_boxplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_1000_balabit_p.csv")
+
+    sns.boxplot(data=df, linewidth=2)
+
+    plt.title('OCSVM eredménye Balabit adathalmaz esetén', fontsize=30)
+    plt.ylabel('AUC érték', fontsize=30)
+    plt.xlabel('Tanító adathalmaz típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], fontsize=28)
+    plt.ylim(0.3, 1)    
+    plt.show()
+
+
+def plot_occ_dfl_results_boxplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_300_dfl_p.csv")
+
+    sns.boxplot(data=df, linewidth=2)
+
+    plt.title('OCSVM eredménye DFL adathalmaz esetén', fontsize=30)
+    plt.ylabel('AUC érték', fontsize=30)
+    plt.xlabel('Tanító adathalmaz típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], fontsize=28)
+    plt.ylim(0.3, 1) 
+    plt.show()
+
+
+def plot_binary_classification_balabit_results_boxplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/binary_300_balabit_p.csv")
+
+    sns.catplot(x="model", y="value", hue="metric", kind="box", data=df, legend=False, linewidth=2)
+    sns.despine(top=False, right=False)
+
+    plt.title('Bináris osztályozás eredménye Balabit adathalmaz esetén', fontsize=30)
+    plt.ylabel('Érték', fontsize=30)
+    plt.xlabel('CNN modell típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], fontsize=28)
+    plt.ylim(0.35, 1) 
+    plt.legend(fontsize=28, loc='lower right')
+    plt.show()
+
+
+def plot_binary_classification_dfl_results_boxplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/binary_440_dfl_p.csv")
+
+    sns.catplot(x="model", y="value", hue="metric", kind="box", data=df, legend=False, linewidth=2)
+    sns.despine(top=False, right=False)
+
+    plt.title('Bináris osztályozás eredménye DFL adathalmaz esetén', fontsize=30)
+    plt.ylabel('Érték', fontsize=30)
+    plt.xlabel('CNN modell típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], fontsize=28)
+    plt.ylim(0.35, 1) 
+    plt.legend(fontsize=28, loc='lower right')
+    plt.show()
+
+
+def plot_occ_balabit_results_barplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_balabit_barplot.csv")
+
+    sns.catplot(x="model", y="value", hue='metric', data=df, kind="bar", legend=False, linewidth=2.5,
+                 errcolor=".2", edgecolor=".2") 
+    sns.despine(top=False, right=False)
+
+    plt.title('OCSVM átlag AUC értéke Balabit adathalmaz esetén', fontsize=30)
+    plt.ylabel('AUC érték', fontsize=30)
+    plt.xlabel('Tanító adathalmaz típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.55, 0.60, 0.65, 0.70, 0.75], fontsize=28)
+    plt.ylim(0.55, 0.75)
+    plt.legend(fontsize=28, loc='upper right')
+    plt.show()
+
+
+def plot_occ_dfl_results_barplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_dfl_barplot.csv")
+
+    sns.catplot(x="model", y="value", hue='blokkszam', data=df, kind="bar", legend=False, linewidth=2.5,
+                 errcolor=".2", edgecolor=".2") 
+    sns.despine(top=False, right=False)
+
+    plt.title('OCSVM átlag AUC értéke DFL adathalmaz esetén', fontsize=30)
+    plt.ylabel('AUC érték', fontsize=30)
+    plt.xlabel('Tanító adathalmaz', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.55, 0.60, 0.65, 0.70, 0.75], fontsize=28)
+    plt.ylim(0.55, 0.75)
+    plt.legend(fontsize=28, loc='upper right')
+    plt.show()
+
+
+def plot_binary_classification_balabit_results_barplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/binary_classification_balabit_barplot.csv")
+
+    sns.catplot(x="model", y="value", hue='metric', data=df, kind="bar", legend=False, linewidth=2.5,
+                 errcolor=".2", edgecolor=".2") 
+    sns.despine(top=False, right=False)
+
+    plt.title('Bináris osztályozás átlag eredménye Balabit adathalmaz esetén', fontsize=30)
+    plt.ylabel('Érték', fontsize=30)
+    plt.xlabel('CNN modell típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.45, 0.55, 0.65, 0.75, 0.85, 0.95], fontsize=28)
+    plt.ylim(0.45, 1)
+    plt.legend(fontsize=28, loc='upper center')
+    plt.show()
+
+
+def plot_binary_classification_dfl_results_barplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/binary_classification_dfl_barplot.csv")
+
+    sns.catplot(x="model", y="value", hue='metric', data=df, kind="bar", legend=False, linewidth=2.5,
+                 errcolor=".2", edgecolor=".2") 
+    sns.despine(top=False, right=False)
+
+    plt.title('Bináris osztályozás átlag eredménye DFL adathalmaz esetén', fontsize=30)
+    plt.ylabel('Érték', fontsize=30)
+    plt.xlabel('CNN modell típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.45, 0.55, 0.65, 0.75, 0.85, 0.95], fontsize=28)
+    plt.ylim(0.45, 1)
+    plt.legend(fontsize=28, loc='upper center')
+    plt.show()
+
+
+def plot_occ_aggregated_blocks_result():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_agg_blocks_res.csv")
+
+    sns.lineplot(y="value", x="block_num", hue="modell", data=df)
+
+    plt.title('Aggregált blokkokal mért eredmény Balabit adathalmazon', fontsize=30)
+    plt.ylabel('Átlag AUC', fontsize=30)
+    plt.xlabel('Aggregált blokkok száma', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks(fontsize=28)
+    plt.legend(fontsize=28, loc='lower right')
+    plt.show()
+
+
+def plot_binary_classification_aggregated_blocks_result():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/binary_classification_agg_blocks_res.csv")
+
+    sns.lineplot(y="value", x="block_num", hue="modell", data=df)
+
+    plt.title('Aggregált blokkokal mért eredmény Balabit adathalmazon', fontsize=30)
+    plt.ylabel('Átlag AUC', fontsize=30)
+    plt.xlabel('Aggregált blokkok száma', fontsize=30)
+    plt.xticks([1, 2, 3, 4, 5], fontsize=28)
+    plt.yticks(fontsize=28)
+    plt.legend(fontsize=28, loc='center right')
+    plt.show()
+
+
 if __name__ == "__main__":
-    plot_data_distribution()
+    #plot_data_distribution()
     #plot_dataset_comparision()
     #print_velocity_distribution()
     #print_velocity_distribution_both_axis()
     #print_normalized_dataset()
     #plot_block_size_evaluation_results()
+
+    #plot_occ_balabit_results_boxplot()
+    plot_occ_dfl_results_boxplot()
+    #plot_binary_classification_balabit_results_boxplot()
+    #plot_binary_classification_dfl_results_boxplot()
+    #plot_occ_balabit_results_barplot()
+    #plot_occ_dfl_results_barplot()
+    #plot_binary_classification_balabit_results_barplot()
+    #plot_binary_classification_dfl_results_barplot()
+    #plot_occ_aggregated_blocks_result()
+    #plot_binary_classification_aggregated_blocks_result()

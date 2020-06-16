@@ -18,7 +18,6 @@ class CNNmodel(base_model.BaseModel):
     def build_model(self, input_shape, nb_classes):
 
         input_layer = keras.layers.Input(shape=(input_shape[1], input_shape[2]), name='input_layer')
-        print('is trainable weights: **********************************************************************************', self.is_trainable)
         tower_11 = keras.layers.Conv1D(filters=40, kernel_size=6, strides=2, activation='relu', trainable=self.is_trainable)(input_layer)
         tower_12 = keras.layers.Conv1D(filters=60, kernel_size=3, strides=1, activation='relu', trainable=self.is_trainable)(tower_11)
         tower_1 = keras.layers.GlobalMaxPooling1D(trainable=self.is_trainable)(tower_12)

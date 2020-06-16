@@ -7,6 +7,7 @@ class Model(Enum):
     TIME_DISTRIBUTED = 1
     CLASSIFIER_FCN = 2
     CLASSIFIER_RESNET = 3
+    CLASSIFIER_TCNN = 4
 
 
 class DatasetBalanceType(Enum):
@@ -119,7 +120,7 @@ sel_method = Method.TRAIN
 
 
 # Defines which model will be used
-sel_model = Model.CNN
+sel_model = Model.CLASSIFIER_TCNN
 
 
 # Defines used dataset
@@ -127,7 +128,7 @@ sel_dataset = Dataset.BALABIT
 
 
 # Defines the selected recognition type
-sel_user_recognition_type = UserRecognitionType.IDENTIFICATION
+sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
 # Defines the model input type
@@ -137,11 +138,11 @@ sel_raw_feature_type = RawFeatureType.VX_VY
 
 
 # Defines scaling method during creating dataset
-sel_scaling_method = ScalingMethod.MIN_MAX_SCALER
+sel_scaling_method = ScalingMethod.STANDARD_SCALER
 
 
 # Defines scaling type during creating dataset
-sel_scaling_type = ScalingType.SESSION_BASED
+sel_scaling_type = ScalingType.ACTION_BASED
 
 
 # Defines the type of samples negative/positive balance rate
@@ -152,7 +153,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
 
 
-sel_occ_features = OCCFeatures.RAW_X_Y_DIR
+sel_occ_features = OCCFeatures.FEATURES_FROM_CNN
 
 
 # Defines how we handle the chunk samples
@@ -190,7 +191,7 @@ sel_evaluate_user_number = EvaluateUserNumber.ALL
 # Defines the evaluation metrics
 # If we use multiple metrics we have to put into a list, as:  [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
 # If we use only one metric we define as: EvaluationMetric.ACC
-sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
+sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC]
 
 
 # Defines the type of evaluation

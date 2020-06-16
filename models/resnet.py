@@ -84,10 +84,10 @@ class Classifier_RESNET(base_model.BaseModel):
 
         model = keras.models.Model(inputs=input_layer, outputs=output_layer)
 
-        model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(),
-                      metrics=['accuracy'])
-
-        keras.utils.plot_model(model, to_file='resnet_model.png', show_shapes=True)
+        if nb_classes == 2:
+            model.compile(loss='binary_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['binary_accuracy'])
+        else:
+            model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['categorical_accuracy'])
 
         return model
 

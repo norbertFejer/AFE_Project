@@ -56,10 +56,15 @@ def aggregate_blocks(y_pred):
 
         if const.AGGREGATE_BLOCK_NUM == 1:
             return y_pred
+        
+        if stt.sel_authentication_type == stt.AuthenticationType.ONE_CLASS_CLASSIFICATION:
 
-        y_pred = y_pred.astype(float)
-        for i in range(len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
-            y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
+            y_pred = y_pred.astype(float)
+            for i in range(const.TRAIN_TEST_SPLIT_VALUE - const.AGGREGATE_BLOCK_NUM + 1):
+                y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
+
+            for i in range(const.TRAIN_TEST_SPLIT_VALUE, len(y_pred) - const.AGGREGATE_BLOCK_NUM + 1):
+                y_pred[i] = np.average(y_pred[i : i + const.AGGREGATE_BLOCK_NUM], axis=0)
 
         return y_pred
 
@@ -80,7 +85,6 @@ def train_test_classifier(user):
 
     stt.sel_method = stt.Method.TRAIN
     X_data, _ = dataset.create_train_dataset_for_authentication(user)
-    print_dataset_to_csv(X_data)
     print('Train dataset shape: ', X_data.shape)
 
     print('Training model', sel_classifier.value, 'for user:', user, '...')

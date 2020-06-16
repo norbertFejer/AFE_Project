@@ -11,6 +11,8 @@ DFL/
 normalizedDataset/
 generatedCSVData/
 afe_pkg.egg-info/
+datasets_raw_csv_data/
+figures/
 
 *.xlsx
 *.csv

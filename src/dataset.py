@@ -218,7 +218,7 @@ class Dataset:
             Returns:
                 DataFrame: horizontal and vertical shift components
         """
-
+        print('getting shift******************************************************************************************')
         return pd.concat([df['dx'], df['dy']], axis=1)
 
 
@@ -236,6 +236,27 @@ class Dataset:
         data = self.__get_preprocessed_data(user, block_num, files_path)
 
         return np.reshape(data, (int(data.shape[0] / const.BLOCK_SIZE), const.BLOCK_SIZE, 2))
+
+
+    def parse_standard_resolution(self, x_max, y_max):
+        x_standard = [320, 360, 480, 720, 768, 1024, 1280, 1360, 1366, 1440, 1600, 1680, 1920]
+        y_standard = [480, 568, 640, 720, 768, 800, 900, 1024, 1050, 1080, 1200, 1280]
+
+        x_pos = 0
+        while x_standard[x_pos] < x_max and x_pos < len(x_standard) - 1:
+            x_pos += 1
+
+        y_pos = 0
+        while y_standard[y_pos] < y_max and y_pos < len(y_standard) - 1:
+            y_pos += 1
+
+        if x_max > x_standard[x_pos]:
+            x_standard[x_pos] = x_max
+
+        if y_max > y_standard[y_pos]:
+            y_standard[y_pos] = y_max
+
+        return x_standard[x_pos], y_standard[y_pos]
 
 
     def __get_preprocessed_data(self, user, block_num, files_path):
@@ -517,13 +538,15 @@ class Dataset:
             return dataset[:, :, 1], labels
 
         if stt.sel_occ_features == stt.OCCFeatures.FEATURES_FROM_CNN:
-            return self.__get_cnn_model_output_features(dataset), labels
+            return self.__get_selected_model_output_features(dataset), labels
 
 
-    def __get_cnn_model_output_features(self, data):
+    def __get_selected_model_output_features(self, data):
         
-        model_name = 'best_' + const.USER_NAME + '_Model.CNN_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.hdf5'
+        #model_name = 'best_' + const.USER_NAME + '_' + stt.sel_model + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.hdf5'
+        model_name = const.USED_MODEL_FOR_OCC_FEATURE_EXTRACTION
         model_path = const.TRAINED_MODELS_PATH + '/' + model_name
+        print(model_path, 'mp################################################################################################################')
 
         model = load_model(model_path)
         model._layers.pop()
@@ -615,7 +638,7 @@ class Dataset:
 
     def __action_based_scaling(self, scaler, X_train, X_test):
 
-        # Here X_test[0] it is a dummy variable
+        # Here X_test[0] is a dummy variable
         # It is necessary for the sintax
         if stt.sel_method == stt.Method.TRAIN:
 

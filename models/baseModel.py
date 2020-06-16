@@ -70,21 +70,23 @@ class BaseModel:
         if stt.sel_method == stt.Method.TRANSFER_LEARNING:
             self.__set_weights_from_pretrained_model(const.TRAINED_MODELS_PATH + '/' + const.USED_MODEL_FOR_TRANSFER_LEARNING)
 
-        # authentication
-        es = keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.01, patience=45, restore_best_weights=False, verbose=1)
-        # identification
-        #es = keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.01, patience=80, restore_best_weights=False, verbose=1)
-        
-        # authentication
-        reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=15, min_lr=0.0001)
-        # identification
-        #reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=50, min_lr=0.0001)
-
         file_path = const.TRAINED_MODELS_PATH + "/best_" + self.model_name
         model_checkpoint = keras.callbacks.ModelCheckpoint(filepath=file_path, monitor='loss', save_best_only=True, verbose=1)
 
-        self.callbacks = [reduce_lr, model_checkpoint, es]
-        #self.callbacks = [model_checkpoint]
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
+
+            if stt.sel_model == stt.Model.CNN:
+                reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=15, min_lr=0.0001)
+
+            if stt.sel_model == stt.Model.CLASSIFIER_FCN or stt.sel_model == stt.Model.CLASSIFIER_RESNET or stt.sel_model == stt.Model.CLASSIFIER_TCNN:
+                reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=50, min_lr=0.0001)
+            
+            es = keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.01, patience=45, restore_best_weights=False, verbose=1)
+            self.callbacks = [reduce_lr, model_checkpoint, es]
+
+        if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
+            reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=15, min_lr=0.0001)
+            self.callbacks = [reduce_lr, model_checkpoint]
     
     
     def get_trained_model(self):

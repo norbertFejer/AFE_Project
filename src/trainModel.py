@@ -12,7 +12,7 @@ import models.timeDistributedModel as timeDistributedModel
 import models.cnnModel as cnnModel
 import models.fcn as fcn
 import models.resnet as resnet
-
+import models.tcnn as tcnn
 
 class TrainModel:
 
@@ -55,8 +55,20 @@ class TrainModel:
 
     def __fit_and_save_model(self, model, trainX, trainy):
 
-        model.train_model(trainX, trainy)
+        history = model.train_model(trainX, trainy)
         model.save_model()
+
+        # plt.plot(history.history['categorical_accuracy'])
+        # plt.plot(history.history['val_categorical_accuracy'])
+        
+        # plt.title("MCD-CNN modell pontossága DFL adathalmaz felhasználóinak tanítása során", fontsize=30)
+        # plt.xlabel("Korszak", fontsize=30)
+        # plt.ylabel("Kategórikus pontosság (categorical accuracy)", fontsize=28)
+        # plt.xticks(fontsize=28)
+        # plt.yscale('log')
+        # plt.yticks(fontsize=28)
+        # plt.legend(['Tanítás', 'Validálás'], loc='lower right', fontsize=28)
+        # plt.show()
 
 
     def __get_model_0(self, trainX, trainy, model_name, input_shape, nb_classes):
@@ -119,6 +131,21 @@ class TrainModel:
         self.__fit_and_save_model(classifier_resnet, trainX, trainy)
 
 
+    def __get_model_4(self, trainX, trainy, model_name, input_shape, nb_classes):
+        """ Trains Classifier_TCNN model
+
+            Parameters:
+                np.ndarray - input dataset
+                np.ndarray - true labels
+                str - model name
+
+            Returns:
+                None
+        """
+        classifier_tcnn = tcnn.Classifier_TCNN(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
+        self.__fit_and_save_model(classifier_tcnn, trainX, trainy)
+
+
     def __train_selected_model(self, trainX, trainy, model_name):
         """ Getting model by name and training it
 
@@ -135,7 +162,8 @@ class TrainModel:
             0: self.__get_model_0,
             1: self.__get_model_1,
             2: self.__get_model_2,
-            3: self.__get_model_3
+            3: self.__get_model_3,
+            4: self.__get_model_4
         }
 
         train_model = switcher.get(stt.sel_model.value, lambda: 'Not a valid model name!')
