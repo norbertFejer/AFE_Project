@@ -51,7 +51,8 @@ class Dataset:
         def print_msg(self, msg):
             """ Prints the given message if VERBOSE is True
 
-                Parameters: msg (str)
+                Parameters: 
+                    msg (str)
 
                 Returns:
                     void
@@ -64,10 +65,12 @@ class Dataset:
     def __load_session(self, session_path, n_rows = None):
         """ Reads the given columns from .csv file
 
-            Parameters: session_path (str): the full path of the given session
+            Parameters: 
+                session_path (str): the full path of the given session
+                n_rows (int) - number of rows to read
 
             Returns:
-                DataFrame: returning value
+                DataFrame: raw session data
         """
         try:
 
@@ -85,10 +88,11 @@ class Dataset:
             
             Parameters: 
                 user (str): user name
+                block_num (int): blocks nums to read
                 files_path (str): specifies the input file location
 
             Returns:
-                DataFrame: returning value
+                DataFrame: contains values from users all session files
         """
         # Maximum number of rows to read
         # We multiply the value by 3, because of the unknown chunk samples size
@@ -136,7 +140,7 @@ class Dataset:
                 block_num (int): number of rows to return
 
             Return:
-                DataFrame: preprocessed dx, dy and dt with chunck handled
+                DataFrame: preprocessed dx, dy and dt with chunk handled
         """
         complete_df, chunk_df = self.__handle_raw_data(df)
 
@@ -145,6 +149,7 @@ class Dataset:
 
         row_num = const.BLOCK_SIZE * block_num
 
+        # Dropping redundant data
         if row_num < complete_df.shape[0]:
             return complete_df[:row_num]
 
@@ -155,6 +160,7 @@ class Dataset:
         """ Separates the data (df) to complete_df and chunk_df.
             complete_df holds samples, that is equal or greater than BLOCK_NUM
             chunk_df holds samples, that is less than BLOCK_NUM
+
             Parameters:
                 df (DataFrame): input dataframe, that contains all user session
             Returns:
@@ -186,9 +192,6 @@ class Dataset:
             if (reminder != 0) or quotient.is_integer():
                 chunk_samples_indexes.extend(range(outlays_index_list[i] - reminder, outlays_index_list[i]))
 
-        #for i in range(len(chunk_samples_indexes)):
-        #    chunk_samples_indexes[i] = chunk_samples_indexes[i] - 1
-
         # Return complete_samples and chunk_samples
         return df.loc[~df.index.isin(chunk_samples_indexes)], df.iloc[chunk_samples_indexes]
 
@@ -218,7 +221,6 @@ class Dataset:
             Returns:
                 DataFrame: horizontal and vertical shift components
         """
-        print('getting shift******************************************************************************************')
         return pd.concat([df['dx'], df['dy']], axis=1)
 
 
@@ -239,13 +241,24 @@ class Dataset:
 
 
     def parse_standard_resolution(self, x_max, y_max):
+        """ Parses an appropriate screen resolution
+
+            Parameters:
+                x_max (int): maximum x coordinate
+                y_max (int): maximum y coordinate
+
+            Returns:
+                x_std (int), y_std(int): standard screen resolution
+        """
         x_standard = [320, 360, 480, 720, 768, 1024, 1280, 1360, 1366, 1440, 1600, 1680, 1920]
         y_standard = [480, 568, 640, 720, 768, 800, 900, 1024, 1050, 1080, 1200, 1280]
 
+        # Parsing x coordinate
         x_pos = 0
         while x_standard[x_pos] < x_max and x_pos < len(x_standard) - 1:
             x_pos += 1
 
+        # Parsing y coordinate
         y_pos = 0
         while y_standard[y_pos] < y_max and y_pos < len(y_standard) - 1:
             y_pos += 1
@@ -280,7 +293,6 @@ class Dataset:
 
         # Checking if we have enough data
         if data.shape[0] < const.BLOCK_SIZE * block_num and block_num != inf:
-            print('Data augmented for user: ', user, '####################################')
             data = self.__get_augmentated_dataset(data, block_num)
 
         data = self.__get_features_from_raw_data(data)
@@ -292,6 +304,14 @@ class Dataset:
 
 
     def __get_features_from_raw_data(self, df):
+        """ Returns the modified raw data (shift or velocity)
+
+            Parameters:
+                df (DataFrame): input data
+
+            Returns:
+                np.ndarray: shift or velocities
+        """
 
         if stt.sel_raw_feature_type == stt.RawFeatureType.VX_VY:
             data = self.__get_velocity_from_data( df )
@@ -481,6 +501,14 @@ class Dataset:
 
 
     def create_train_dataset_for_authentication(self, user):
+        """ Returns authentication dataset either for one class or binary classification
+
+            Parameters:
+                user(str) - username
+
+            Returns:
+                np.ndarray: train dataset
+        """
 
         if stt.sel_authentication_type == stt.AuthenticationType.BINARY_CLASSIFICATION:
             return self.__create_train_dataset_authentication_for_binary_classification(user)
@@ -490,6 +518,14 @@ class Dataset:
 
 
     def __create_train_dataset_authentication_for_one_class_classification(self, user):
+        """ Returns train dataset for OCC
+
+            Parameters:
+                user(str) - username
+
+            Returns:
+                np.ndarray: train dataset
+        """
 
         pos_dset = self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
         pos_labels = self.__create_labels(pos_dset.shape[0], POSITIVE_CLASS)
@@ -499,6 +535,14 @@ class Dataset:
 
 
     def __create_test_authentication_dataset_for_one_class_classification(self, user):
+        """ Returns test dataset for OCC
+
+            Parameters:
+                user(str) - username
+
+            Returns:
+                np.ndarray: train dataset
+        """
 
         files_path = const.TRAIN_FILES_PATH
         pos_data = self.__load_positive_dataset(user, stt.BLOCK_NUM, files_path)
@@ -527,6 +571,15 @@ class Dataset:
 
     
     def __get_occ_input_features(self, dataset, labels):
+        """ Returns input dataset type for OCC
+
+            Parameters:
+                dataset (np.ndarray) - dataset used for binary classification
+                labels (np.array) - true labels of the dataset
+
+            Returns:
+                np.ndarray: input dataset
+        """
 
         if stt.sel_occ_features == stt.OCCFeatures.RAW_X_Y_DIR:
             return np.concatenate((dataset[:, :, 0], dataset[:, :, 1]), axis=1), labels
@@ -542,11 +595,17 @@ class Dataset:
 
 
     def __get_selected_model_output_features(self, data):
+        """ Returns the extracted features, using pretrained model
+
+            Parameters:
+                dataset (np.ndarray) - input dataset
+
+            Returns:
+                np.ndarray: extracted features
+        """
         
-        #model_name = 'best_' + const.USER_NAME + '_' + stt.sel_model + '_' + str(stt.sel_dataset) + '_' + str(const.BLOCK_SIZE) + '_' + str(stt.BLOCK_NUM) + '_trained.hdf5'
         model_name = const.USED_MODEL_FOR_OCC_FEATURE_EXTRACTION
         model_path = const.TRAINED_MODELS_PATH + '/' + model_name
-        print(model_path, 'mp################################################################################################################')
 
         model = load_model(model_path)
         model._layers.pop()
@@ -589,6 +648,16 @@ class Dataset:
 
 
     def __split_and_scale_dataset(self, data, labels, train_test_split_value):
+        """ Splits then scales the dataset.
+
+            Parameters:
+                data (np.ndarray): input dataset
+                label (np.array): true labels
+                train_test_split_value (int): the proportion of the test dataset
+
+            Returns:
+                np.ndarray, np.array: scaled dataset values, true labels
+        """
 
         X_train, X_test, y_train, y_test = self.__split_data(data, labels, train_test_split_value)
 
@@ -602,6 +671,15 @@ class Dataset:
 
 
     def __scale_dataset(self, X_train, X_test):
+        """ Scales dataset
+
+            Parameters:
+                X_train (np.ndarray): input dataset
+                X_test (np.array): true labels
+
+            Returns:
+                np.ndarray, np.array: scaled dataset values, true labels
+        """
         return self.__scale_data_with_selected_scaler(X_train, X_test)
 
 
@@ -626,6 +704,15 @@ class Dataset:
 
 
     def __scale_data_with_selected_scaler(self, X_train, X_test):
+        """ Scales dataset with the selected scaler
+
+            Parameters:
+                X_train (np.ndarray): input dataset
+                X_test (np.array): true labels
+
+            Returns:
+                np.ndarray, np.array: scaled dataset values, true labels
+        """
 
         scaler = self.__get_selected_scaler(stt.sel_scaling_method.value)
 
@@ -637,6 +724,15 @@ class Dataset:
 
 
     def __action_based_scaling(self, scaler, X_train, X_test):
+        """ Scales each block separately
+
+            Parameters:
+                X_train (np.ndarray): input dataset
+                X_test (np.array): true labels
+
+            Returns:
+                np.ndarray, np.array: scaled dataset values, true labels
+        """
 
         # Here X_test[0] is a dummy variable
         # It is necessary for the sintax
@@ -654,6 +750,15 @@ class Dataset:
 
 
     def __session_based_scaling(self, scaler, X_train, X_test):
+        """ Scales all blocks together
+
+            Parameters:
+                X_train (np.ndarray): input dataset
+                X_test (np.array): true labels
+
+            Returns:
+                np.ndarray, np.array: scaled dataset values, true labels
+        """
 
         X_train_shape = X_train.shape
         X_test_shape = X_test.shape
@@ -708,6 +813,15 @@ class Dataset:
 
     
     def __no_scaler(self, X_train, X_test):
+        """ Performs no scaling on dataset
+
+            Parameters:
+                X_train (np.ndarray): train dataset
+                X_test (np.ndarray): test dataset
+
+            Returns:
+                X_train (np.ndarray), X_test (np.ndarray)
+        """
         return X_train, X_test
 
 
@@ -721,6 +835,8 @@ class Dataset:
         if std_val[1] == 0:
             std_val[1] = 0.0001
 
+        # Scales train and test dataset separately
+        # It is important for the model generalizing ability
         X_train = (X_train - mean_val) / std_val
         X_test = (X_test - mean_val) / std_val
 
@@ -735,6 +851,7 @@ class Dataset:
             Parameters:
                 data (np.ndarray): dataset
                 labels (np.ndarray): labels for the given dataset
+                train_test_split_value (int): proportion of the test dataset
 
             Returns:
                 np.ndarray, np.array: splitted train dataset, splitted train labels for the dataset
@@ -901,7 +1018,6 @@ class Dataset:
     def get_user_raw_data(self, username):
         return self.__load_user_sessions(username, const.BLOCK_SIZE, const.TRAIN_FILES_PATH)
 
-    
     def get_session_from_user(self, session_name):
         return self.__load_session(session_name)
 

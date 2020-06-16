@@ -50,9 +50,11 @@ def main():
 
 if __name__ == "__main__":
 
+    # Performing only one action (train or test)
     if stt.sel_settings_source == stt.SettingsSource.FROM_PY_FILE:
         main()
 
+    # Performing multiple actions (train or test)
     if stt.sel_settings_source == stt.SettingsSource.FROM_XML_FILE:
         import config.parser as pars
     

@@ -65,9 +65,11 @@ class EvaluationMetric(Enum):
     AUC = 2
     CONFUSION_MATRIX = 3
 
+
 class UserRecognitionType(Enum):
     AUTHENTICATION = 'authentication'
     IDENTIFICATION = 'identification'
+
 
 class ChunkSamplesHandler(Enum):
     CONCATENATE_CHUNKS = 'concatenate'
@@ -109,102 +111,109 @@ class OCCFeatures(Enum):
     FEATURES_FROM_CNN = 'features_from_cnn'
 
 
-# Block size number from given user
+# Block number from given user.
 # If its value is inf then reads all samples.
 # If int value is set, then BLOCK_NUM * BLOCK_SIZE rows will be read.
 BLOCK_NUM = 300
 
 
-# Defines the selected method
+# Defines the selected method.
 sel_method = Method.TRAIN
 
 
-# Defines which model will be used
+# Defines which model will be used.
 sel_model = Model.CLASSIFIER_TCNN
 
 
-# Defines used dataset
+# Defines used dataset.
 sel_dataset = Dataset.BALABIT
 
 
-# Defines the selected recognition type
+# Defines the selected recognition type.
 sel_user_recognition_type = UserRecognitionType.AUTHENTICATION
 
 
-# Defines the model input type
-# VX_VY - horizontal and vertical velocity components
-# DX_DY - horizontal and vertical shift components
+# Defines the model input type:
+# VX_VY - horizontal and vertical velocity components.
+# DX_DY - horizontal and vertical shift components.
 sel_raw_feature_type = RawFeatureType.VX_VY
 
 
-# Defines scaling method during creating dataset
+# Defines scaling method.
 sel_scaling_method = ScalingMethod.STANDARD_SCALER
 
 
-# Defines scaling type during creating dataset
+# Defines scaling type.
+# ACTION_BASED means normalization for each block separately.
+# SESSION_BASED means normalization for all blocks together.
 sel_scaling_type = ScalingType.ACTION_BASED
 
 
-# Defines the type of samples negative/positive balance rate
+# Defines the type of samples negative/positive balance rate.
 sel_balance_type = DatasetBalanceType.POSITIVE
 
 
-# It is relevant only for authentication measurement
+# It is relevant only for authentication measurements.
+# BINARY_CLASSIFICATION uses CNN models
+# ONE_CLASS_CLASSIFICATION uses OCC models
 sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
 
 
+# Defines the input dataset type for OCC models. 
 sel_occ_features = OCCFeatures.FEATURES_FROM_CNN
 
 
-# Defines how we handle the chunk samples
+# Defines how we handle the chunk blocks.
 sel_chunck_samples_handler = ChunkSamplesHandler.DROP_CHUNKS
 
 
-# TRAIN_AVAILABLE means, that we have only train dataset
-# TRAIN_TEST_AVAILABLE means, that we have both train and separate test dataset
+# TRAIN_AVAILABLE means, that we have only train dataset.
+# TRAIN_TEST_AVAILABLE means, that we have both train and a separate test dataset.
 sel_dataset_type = DatasetType.TRAIN_AVAILABLE
 
 
-# Defines how many user will be used
-# in case of model training
+# Defines model training for single user or
+# Model training for all available users.
 sel_train_user_number = TrainUserNumber.ALL
 
 
-# It is used for TRAIN
-# If True and given model already exists the training process will use the pretrained weights
-# If False the model weights will be initialized randomly
-# With this option we can retrain our model with the previously (pre)trained model weights
+# It is used for TRAIN.
+# If True and given model already exists the training process will use the pretrained weights.
+# If False the model weights will be initialized randomly.
+# With this option we can retrain our model with the previously (pre)trained model weights.
 use_pretrained_weights_for_training_model = False
 
 
-# It is used for TRANSFER_LEARNING
-# If True model weights will be trainable
-# If False model weights will be non-trainable
+# It is used for TRANSFER_LEARNING.
+# If True, model weights will be trainable.
+# If False, model weights will be non-trainable.
 use_trainable_weights_for_transfer_learning = True
 
 
-# Defines how many user will be used 
-# in case of model evaluation
+# Defines model evaluation for single user or
+# Model evaluation for all available users.
 sel_evaluate_user_number = EvaluateUserNumber.ALL
 
 
-# Defines the evaluation metrics
-# If we use multiple metrics we have to put into a list, as:  [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
+# Defines the evaluation metrics.
+# If we use multiple metrics we have to put into a list, as follows: [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX].
 # If we use only one metric we define as: EvaluationMetric.ACC
 sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC]
 
 
-# Defines the type of evaluation
+# Defines the type of evaluation.
+# ACTION_BASED means model evaluation based on AGGREGATE_BLOCK_NUM number of blocks.
+# SESSION_BASED means, model evaluation based on an entire session.
 sel_evaluation_type = EvaluationType.ACTION_BASED
 
 
-# Defines saving evaluation results to file
+# Sets printing evaluation results to file.
 print_evaluation_results_to_file = True
 
 
-# Defines setting source location
-# FROM_PY_FILE means that we use settings from settings.py and constants.py
-# FROM_XML_FILE means that we use settings from config.xml
+# Defines setting source location.
+# FROM_PY_FILE means that we use settings from settings.py and constants.py.
+# FROM_XML_FILE means that we use settings from config.xml.
 sel_settings_source = SettingsSource.FROM_PY_FILE
 
 
@@ -233,7 +242,7 @@ def get_dfl_users():
 
 
 def get_users():
-    """ Gets users name from the selected dataset
+    """ Returns usersnames from the selected dataset
 
         Parameters:
             None
@@ -251,7 +260,18 @@ def get_users():
 
 
 def setter(property_name, args):
+    """ Function for setting these values:
+        It sets property_name with arg value.
+
+        Parameters:
+            property_name (str): Enum type
+            arg (str): Enum type value
+
+        Returns:
+            None
+    """ 
     
+    # Sets numeric values
     if len(args) == 1:
 
         if args[0].isdigit():
@@ -264,14 +284,16 @@ def setter(property_name, args):
 
         globals()[property_name] = value
 
+    # Sets one enum type value
     if len(args) == 2:
         globals()[property_name] = eval(args[0])[args[1]]
 
+    # Sets multiple enum type values
     if len(args) > 2:
-        tmp = ' '.join(args)
-        tmp = tmp[1 : -1]
-        tmp = tmp.split(', ')
+        tmp_metric = ' '.join(args)
+        tmp_metric = tmp_metric[1 : -1]
+        tmp_metric = tmp_metric.split(', ')
         globals()[property_name] = []
-        for metric in tmp:
+        for metric in tmp_metric:
             metric = metric.split(' ')
             globals()[property_name].append( eval(metric[0])[metric[1]] )

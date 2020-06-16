@@ -58,17 +58,7 @@ class TrainModel:
         history = model.train_model(trainX, trainy)
         model.save_model()
 
-        # plt.plot(history.history['categorical_accuracy'])
-        # plt.plot(history.history['val_categorical_accuracy'])
-        
-        # plt.title("MCD-CNN modell pontossága DFL adathalmaz felhasználóinak tanítása során", fontsize=30)
-        # plt.xlabel("Korszak", fontsize=30)
-        # plt.ylabel("Kategórikus pontosság (categorical accuracy)", fontsize=28)
-        # plt.xticks(fontsize=28)
-        # plt.yscale('log')
-        # plt.yticks(fontsize=28)
-        # plt.legend(['Tanítás', 'Validálás'], loc='lower right', fontsize=28)
-        # plt.show()
+        # self.__plot_train(history)
 
 
     def __get_model_0(self, trainX, trainy, model_name, input_shape, nb_classes):
@@ -117,7 +107,7 @@ class TrainModel:
 
 
     def __get_model_3(self, trainX, trainy, model_name, input_shape, nb_classes):
-        """ Trains Classifier_FCN model
+        """ Trains Classifier_ResNet model
 
             Parameters:
                 np.ndarray - input dataset
@@ -227,10 +217,14 @@ class TrainModel:
     def __plot_train(self, history):
 
         # Plot training & validation accuracy values
-        plt.plot(history.history['acc'])
-        plt.plot(history.history['loss'])
-        plt.title('Model training')
-        plt.ylabel('Value')
-        plt.xlabel('Epoch')
-        plt.legend(['Acc', 'Loss'], loc='upper left')
+        plt.plot(history.history['categorical_accuracy'])
+        plt.plot(history.history['val_categorical_accuracy'])
+        
+        plt.title("MCD-CNN modell pontossága DFL adathalmaz felhasználóinak tanítása során", fontsize=30)
+        plt.xlabel("Korszak", fontsize=30)
+        plt.ylabel("Kategórikus pontosság (categorical accuracy)", fontsize=28)
+        plt.xticks(fontsize=28)
+        plt.yscale('log')
+        plt.yticks(fontsize=28)
+        plt.legend(['Tanítás', 'Validálás'], loc='lower right', fontsize=28)
         plt.show()
