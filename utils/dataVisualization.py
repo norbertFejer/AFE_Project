@@ -20,7 +20,7 @@ def get_user_raw_dataset(username, concat_chuncks_value):
 
 
 def plot_data_distribution():
-    users = stt.get_balabit_users()
+    users = stt.get_dfl_users()
 
     drop_chunck_samples = np.array([]).astype(int)
     concatenate_chunck_samples = np.array([]).astype(int)
@@ -76,6 +76,8 @@ def plot_data_distribution():
     plt.legend(fontsize=24)
     plt.xscale('log')
     plt.show()
+
+    print(df['drop_chunck_samples'])
 
 
 def plot_dataset_comparision():
@@ -165,7 +167,7 @@ def print_normalized_dataset():
 
 
 def plot_block_size_evaluation_results():
-    acc_value = [0.647887324, 0.687323944, 0.756338028, 0.815915493, 0.76028169, 0.7, 0.649295775]
+    acc_value = [0.647887324, 0.687323944, 0.756338028, 0.8113, 0.76028169, 0.7, 0.649295775]
     block_size = [16, 32, 64, 128, 256, 512, 1024]
 
     df = pd.DataFrame(list(zip(acc_value, block_size)), columns =['acc_value', 'block_size']) 
@@ -175,11 +177,12 @@ def plot_block_size_evaluation_results():
     for index, row in df.iterrows():
         g.text(row.name, row.acc_value + 0.02, round(row.acc_value, 2), color='black', ha="center", fontsize=20, fontweight='bold')
 
-    plt.title('Balabit teszt adathalmazra mért MCDCNN pontossága', fontsize=30)
+    plt.title('Balabit teszt adathalmazra mért MCD-CNN pontossága', fontsize=30)
     plt.ylabel('ACC érték', fontsize=30)
     plt.xlabel('Blokkméret (adatpont)', fontsize=30)
     plt.xticks(fontsize=28)
     plt.yticks(fontsize=28)
+    plt.ylim(0.5, 0.82) 
     plt.show()
 
 
@@ -339,6 +342,77 @@ def plot_binary_classification_aggregated_blocks_result():
     plt.show()
 
 
+def plot_occ_sapimouse_results_boxplot():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_1000_sapimouse_p.csv")
+
+    sns.boxplot(x="modell", y="AUC", data=df, linewidth=2)
+
+    plt.title('OCSVM eredménye SapiMouse adathalmaz esetén', fontsize=30)
+    plt.ylabel('AUC érték', fontsize=30)
+    plt.xlabel('Tudástranszfer típusa', fontsize=30)
+    plt.xticks(fontsize=28)
+    plt.yticks([0.5, 0.6, 0.7, 0.8, 0.9, 1], fontsize=28)
+    plt.ylim(0.5, 1.01)    
+    plt.show()
+
+
+def plot_occ_sapimouse_aggregated_blocks_result():
+    df = pd.read_csv("C:/Anaconda projects/Software_mod/evaluationResults/occ_agg_blocks_res_sapimouse.csv")
+
+    sns.lineplot(y="value", x="block_num", hue="modell", data=df)
+
+    plt.title('Aggregált blokkokal mért eredmény SapiMouse adathalmazon', fontsize=30)
+    plt.ylabel('Átlag AUC', fontsize=30)
+    plt.xlabel('Aggregált blokkok száma', fontsize=30)
+    plt.xticks([1, 2, 3, 4, 5], fontsize=28)
+    plt.xticks(fontsize=28)
+    plt.yticks(fontsize=28)
+    plt.legend(fontsize=28, loc='lower right')
+    plt.show()
+
+
+def plot_ROC(model_name, username, fpr, tpr, roc_auc):
+
+    plt.figure()
+    lw = 2
+    plt.plot(fpr, tpr, color='red', linewidth=4,
+        lw=lw, label='ROC görbe (terület = %0.3f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='navy', linewidth=4, lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('Hamis pozitív arány (FPR)', fontsize=28,)
+    plt.ylabel('Igaz pozitív arány (TPR)', fontsize=28,)
+    plt.title(model_name + ' modellel mért ROC görbe ' + username + ' felhasználóra', fontsize=30)
+    plt.legend(fontsize=28, loc="lower right")
+    plt.xticks(fontsize=28)
+    plt.yticks(fontsize=28)
+    plt.show()
+
+
+def plot_confusion_matrix(cm):
+
+    df_cm = pd.DataFrame(cm, range(2), range(2))
+    # plt.figure(figsize=(10,7))
+    sns.set(font_scale=1.4) # for label size
+    sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}, cmap="YlGnBu") # font size
+
+    plt.show()
+
+
+def plot_occ_results_boxplot(data, dataset_name):
+    df = pd.DataFrame.from_dict(data, orient='index')
+    print(df)
+
+    sns.boxplot(data=df, linewidth=2)
+
+    plt.title('OCSVM eredménye ' + dataset_name + ' adathalmaz esetén', fontsize=30)
+    plt.ylabel('AUC érték', fontsize=30)
+    plt.yticks(fontsize=28)   
+    plt.xticks([])
+    plt.show()
+
+
+
 if __name__ == "__main__":
     #plot_data_distribution()
     #plot_dataset_comparision()
@@ -349,7 +423,7 @@ if __name__ == "__main__":
 
     #plot_occ_balabit_results_boxplot()
     #plot_occ_dfl_results_boxplot()
-    plot_binary_classification_balabit_results_boxplot()
+    #plot_binary_classification_balabit_results_boxplot()
     #plot_binary_classification_dfl_results_boxplot()
     #plot_occ_balabit_results_barplot()
     #plot_occ_dfl_results_barplot()
@@ -357,3 +431,10 @@ if __name__ == "__main__":
     #plot_binary_classification_dfl_results_barplot()
     #plot_occ_aggregated_blocks_result()
     #plot_binary_classification_aggregated_blocks_result()
+    #plot_occ_sapimouse_results_boxplot()
+    #plot_occ_sapimouse_aggregated_blocks_result()
+    results = {}
+    results['user1'] = 0.63
+    results['user2'] = 0.75
+    results['user3'] = 0.92
+    plot_occ_results_boxplot(results, 'Balabit')

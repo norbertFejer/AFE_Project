@@ -1,15 +1,16 @@
 import os
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from keras.utils import to_categorical
 from sklearn.metrics import roc_curve, confusion_matrix, accuracy_score, auc
 
 import config.settings as stt
 import config.constants as const
 import src.dataset as dset
+import utils.dataVisualization as dvisuals
 import models.baseModel as base_model
-
-import matplotlib.pyplot as plt
 
 
 class EvaluateModel:
@@ -80,24 +81,9 @@ class EvaluateModel:
         y_true = np.argmax( y_true, axis=1 )
         fpr, tpr, thresholds = roc_curve(y_true, y_pred, pos_label=0)
 
+        dvisuals.plot_ROC(str(stt.sel_model)[17:], const.USER_NAME, fpr, tpr, auc(fpr, tpr))
+
         return auc(fpr, tpr)
-
-    def plot_ROC(self, userid, fpr, tpr, roc_auc):
-
-        plt.figure()
-        lw = 2
-        plt.plot(fpr, tpr, color='red', linewidth=4,
-            lw=lw, label='ROC görbe (terület = %0.3f)' % roc_auc)
-        plt.plot([0, 1], [0, 1], color='navy', linewidth=4, lw=lw, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('Hamis pozitív arány (FPR)', fontsize=28,)
-        plt.ylabel('Igaz pozitív arány (TPR)', fontsize=28,)
-        plt.title('ResNet modellel mért ROC görbe user9 felhasználóra', fontsize=30)
-        plt.legend(fontsize=28, loc="lower right")
-        plt.xticks(fontsize=28)
-        plt.yticks(fontsize=28)
-        plt.show()
 
 
     # Computes Accuracy
@@ -139,6 +125,8 @@ class EvaluateModel:
         y_pred = np.argmax( y_pred, axis=1)
         y_true = np.argmax( y_true, axis=1)
         conf_matrix = confusion_matrix(y_true, y_pred)
+
+        dvisuals.plot_confusion_matrix(conf_matrix)
 
         return conf_matrix
 
@@ -186,8 +174,8 @@ class EvaluateModel:
             testX = testX.reshape((testX.shape[0], n_steps, n_length, testX.shape[2]))
 
         self.print_msg('\nTest dataset shape: ')
-        self.print_msg(testX.shape)
-        self.print_msg(y_true.shape)
+        self.print_msg('Test data shape: ' + str(testX.shape))
+        self.print_msg('Test labels shape: ' + str(y_true.shape))
         
         self.__evaluate_model_by_metrics(user, 'best_' + model_name, testX, y_true)
 
@@ -196,7 +184,7 @@ class EvaluateModel:
         self.print_msg('\nEvaluating model for user: ' + const.USER_NAME + '...')
         model_name = const.USER_NAME + '_' + model_name
         self.__evaluate_model_by_method(const.USER_NAME, model_name)
-        self.print_msg('\nEvaluating model finished.\n')
+        self.print_msg('\nEvaluating model for user: ' + const.USER_NAME + ' finished.\n')
 
 
     def __evaluate_model_action_based_all_user(self, model_name):
@@ -206,7 +194,7 @@ class EvaluateModel:
             self.print_msg('\nEvaluatig model for user: ' + user + '...')
             tmp_model_name = user + '_' + model_name
             self.__evaluate_model_by_method(user, tmp_model_name)
-            self.print_msg('\nEvaluatig model finished.\n')
+            self.print_msg('\nEvaluating model for user: ' + const.USER_NAME + ' finished.\n')
             
             
     def __action_based_evaluation(self, model_name):

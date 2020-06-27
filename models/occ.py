@@ -14,6 +14,7 @@ from enum import Enum
 import config.settings as stt
 import config.constants as const
 import src.dataset as dset
+import utils.dataVisualization as dvisuals
 
 # Setting random states to get reproducible results
 from numpy.random import seed
@@ -50,13 +51,13 @@ def fit_selected_classifier(X_data):
 
     if sel_classifier == Classifier.OCSVM:
         #classifier = OneClassSVM(kernel='sigmoid', gamma='scale', nu=0.1).fit(X_data)
-        classifier = OneClassSVM(gamma='scale').fit(X_data)
+        classifier = OneClassSVM(gamma='scale', verbose=True).fit(X_data)
 
     if sel_classifier == Classifier.IFOREST:
         classifier = IsolationForest(random_state=0, contamination=0.1).fit(X_data)
 
     if sel_classifier == Classifier.EllipticEnvelope:
-        classifier = IsolationForest(random_state=0, contamination=0.1).fit(X_data)
+        classifier = EllipticEnvelope(random_state=0, contamination=0.1).fit(X_data)
 
     if sel_classifier == Classifier.LocalOutlierFactor:
         classifier = LocalOutlierFactor(contamination=0.1, novelty=True).fit(X_data)
@@ -121,19 +122,23 @@ def train_test_classifier(user):
 
     stt.sel_method = stt.Method.TRAIN
     # Create train dataset
+    print('Creating train dataset...')
     X_data, _ = dataset.create_train_dataset_for_authentication(user)
     print('Train dataset shape: ', X_data.shape)
 
-    print('Training model', sel_classifier.value, 'for user:', user, '...')
+    print('\nTraining model', sel_classifier.value, 'for user:', user, '...')
     # Fit selected network
     fit_selected_classifier(X_data)
 
     stt.sel_method = stt.Method.EVALUATE
     # Create test dataset
+    print('\nCreating test dataset...')
     X_data, y_true = dataset.create_test_dataset_for_authentication(user)
-    print('Test dataset shape:', X_data.shape)
+    print('Test dataset shape:')
+    print('Test data shape:', X_data.shape)
+    print('Test labels shape:', y_true.shape)
 
-    print('Evaluate model', sel_classifier.value, '...')
+    print('\nEvaluating model', sel_classifier.value, '...')
     # Getting AUC from predicted values
     results[user] = get_auc_result(X_data, y_true)
     print('Evaluated AUC for user:', user, ' ', results[user], '\n')

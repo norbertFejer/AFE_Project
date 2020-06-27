@@ -3,7 +3,7 @@ from math import inf
 
 
 class Model(Enum):
-    CNN = 0
+    CLASSIFIER_MCDCNN = 0
     TIME_DISTRIBUTED = 1
     CLASSIFIER_FCN = 2
     CLASSIFIER_RESNET = 3
@@ -18,6 +18,7 @@ class DatasetBalanceType(Enum):
 class Dataset(Enum):
     BALABIT = 0
     DFL = 1
+    SAPI_MOUSE = 2
 
 
 class EvaluationType(Enum):
@@ -41,6 +42,19 @@ class Users(Enum):
         return ['User1', 'User2', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9', 'User10', 
             'User11', 'User12', 'User13', 'User14', 'User15', 'User16', 'User17', 'User18', 'User19',
             'User20', 'User21']
+
+    @staticmethod
+    def get_sapimouse_users():
+        return ['user001','user002','user003','user004','user005','user006','user007','user008','user009',
+            'user010','user011','user012','user013','user014','user015','user016','user017','user018',
+            'user019','user020','user021','user022','user023','user024','user025','user026','user027',
+            'user028','user029','user030','user031','user032','user033','user034','user035','user036',
+            'user037','user038','user039','user040','user041','user042','user043','user044','user045',
+            'user046','user047','user048','user049','user050','user051','user052','user053','user054',
+            'user055','user056','user057','user058','user059','user060','user061','user062','user063',
+            'user064','user065','user066','user067','user068','user069','user070','user071','user072',
+            'user073','user074','user075','user076','user077','user078','user079','user080','user081',
+            'user082','user083']
 
 
 class TrainUserNumber(Enum):
@@ -122,7 +136,7 @@ sel_method = Method.TRAIN
 
 
 # Defines which model will be used.
-sel_model = Model.CLASSIFIER_TCNN
+sel_model = Model.CLASSIFIER_MCDCNN
 
 
 # Defines used dataset.
@@ -156,7 +170,7 @@ sel_balance_type = DatasetBalanceType.POSITIVE
 # It is relevant only for authentication measurements.
 # BINARY_CLASSIFICATION uses CNN models
 # ONE_CLASS_CLASSIFICATION uses OCC models
-sel_authentication_type = AuthenticationType.BINARY_CLASSIFICATION
+sel_authentication_type = AuthenticationType.ONE_CLASS_CLASSIFICATION
 
 
 # Defines the input dataset type for OCC models. 
@@ -198,7 +212,7 @@ sel_evaluate_user_number = EvaluateUserNumber.ALL
 # Defines the evaluation metrics.
 # If we use multiple metrics we have to put into a list, as follows: [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX].
 # If we use only one metric we define as: EvaluationMetric.ACC
-sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC]
+sel_evaluation_metrics = [EvaluationMetric.ACC, EvaluationMetric.AUC, EvaluationMetric.CONFUSION_MATRIX]
 
 
 # Defines the type of evaluation.
@@ -241,6 +255,18 @@ def get_dfl_users():
     return Users.get_dfl_users()
 
 
+def get_sapimouse_users():
+    """ Returns the DFL Dataset users
+
+        Parameters:
+            None
+
+        Returns:
+            np.ndarray() - users list
+    """ 
+    return Users.get_sapimouse_users()
+
+
 def get_users():
     """ Returns usersnames from the selected dataset
 
@@ -252,7 +278,8 @@ def get_users():
     """ 
     switcher = { 
         0: get_balabit_users,
-        1: get_dfl_users, 
+        1: get_dfl_users,
+        2: get_sapimouse_users
     } 
   
     func = switcher.get(sel_dataset.value, lambda: "Wrong dataset name!")

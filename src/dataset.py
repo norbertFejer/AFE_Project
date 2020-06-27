@@ -7,10 +7,10 @@ import pandas as pd
 import numpy as np
 from glob import glob
 from math import inf, floor
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
 from importlib import reload
 
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 from tensorflow.keras.models import load_model
 from keras.models import Model
 from keras import backend as K
@@ -158,8 +158,8 @@ class Dataset:
 
     def __handle_raw_data(self, df):
         """ Separates the data (df) to complete_df and chunk_df.
-            complete_df holds samples, that is equal or greater than BLOCK_NUM
-            chunk_df holds samples, that is less than BLOCK_NUM
+            complete_df holds samples, that have equal or greater lentth than BLOCK_NUM
+            chunk_df holds samples, that have less length than BLOCK_NUM
 
             Parameters:
                 df (DataFrame): input dataframe, that contains all user session
@@ -1024,6 +1024,9 @@ class Dataset:
     def get_user_preprocessed_dataset(self, user):
         return self.__load_positive_dataset(user, stt.BLOCK_NUM, const.TRAIN_FILES_PATH)
 
+    def test(self, username):
+        return self.__load_positive_dataset(username, inf, const.TRAIN_FILES_PATH)
+
 
             
 if __name__ == "__main__":
@@ -1042,3 +1045,4 @@ if __name__ == "__main__":
     #trainX, trainy = dataset.create_train_dataset_for_identification()
     #print(trainX.shape, ' trainX shape')
     dataset.print_all_user_dataset_shape()
+    #dataset = dataset.test('User11')

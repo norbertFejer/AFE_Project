@@ -14,6 +14,8 @@ import models.fcn as fcn
 import models.resnet as resnet
 import models.tcnn as tcnn
 
+import utils.analysis as analysis
+
 class TrainModel:
 
     def __init__(self):
@@ -46,8 +48,8 @@ class TrainModel:
         trainy = to_categorical(trainy)
         
         self.print_msg('Train dataset shape:')
-        self.print_msg(trainX.shape)
-        self.print_msg(trainy.shape)
+        self.print_msg('Train data shape: ' + str(trainX.shape))
+        self.print_msg('Train labels shape: ' + str(trainy.shape))
         self.print_msg('\nLoading train dataset finished.')
 
         self.__train_selected_model(trainX, trainy, model_name)
@@ -72,7 +74,7 @@ class TrainModel:
             Returns:
                 None
         """
-        cnn_model = cnnModel.CNNmodel(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
+        cnn_model = cnnModel.MCDCNN(model_name, input_shape, nb_classes, stt.use_trainable_weights_for_transfer_learning)
         self.__fit_and_save_model(cnn_model, trainX, trainy)
 
 

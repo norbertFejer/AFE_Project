@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 
-class CNNmodel(base_model.BaseModel):
+class MCDCNN(base_model.BaseModel):
 
 
     def __init__(self, model_name, input_shape, nb_classes, is_trainable = True):

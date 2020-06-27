@@ -29,8 +29,10 @@ class Classifier_TCNN(base_model.BaseModel):
 
         model = keras.models.Model(inputs=input_layer, outputs=output_layer)
 
-        model.compile(loss='mean_squared_error', optimizer=keras.optimizers.Adam(),
-                      metrics=['accuracy'])
+        if nb_classes == 2:
+            model.compile(loss='binary_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['binary_accuracy'])
+        else:
+            model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['categorical_accuracy'])
 
         return model
 

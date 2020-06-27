@@ -35,6 +35,7 @@ class BaseModel:
 
 
     def __set_weights_from_pretrained_model(self, model_path):
+        print('setting weights from.........................................:', model_path)
         """ Loads weights from a pretrained model and sets the new model weights with these.
 
             Parameters:
@@ -48,7 +49,7 @@ class BaseModel:
         except:
             raise Exception(model_path + ' model does not exist!')
         
-        # The last layer weights will not be ignored
+        # The last layer weights will be ignored
         for i in range(len(old_model.layers) - 1):
             self.model.layers[i].set_weights(old_model.layers[i].get_weights())
 
@@ -79,7 +80,7 @@ class BaseModel:
         # We use different parameters for UserRecognitionType values
         if stt.sel_user_recognition_type == stt.UserRecognitionType.AUTHENTICATION:
 
-            if stt.sel_model == stt.Model.CNN:
+            if stt.sel_model == stt.Model.CLASSIFIER_MCDCNN:
                 # Callback funtion for reducing learning rate
                 reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=15, min_lr=0.0001)
 
@@ -88,11 +89,21 @@ class BaseModel:
             
             # Callback funtion for performing early stopping
             es = keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.01, patience=45, restore_best_weights=False, verbose=1)
-            self.callbacks = [reduce_lr, model_checkpoint, es]
+
+            # For visualizing train only
+            from time import time
+            import datetime
+            from tensorflow.keras.callbacks import TensorBoard
+            log_dir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+            tensorboard = TensorBoard(log_dir=log_dir, profile_batch=0, update_freq='epoch')
+
+            self.callbacks = [reduce_lr, model_checkpoint, es, tensorboard]
 
         if stt.sel_user_recognition_type == stt.UserRecognitionType.IDENTIFICATION:
-            reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=15, min_lr=0.0001)
-            self.callbacks = [reduce_lr, model_checkpoint]
+            reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=50, min_lr=0.0001)
+            es = keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.01, patience=80, restore_best_weights=False, verbose=1)
+            #reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50, min_lr=0.0001)
+            self.callbacks = [model_checkpoint, es, reduce_lr]
     
     
     def get_trained_model(self):
