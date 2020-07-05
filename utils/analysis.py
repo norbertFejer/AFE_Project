@@ -696,7 +696,6 @@ def fit_and_evaluate_all_user():
             break
         id = id + 1
 
-    print_result_to_file()
     dvisuals.plot_occ_results_boxplot(results, 'SapiMouse')
 
 

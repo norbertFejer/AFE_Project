@@ -14,7 +14,10 @@ afe_pkg.egg-info/
 datasets_raw_csv_data/
 figures/
 sapimouse_dataset/
+**/logs
+**/analysis
 
 *.xlsx
 *.csv
 *.png
+*.zip

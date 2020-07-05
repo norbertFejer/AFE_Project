@@ -136,11 +136,11 @@ sel_method = Method.TRAIN
 
 
 # Defines which model will be used.
-sel_model = Model.CLASSIFIER_MCDCNN
+sel_model = Model.CLASSIFIER_RESNET
 
 
 # Defines used dataset.
-sel_dataset = Dataset.BALABIT
+sel_dataset = Dataset.DFL
 
 
 # Defines the selected recognition type.

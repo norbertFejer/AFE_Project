@@ -423,7 +423,7 @@ if __name__ == "__main__":
 
     #plot_occ_balabit_results_boxplot()
     #plot_occ_dfl_results_boxplot()
-    #plot_binary_classification_balabit_results_boxplot()
+    plot_binary_classification_balabit_results_boxplot()
     #plot_binary_classification_dfl_results_boxplot()
     #plot_occ_balabit_results_barplot()
     #plot_occ_dfl_results_barplot()
@@ -433,8 +433,3 @@ if __name__ == "__main__":
     #plot_binary_classification_aggregated_blocks_result()
     #plot_occ_sapimouse_results_boxplot()
     #plot_occ_sapimouse_aggregated_blocks_result()
-    results = {}
-    results['user1'] = 0.63
-    results['user2'] = 0.75
-    results['user3'] = 0.92
-    plot_occ_results_boxplot(results, 'Balabit')
